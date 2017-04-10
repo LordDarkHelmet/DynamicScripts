@@ -10,7 +10,8 @@
 #   LordDarkHelmet      D9HWH96iQDX5W4LFag7v8pUtQgnWUHGFLo
 #   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
 
-# Version: 1.0.0 April 9, 2017 Released by LordDarkHelmet
+# Version:
+varVersion="1.0.1 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923886-3B
@@ -106,7 +107,7 @@ mkdir -p $varScriptsDirectory
 cd $varScriptsDirectory
 echo "Creating The Stop dynamicd Script: dynStopDynamicd.sh"
 echo '#!/bin/sh' > dynStopDynamicd.sh
-echo "# This file was generated. $(date +%F_%T)" >> dynStopDynamicd.sh
+echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynStopDynamicd.sh
 echo "# This script is here to force stop or force kill dynamicd" >> dynStopDynamicd.sh
 echo "cd $varDynamicBinaries" >> dynStopDynamicd.sh
 echo "echo \"Stopping the dynamicd if it already running \"" >> dynStopDynamicd.sh
@@ -130,7 +131,7 @@ cd $varScriptsDirectory
 echo "Creating Mining Start script: dynMineStart.sh"
 echo '#!/bin/sh' > dynMineStart.sh
 echo "" >> dynMineStart.sh
-echo "# This file was generated. $(date +%F_%T)" >> dynMineStart.sh
+echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynMineStart.sh
 echo "echo \"Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
 echo "sudo ${varDynamicBinaries}dynamicd --daemon" >> dynMineStart.sh
 echo "sleep 15" >> dynMineStart.sh
@@ -144,7 +145,7 @@ cd $varScriptsDirectory
 echo "Creating Scrape script: dynScrape.sh"
 echo '#!/bin/sh' > dynScrape.sh
 echo "" >> dynScrape.sh
-echo "# This file was generated. $(date +%F_%T)" >> dynScrape.sh
+echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynScrape.sh
 echo "myZero=0.0" >> dynScrape.sh
 echo "myBalance=\$(sudo ${varDynamicBinaries}dynamic-cli getbalance)" >> dynScrape.sh
 echo "if [  -gt \$myZero ];then" >> dynScrape.sh
@@ -162,7 +163,7 @@ cd $varScriptsDirectory
 echo "Creating Scrape script: dynAutoUpdater.sh"
 echo '#!/bin/sh' > dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo "# This file was generated. $(date +%F_%T)" >> dynAutoUpdater.sh
+echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo "cd $varGITDynamicPath" >> dynAutoUpdater.sh
 echo "if [ \"\`git log --pretty=%H ...refs/heads/master^ | head -n 1\`\" = \"\`git ls-remote $varRemoteRepository -h refs/heads/master |cut -f1\`\" ] ; then " >> dynAutoUpdater.sh
@@ -221,7 +222,7 @@ funcCreateDynamicConfFile ()
  Myport=$((Myrpcport+Myport))
  
  mkdir -p $varDynamicConfigDirectory
- echo "# This file was generated. $(date +%F_%T)" > $varDynamicConfigFile
+ echo "# This file was generated. $(date +%F_%T)  Version: $varVersion" > $varDynamicConfigFile
  echo "# Do not use special characters or spaces with username/password" >> $varDynamicConfigFile
  echo "rpcuser=$Myrpcuser" >> $varDynamicConfigFile
  echo "rpcpassword=$Myrpcpassword" >> $varDynamicConfigFile
@@ -263,6 +264,7 @@ echo "Downloading blockchain bootstrap and extracting to data folder..."
 sudo apt-get -y install unzip
 rm -fdr $varQuickStartCompressedBlockChainFileName
 wget $varQuickStartCompressedBlockChainLocation
+mkdir -p $varDynamicConfigDirectory
 unzip $varQuickStartCompressedBlockChainFileName -do $varDynamicConfigDirectory
 echo "Finished blockchain download and extraction"
 
@@ -400,4 +402,5 @@ All set! Helpful commands:
 \"dynamic-cli listaddressgroupings to see mined balances.
 \"dynamic-cli help\" for a full list of commands.
 
+ Version: $varVersion
 end of startup script"
