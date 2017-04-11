@@ -6,18 +6,19 @@
 
 # Credit:
 # Written by those who are dedicated to teaching other about ion (ionomy.com) and other cryptocurrencies. 
-# Contributors:         DYN Donation Address
-#   LordDarkHelmet      D9HWH96iQDX5W4LFag7v8pUtQgnWUHGFLo
+# Contributors:         DYN Donation Address                      BTC Address
+#   LordDarkHelmet      D9HWH96iQDX5W4LFag7v8pUtQgnWUHGFLo        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
 #   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
+#   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.3 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
+varVersion="1.0.4 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
 echo "$varVersion"
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
 echo "If you found this script usefull please contribute. Feedback is appreciated"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
-# LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923886-3B
+# LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
 # The script will take some time to run. You can view progress when you first log in by typing in the command:
