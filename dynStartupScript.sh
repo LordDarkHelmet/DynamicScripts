@@ -11,7 +11,7 @@
 #   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
 
 # Version:
-varVersion="1.0.2 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
+varVersion="1.0.3 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
 echo "$varVersion"
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
 echo "If you found this script usefull please contribute. Feedback is appreciated"
@@ -212,6 +212,12 @@ echo "Changing the file attributes so we can run the script"
 chmod +x dynAutoUpdater.sh
 echo "Created dynAutoUpdater.sh."
 
+######## Reserverd for Watchdog #############
+# Not implementing for now. Dont want to mask potential issues witht he script by keeping the daemon on life support. 
+######## Reserverd for Watchdog #############
+
+
+
 
 ### Functions ###
 funcCreateDynamicConfFile ()
@@ -253,6 +259,11 @@ funcCreateDynamicConfFile ()
 
 
 
+####### RESERVED For Security Lockdown Function #############
+#Perminant lockdown and security of the node/miner. Not implementing before we work out the bugs. (dont want to lock us out from debugging it)
+####### RESERVED For Security Lockdown Function #############
+
+
 
 ## Quick Start (get blockchain from the web, not completly safe or reliable, but fast!)
 if [ "$varQuickBlockchainDownload" = true ]; then
@@ -268,7 +279,7 @@ sudo apt-get -y install unzip
 rm -fdr $varQuickStartCompressedBlockChainFileName
 wget $varQuickStartCompressedBlockChainLocation
 mkdir -p $varDynamicConfigDirectory
-unzip $varQuickStartCompressedBlockChainFileName -do $varDynamicConfigDirectory
+unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
 echo "Finished blockchain download and extraction"
 
 fi
