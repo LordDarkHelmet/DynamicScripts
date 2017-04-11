@@ -11,7 +11,10 @@
 #   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
 
 # Version:
-varVersion="1.0.1 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
+varVersion="1.0.2 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
+echo "$varVersion"
+echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
+echo "If you found this script usefull please contribute. Feedback is appreciated"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923886-3B
