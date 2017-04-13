@@ -19,7 +19,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.5 dynStartupScript.sh April 12, 2017 Released by LordDarkHelmet"
+varVersion="1.0.6 dynStartupScript.sh April 12, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -159,7 +159,7 @@ echo "" >> dynScrape.sh
 echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynScrape.sh
 echo "myZero=0.0" >> dynScrape.sh
 echo "myBalance=\$(sudo ${varDynamicBinaries}dynamic-cli getbalance)" >> dynScrape.sh
-echo "if [  -gt \$myZero ];then" >> dynScrape.sh
+echo "if [ \$myBalance -gt \$myZero ];then" >> dynScrape.sh
 echo "echo\"\$(date +%F_%T) Scraping a balance of \myBalance to $myScrapeAddress \"" >> dynScrape.sh
 echo "sudo ${varDynamicBinaries}dynamic-cli sendtoaddress \"$myScrapeAddress\" \$(sudo ${varDynamicBinaries}dynamic-cli getbalance) \"\" \"\" true " >> dynScrape.sh
 echo "fi" >> dynScrape.sh
