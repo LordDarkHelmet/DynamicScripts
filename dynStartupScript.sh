@@ -4,18 +4,22 @@
 # This script is a one stop installing and maintenance script for Dynamic. 
 # It is used to startup a new VPS. It will download, compile, and maintain the wallet.
 
+# myScrapeAddress: This is the address that the wallet will scrape mining coins to:
+# "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
+# "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
+myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
+# "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
+# "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
+
 # Credit:
 # Written by those who are dedicated to teaching other about ion (ionomy.com) and other cryptocurrencies. 
 # Contributors:         DYN Donation Address                      BTC Address
-#   LordDarkHelmet      D9HWH96iQDX5W4LFag7v8pUtQgnWUHGFLo        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
+#   LordDarkHelmet      DJnERexmBy1oURgpp2JpzVzHcE17LTFavD        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
 #   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.4 dynStartupScript.sh April 10, 2017 Released by LordDarkHelmet"
-echo "$varVersion"
-echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
-echo "If you found this script usefull please contribute. Feedback is appreciated"
+varVersion="1.0.5 dynStartupScript.sh April 12, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -24,14 +28,16 @@ echo "If you found this script usefull please contribute. Feedback is appreciate
 # The script will take some time to run. You can view progress when you first log in by typing in the command:
 # tail -f /tmp/firstboot.log
 
+echo "$varVersion"
+echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
+echo "Local Filename: $0"
+echo "SCRAPE ADDRESS: $myScrapeAddress"
+echo "Local Time: $(date +%F_%T)"
+echo "If you found this script usefull please contribute. Feedback is appreciated"
+
 # Variables:
 # These variables control the script's function. The only item you should change is the scrape address (the first variable)
 #
-# myScrapeAddress: This is the address that the wallet will scrape mining coins to:
-# "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
-myScrapeAddress=DKCUXNLNLtm7AkUAraoRViX5HoJWmYVU1S
-echo "We will be scraping to this address: $myScrapeAddress"
-# "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
 
 # Are you setting up a Dynode? if so you want to set these variables
 # Set varDynode to 1 if you want to run a node, otherwise set it to zero. 
@@ -82,9 +88,9 @@ varRemoteRepository=https://github.com/duality-solutions/Dynamic
 ### Prep your VPS (Increase Swap Space and update) ###
 
 if [ "$varExpandSwapFile" = true ]; then
-# This will expand your swap file. It is not necessary if your VPS has more than 3G of ram, but it wont hurt to have
+# This will expand your swap file. It is not necessary if your VPS has more than 4G of ram, but it wont hurt to have
 echo "Expanding the swap file for optimization with low RAM VPS..."
-sudo fallocate -l 3G /swapfile
+sudo fallocate -l 4G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
@@ -111,16 +117,17 @@ mkdir -p $varScriptsDirectory
 cd $varScriptsDirectory
 echo "Creating The Stop dynamicd Script: dynStopDynamicd.sh"
 echo '#!/bin/sh' > dynStopDynamicd.sh
-echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynStopDynamicd.sh
+echo "# This file was generated.  Version: $varVersion" >> dynStopDynamicd.sh
 echo "# This script is here to force stop or force kill dynamicd" >> dynStopDynamicd.sh
 echo "cd $varDynamicBinaries" >> dynStopDynamicd.sh
 echo "echo \"Stopping the dynamicd if it already running \"" >> dynStopDynamicd.sh
 echo "# stop the dynamic daemon if it is running" >> dynStopDynamicd.sh
 echo "sudo ./dynamic-cli stop" >> dynStopDynamicd.sh
-echo "sleep 5" >> dynStopDynamicd.sh
-echo "# Killing the daemon and relaunching with the generated dynamic.conf (for RPC control). This is the only way to relaunch it at this point." >> dynStopDynamicd.sh
+echo "sleep 10" >> dynStopDynamicd.sh
+echo "# Kill the process directly, if it could not be shut down normally." >> dynStopDynamicd.sh
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynStopDynamicd.sh
 echo "if [ \"\" !=  \"\$PID\" ]; then" >> dynStopDynamicd.sh
+echo "  echo \"Rouge dynamicd process found. Killing PID: \$PID\""  >> dynStopDynamicd.sh
 echo "  sudo kill -9 \$PID" >> dynStopDynamicd.sh
 echo "fi" >> dynStopDynamicd.sh
 echo "sleep 1" >> dynStopDynamicd.sh
@@ -321,6 +328,23 @@ echo "waiting 60 seconds"
 sleep 60
 echo "Dynamic Wallet created and blockchain should be syncing."
 
+echo ""
+echo "In case QuickStart fails, we want to put all of our cron jobs in"
+echo ""
+
+## CREATE CRON JOBS ###
+echo "Creating Boot Start and Scrape Cron jobs..."
+
+dynStart="${varScriptsDirectory}dynMineStart.sh"
+dynScrape="${varScriptsDirectory}dynScrape.sh"
+
+startLine="@reboot sh $dynStart >> ${varScriptsDirectory}/dynMineStart.log 2>&1"
+scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}/dynScrape.log 2>&1"
+
+(crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
+(crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
+
+
 echo "QuickStart complete"
 fi
 #End of QuickStart
@@ -337,12 +361,13 @@ sudo apt-get -y update
 sudo apt-get -y install nano
 sudo apt-get -y install git
 sudo apt-get -y install git build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev automake libminiupnpc-dev libgmp-dev libboost-all-dev
+sudo add-apt-repository -y ppa:bitcoin/bitcoin
+sudo apt-get -y update
 sudo add-apt-repository -y ppa:silknetwork/silknetwork
 sudo apt-get -y update
 sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
 sudo apt-get -y update
 sudo apt-get -y upgrade
-sudo apt-get -y install git build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev 
 
 # Clone the github repository
 echo "Clone the github repository"
@@ -404,9 +429,6 @@ AutoUpdaterLine="$(( $RANDOM % 59 )) $(( $RANDOM % 23 )) * * * $dynAutoUpdater >
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynAutoUpdater"; echo "$AutoUpdaterLine") | crontab -u root -
 
-
-############### We want to give the dynode priv key thing
-##dynamic -cli dynode genkey
 
 
 echo "Created Cron jobs.
