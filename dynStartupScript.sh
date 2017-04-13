@@ -19,7 +19,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.9 dynStartupScript.sh April 12, 2017 Released by LordDarkHelmet"
+varVersion="1.0.10 dynStartupScript.sh April 13, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -423,7 +423,7 @@ startLine="@reboot sh $dynStart >> ${varScriptsDirectory}/dynMineStart.log 2>&1"
 scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}/dynScrape.log 2>&1"
 
 #we don't want eveyone updating at the same time, that would be bad for the network, so check for updates at a random time.
-AutoUpdaterLine="$(( $RANDOM % 59 )) $(( $RANDOM % 23 )) * * * $dynAutoUpdater >> ${varScriptsDirectory}/dynAutoUpdater.log 2>&1"
+AutoUpdaterLine="$(shuf -i 0-59 -n 1) $(shuf -i 0-23 -n 1) * * * $dynAutoUpdater >> ${varScriptsDirectory}/dynAutoUpdater.log 2>&1"
 #this will check once a day, just at a random time of day from other runs of this script. 
 
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
