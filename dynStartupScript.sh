@@ -19,7 +19,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.6 dynStartupScript.sh April 12, 2017 Released by LordDarkHelmet"
+varVersion="1.0.7 dynStartupScript.sh April 12, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -132,6 +132,7 @@ echo "  sudo kill -9 \$PID" >> dynStopDynamicd.sh
 echo "fi" >> dynStopDynamicd.sh
 echo "sleep 1" >> dynStopDynamicd.sh
 echo "echo \"Stop Complete\"" >> dynStopDynamicd.sh
+echo "sleep 1" >> dynStopDynamicd.sh
 echo "Changing the file attributes so we can run the script"
 chmod +x dynStopDynamicd.sh
 echo "Created dynStopDynamicd.sh"
@@ -159,16 +160,16 @@ echo "" >> dynScrape.sh
 echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynScrape.sh
 echo "myZero=0.0" >> dynScrape.sh
 echo "myBalance=\$(sudo ${varDynamicBinaries}dynamic-cli getbalance)" >> dynScrape.sh
-echo "if [ \$myBalance -gt \$myZero ];then" >> dynScrape.sh
+#echo "if [ \$myBalance -gt \$myZero ];then" >> dynScrape.sh
 echo "echo\"\$(date +%F_%T) Scraping a balance of \myBalance to $myScrapeAddress \"" >> dynScrape.sh
 echo "sudo ${varDynamicBinaries}dynamic-cli sendtoaddress \"$myScrapeAddress\" \$(sudo ${varDynamicBinaries}dynamic-cli getbalance) \"\" \"\" true " >> dynScrape.sh
-echo "fi" >> dynScrape.sh
+#echo "fi" >> dynScrape.sh
 echo "Changing the file attributes so we can run the script"
 chmod +x dynScrape.sh
 echo "Created dynScrape.sh."
 
 
-### script #3: GENERATE SCRAPE SCRIPT ###
+### script #4: AUTO UPDATER SCRIPT ###
 # Filename: dynAutoUpdater.sh
 cd $varScriptsDirectory
 echo "Creating Scrape script: dynAutoUpdater.sh"
