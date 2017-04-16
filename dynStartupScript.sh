@@ -16,10 +16,11 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 # Contributors:         DYN Donation Address                      BTC Address
 #   LordDarkHelmet      DJnERexmBy1oURgpp2JpzVzHcE17LTFavD        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
 #   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
+#   Coinkiller          DLvnNNYzbUxtDyADbyGDSio9ghazEcvRBk
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.10 dynStartupScript.sh April 13, 2017 Released by LordDarkHelmet"
+varVersion="1.0.11 dynStartupScript.sh April 15, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -61,8 +62,8 @@ varGITDynamicPath="${varGITRootPath}Dynamic/"
 varQuickStart=true
 varQuickBlockchainDownload=true
 # Quickstart compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v1.3.0.1/Dynamic-Linux-x64-v1.3.0.1.tar.gz
-varQuickStartCompressedFileName=Dynamic-Linux-x64-v1.3.0.1.tar.gz
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v1.3.0.2/Dynamic-Linux-x64-v1.3.0.2.tar.gz
+varQuickStartCompressedFileName=Dynamic-Linux-x64-v1.3.0.2.tar.gz
 varQuickStartCompressedFilePathForDaemon=dynamic-1.3.0/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-1.3.0/bin/dynamic-cli
 varQuickStartCompressedBlockChainLocation=http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
@@ -361,7 +362,7 @@ sudo add-apt-repository -y ppa:git-core/ppa
 sudo apt-get -y update 
 sudo apt-get -y install nano
 sudo apt-get -y install git
-sudo apt-get -y install git build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev automake libminiupnpc-dev libgmp-dev libboost-all-dev
+sudo apt-get -y install git build-essential libtool autotools-dev autoconf pkg-config bsdmainutils libssl-dev libcrypto++-dev libevent-dev automake libminiupnpc-dev libgmp-dev libboost-all-dev
 sudo add-apt-repository -y ppa:bitcoin/bitcoin
 sudo apt-get -y update
 sudo add-apt-repository -y ppa:silknetwork/silknetwork
