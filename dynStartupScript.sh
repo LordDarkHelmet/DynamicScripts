@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.11 dynStartupScript.sh April 15, 2017 Released by LordDarkHelmet"
+varVersion="1.0.12 dynStartupScript.sh April 16, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -35,6 +35,7 @@ echo "Local Filename: $0"
 echo "SCRAPE ADDRESS: $myScrapeAddress"
 echo "Local Time: $(date +%F_%T)"
 echo "If you found this script usefull please contribute. Feedback is appreciated"
+echo "==========================================================================="
 
 # Variables:
 # These variables control the script's function. The only item you should change is the scrape address (the first variable)
@@ -43,7 +44,7 @@ echo "If you found this script usefull please contribute. Feedback is appreciate
 # Are you setting up a Dynode? if so you want to set these variables
 # Set varDynode to 1 if you want to run a node, otherwise set it to zero. 
 varDynode=0
-# This will set the external IP to your IP adderess (linux only), or you can put your IP address in here
+# This will set the external IP to your IP address (linux only), or you can put your IP address in here
 varDynodeExternalIP=$(hostname -I)
 # This is your dynode private key. To get it run dynamic-cli dynode genkey
 varDynodePrivateKey=ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey
@@ -59,15 +60,28 @@ varGITRootPath="${varUserDirectory}"
 varGITDynamicPath="${varGITRootPath}Dynamic/"
 
 # Quick Non-Source Start (get binaries and blockchain from the web, not completly safe or reliable, but fast!)
+
+# QuickStart Binaries
 varQuickStart=true
-varQuickBlockchainDownload=true
 # Quickstart compressed file location and name
 varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v1.3.0.2/Dynamic-Linux-x64-v1.3.0.2.tar.gz
 varQuickStartCompressedFileName=Dynamic-Linux-x64-v1.3.0.2.tar.gz
 varQuickStartCompressedFilePathForDaemon=dynamic-1.3.0/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-1.3.0/bin/dynamic-cli
+
+# QuickStart Bootstrap (The developer recomends that you set this to true. This will clean up the blockchain on the network.)
+varQuickBootstrap=true
+varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapFileIsZip=false
+
+# QuickStart Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
+varQuickBlockchainDownload=false
 varQuickStartCompressedBlockChainLocation=http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileName=Dynamic_blockchain.zip
+varQuickStartCompressedBlockChainFileIsZip=true
+
+
 #
 #Expand Swap File
 varExpandSwapFile=true
@@ -124,7 +138,7 @@ echo "cd $varDynamicBinaries" >> dynStopDynamicd.sh
 echo "echo \"Stopping the dynamicd if it already running \"" >> dynStopDynamicd.sh
 echo "# stop the dynamic daemon if it is running" >> dynStopDynamicd.sh
 echo "sudo ./dynamic-cli stop" >> dynStopDynamicd.sh
-echo "sleep 10" >> dynStopDynamicd.sh
+echo "sleep 15" >> dynStopDynamicd.sh
 echo "# Kill the process directly, if it could not be shut down normally." >> dynStopDynamicd.sh
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynStopDynamicd.sh
 echo "if [ \"\" !=  \"\$PID\" ]; then" >> dynStopDynamicd.sh
@@ -232,7 +246,9 @@ echo "Created dynAutoUpdater.sh."
 ### Functions ###
 funcCreateDynamicConfFile ()
 {
- echo "Creating the dynamic.conf file, this replaces any existing file. "
+ echo "---------------------------------"
+ echo "- Creating the configuration file."
+ echo "- Creating the dynamic.conf file, this replaces any existing file. "
  
  Myrpcuser=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
  Myrpcpassword=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
@@ -255,7 +271,7 @@ funcCreateDynamicConfFile ()
  echo "genproclimit=$varMiningProcessorLimit" >> $varDynamicConfigFile
  echo "" >> $varDynamicConfigFile
 
- if [[ "$varDynode" -eq 1 ]]; then
+ if [ "$varDynode" = 1 ]; then
   echo "# DYNODE: " >> $varDynamicConfigFile
   echo "externalip=$varDynodeExternalIP" >> $varDynamicConfigFile
   echo "dynode=$varDynode" >> $varDynamicConfigFile
@@ -264,7 +280,9 @@ funcCreateDynamicConfFile ()
  fi
 
  echo "# End of generated file" >> $varDynamicConfigFile
- echo "Finished creating dynamic.conf"
+ echo "- Finished creating dynamic.conf"
+ echo "---------------------------------"
+ sleep 1
 }
 
 
@@ -275,35 +293,117 @@ funcCreateDynamicConfFile ()
 
 
 
+## Quick Start Get Botstrap Data, recomended by the development team.
+if [ "$varQuickBootstrap" = true ]; then
+
+echo "Starting Bootstrap and Blockchain download."
+
+echo "Step 1a: If the dynamicd process is running, Stop it"
+sudo ${varScriptsDirectory}dynStopDynamicd.sh
+
+echo "Step 1b: Backup wallet.dat files"
+#We are not backing up the full data directory contrary to the instuctions. The reason is that this is most likely an automated situation and a backup will just waste space
+
+#$varDynamicConfigDirectory
+myBackupDirectory="${varScriptsDirectory}Backup$(date +%Y%m%d_%H%M%S)/"
+mkdir -p ${myBackupDirectory}backups/
+sudo cp -r ${varDynamicConfigDirectory}backups/* ${myBackupDirectory}backups/
+sudo cp ${varDynamicConfigDirectory}wallet.dat ${myBackupDirectory}
+sudo cp ${varDynamicConfigDirectory}dynamic.conf ${myBackupDirectory}
+
+echo "Files backed up to ${myBackupDirectory}"
+
+echo "Step 2: Delete all data apart from your wallet.dat, conf files and backup folder."
+rm -fdr $varDynamicConfigDirectory
+#we make sure the directory is there for the script.
+mkdir -p $varDynamicConfigDirectory
+
+
+echo "Step 3: Download the bootstrap.dat compressed file"
+
+mkdir -p ${varUserDirectory}QuickStart
+cd ${varUserDirectory}QuickStart
+
+echo "Downloading blockchain bootstrap and extracting to data folder..."
+
+rm -fdr $varQuickStartCompressedBootstrapFileNameFileName
+wget $varQuickStartCompressedBootstrapLocation
+mkdir -p $varDynamicConfigDirectory
+
+if [ "$varQuickStartCompressedBootstrapFileIsZip" = true ]; then
+  sudo apt-get -y install unzip
+  unzip -o $varQuickStartCompressedBootstrapFileName -d $varDynamicConfigDirectory
+  echo "Extracted Zip file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
+else
+  tar -xvf $varQuickStartCompressedBootstrapFileName -C $varDynamicConfigDirectory
+  echo "Extracted TAR file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
+fi
+
+
+echo "Step 4: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"-loadblock=\" argument when starting Dynamic"
+
+echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compelation if you don't download the binaries"
+##sudo ./dynamicd -loadblock=~/.dynamic/bootstrap.dat
+
+
+echo "Bootstrap Prep completed!"
+sleep 1
+
+
+echo "Finished Bootstrap and Blockchain download."
+
+fi
+
+
+## blockchain download (get blockchain from the web, not completly safe or reliable, but fast!)
+
 ## Quick Start (get blockchain from the web, not completly safe or reliable, but fast!)
+## If you are bootstraping, you can still download the blockchain. While the developers recomend you only bootstrap, this will save time while syncing.
+## 
 if [ "$varQuickBlockchainDownload" = true ]; then
 
 echo "If the dynamicd process is running, this will kill it."
 sudo ${varScriptsDirectory}dynStopDynamicd.sh
 
-mkdir -p /root/QuickStart
-cd /root/QuickStart
+mkdir -p ${varUserDirectory}QuickStart
+cd ${varUserDirectory}QuickStart
 
 echo "Downloading blockchain bootstrap and extracting to data folder..."
 sudo apt-get -y install unzip
 rm -fdr $varQuickStartCompressedBlockChainFileName
 wget $varQuickStartCompressedBlockChainLocation
 mkdir -p $varDynamicConfigDirectory
-unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
+
+if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
+  sudo apt-get -y install unzip
+  unzip -o $varQuickStartCompressedBlockChainFileNameFileName -d $varDynamicConfigDirectory
+  echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileNameFileName ) to the config directory ( $varDynamicConfigDirectory )"
+else
+  tar -xvf $varQuickStartCompressedBlockChainFileNameFileName -C $varDynamicConfigDirectory
+  echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileNameFileName ) to the config directory ( $varDynamicConfigDirectory )"
+fi
+
 echo "Finished blockchain download and extraction"
 
 fi
 
 
+## Creating the config file. This prevents the boot up, have to shut down thing in dynamicd, We do this here just in case the quickstart stuff deletes the config file.
+echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. no ned to invoke dynamic-cli setgenerate true"
+funcCreateDynamicConfFile
+echo "Now that we have crated the dynamic.conf file, there is no need to do the boot up shut down thing with dyanmicd"
+
+
+
 ## Quick Start (get binaries from the web, not completly safe or reliable, but fast!)
 if [ "$varQuickStart" = true ]; then
-echo "Begining QuickStart"
+echo "Begining QuickStart Executable (binaries) download and start"
 
 echo "If the dynamicd process is running, this will kill it."
 sudo ${varScriptsDirectory}dynStopDynamicd.sh
 
-mkdir -p /root/QuickStart
-cd /root/QuickStart
+mkdir -p ${varUserDirectory}QuickStart
+cd ${varUserDirectory}QuickStart
 echo "Downloading and extracting Dynamic binaries"
 rm -fdr $varQuickStartCompressedFileName
 wget $varQuickStartCompressedFileLocation
@@ -314,24 +414,27 @@ mkdir -p $varDynamicBinaries
 sudo cp $varQuickStartCompressedFilePathForDaemon $varDynamicBinaries
 sudo cp $varQuickStartCompressedFilePathForCLI $varDynamicBinaries
 
-echo "Launching daemon for the first time. Please wait a minute while the wallet.dat, dynamic.conf, and any other files missing from .dynamic home data directory are generated."
-sudo ${varDynamicBinaries}dynamicd --daemon
+
+echo "Launching daemon for the first time."
+if [ "$varQuickBootstrap" = true ]; then
+  echo "sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat"
+  sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat 
+else
+  echo "sudo ${varDynamicBinaries}dynamicd --daemon"
+  sudo ${varDynamicBinaries}dynamicd --daemon
+fi
+
+echo "Waiting 60 seconds"
 sleep 60
 
-echo "Killing the daemon and relaunching with the generated dynamic.conf (for RPC control). This is the only way to relaunch it at this point."
-sudo ${varScriptsDirectory}dynStopDynamicd.sh
-
-echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. no ned to invoke dynamic-cli setgenerate true"
-funcCreateDynamicConfFile
-
-echo "Start up the dynamic daemon. A full sync can take many hours. Mining will automatically start once synced."
-sudo ${varDynamicBinaries}dynamicd --daemon
-echo "waiting 60 seconds"
-sleep 60
-echo "Dynamic Wallet created and blockchain should be syncing."
+echo "The Daemon has started. We are currently on Block:"
+echo "sudo ${varDynamicBinaries}dynamic-cli getblockcount"
+sudo ${varDynamicBinaries}dynamic-cli getblockcount
+echo "A full sync can take many hours. Mining will automatically start once synced."
+sleep 1
 
 echo ""
-echo "In case QuickStart fails, we want to put all of our cron jobs in"
+echo "In case Compiling later on fails, we want to put all of our cron jobs in"
 echo ""
 
 ## CREATE CRON JOBS ###
@@ -346,6 +449,7 @@ scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}/
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
 
+echo "Boot Start and Scrape Cron jobs created"
 
 echo "QuickStart complete"
 fi
@@ -396,20 +500,31 @@ mkdir -p $varDynamicBinaries
 sudo cp ${varGITDynamicPath}src/dynamicd $varDynamicBinaries
 sudo cp ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries
 
-echo "Launching daemon for the first time. Please wait a minute while the wallet.dat, dynamic.conf, and any other files missing from .dynamic home data directory are generated."
-sudo ${varDynamicBinaries}dynamicd --daemon
-sleep 60
+if [ "$varQuickBootstrap" = true ]; then
 
-echo "Killing the daemon and relaunching with the generated dynamic.conf (for RPC control). This is the only way to relaunch it at this point."
-sudo ${varScriptsDirectory}dynStopDynamicd.sh
+  if [ "$varQuickStart" = true ]; then
+     echo "skipping the pre-launch because we already did it with the quickstart"
+	 echo "sudo ${varDynamicBinaries}dynamicd --daemon"
+	 sudo ${varDynamicBinaries}dynamicd --daemon
+  else
+    echo "Doing the bootstrap from step 4 here because we want to boot strap"
+	echo "sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat"
+    sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat
+  fi
+else
+  echo "sudo ${varDynamicBinaries}dynamicd --daemon"
+  sudo ${varDynamicBinaries}dynamicd --daemon
+fi
 
-echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. no ned to invoke dynamic-cli setgenerate true"
-funcCreateDynamicConfFile
-
-echo "Start up the dynamic daemon. A full sync can take many hours. Mining will automatically start once synced."
-sudo ${varDynamicBinaries}dynamicd --daemon
 echo "waiting 60 seconds"
 sleep 60
+
+echo "The Daemon has started. We are currently on Block:"
+echo "sudo ${varDynamicBinaries}dynamic-cli getblockcount"
+sudo ${varDynamicBinaries}dynamic-cli getblockcount
+echo "A full sync can take many hours. Mining will automatically start once synced."
+sleep 1
+
 echo "Dynamic Wallet created and blockchain should be syncing."
 
 
@@ -433,13 +548,27 @@ AutoUpdaterLine="$(shuf -i 0-59 -n 1) $(shuf -i 0-23 -n 1) * * * $dynAutoUpdater
 
 
 
-echo "Created Cron jobs.
-All set! Helpful commands:
+echo "Created Cron jobs."
+echo "
+
+===========================================================
+All set! Helpful commands: you may need to navigate to ${varDynamicBinaries} before you can run the commands.
 \"dynamic-cli getmininginfo\" to check mining and # of blocks synced.
 \"dynamic-cli stop\" stops and \"dynamicd --daemon\" starts.
 \"dynamic-cli setgenerate true\" to start mining.
 \"dynamic-cli listaddressgroupings to see mined balances.
 \"dynamic-cli help\" for a full list of commands.
 
- Version: $varVersion
+example: Getting the blockcount:
+sudo ${varDynamicBinaries}dynamic-cli getblockcount"
+sudo ${varDynamicBinaries}dynamic-cli getblockcount
+echo "
+example: Getting the hash rate:
+sudo ${varDynamicBinaries}dynamic-cli gethashespersec"
+sudo ${varDynamicBinaries}dynamic-cli gethashespersec
+echo "* note: hash rate may be 0 if the blockchain has not fully synced yet.
+
+===========================================================
+
+Version: $varVersion
 end of startup script"
