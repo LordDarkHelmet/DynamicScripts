@@ -5,7 +5,7 @@
 # It is used to startup a new VPS. It will download, compile, and maintain the wallet.
 
 # myScrapeAddress: This is the address that the wallet will scrape mining coins to:
-# "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
+# "IF YOU DON'T USE ATTRIBUTES TO PASS IN YOUR VALUES THEN:"
 # "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
 myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 # "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.12 dynStartupScript.sh April 16, 2017 Released by LordDarkHelmet"
+varVersion="1.0.13 dynStartupScript.sh April 18, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -29,16 +29,18 @@ varVersion="1.0.12 dynStartupScript.sh April 16, 2017 Released by LordDarkHelmet
 # The script will take some time to run. You can view progress when you first log in by typing in the command:
 # tail -f /tmp/firstboot.log
 
+echo ""
+echo ""
+echo "==========================================================================="
 echo "$varVersion"
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
 echo "Local Filename: $0"
-echo "SCRAPE ADDRESS: $myScrapeAddress"
 echo "Local Time: $(date +%F_%T)"
-echo "If you found this script usefull please contribute. Feedback is appreciated"
+echo "If you found this script useful please contribute. Feedback is appreciated"
 echo "==========================================================================="
 
 # Variables:
-# These variables control the script's function. The only item you should change is the scrape address (the first variable)
+# These variables control the script's function. The only item you should change is the scrape address (the first variable, see above)
 #
 
 # Are you setting up a Dynode? if so you want to set these variables
@@ -71,8 +73,8 @@ varQuickStartCompressedFilePathForCLI=dynamic-1.3.0/bin/dynamic-cli
 
 # QuickStart Bootstrap (The developer recomends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=true
-varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
-varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-2017-04-17_11-00\(UTC\).tar.gz
+varQuickStartCompressedBootstrapFileName=bootstrap-2017-04-17_11-00\(UTC\).tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
 # QuickStart Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
@@ -94,30 +96,128 @@ varMiningProcessorLimit=-1
 #varMiningScrapeTime is the amount of time in minutes between scrapes use 15 recommended
 varMiningScrapeTime=15
 
-#GIT
+#Dynamic GIT
 varRemoteRepository=https://github.com/duality-solutions/Dynamic
+
+#Script Repository
+#This can be used to auto heal and update the script system. 
+#If a future deployment breaks something, an update by the repository owner can run a script on your machine. 
+#This is dangerous becaus
+varRemoteScriptRepository=https://github.com/LordDarkHelmet/DynamicScripts
+
+#AutoUpdater
+#This runs the auto update script. If you do not want to automatically update the script, then set this to false. If a new update 
+varAutoUpdate=true
+
+#AutoRepair
+#Future Repair System. 
+varAutoRepair=true
+
+#System Lockdown
+#Future System Lockdown. Firewall, security rules, etc. 
+varSystemLockdown=true
+
 
 #
 #End of Variables
 
+
+#Read in attributes. This allows someone to run the script with their variables without having to modify this script.
+echo "-------------------------------------------"
+echo "- This applies the values passed in by attributes"
+
+while getopts :s:d:a:r:l: option
+do
+        case "${option}"
+        in
+                s) 
+				    myScrapeAddress=${OPTARG}
+					echo "-s has set myScrapeAddress=${myScrapeAddress}"
+					;;
+                d) 
+				    varDynodePrivateKey=${OPTARG}
+					varDynode=1
+					echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey}"
+					;;
+				a)
+				    if [ "${OPTARG}" = true ]; then
+					    varAutoUpdate=true
+					    echo "-a has set varAutoUpdate to true (default)"
+				    else
+					    varAutoUpdate=false
+						echo "-a has set varAutoUpdate to false, the system will not auto update. If an update occurs, you must do it manually."
+					fi
+					;;
+				r)
+				    if [ "${OPTARG}" = true ]; then
+					    varAutoRepair=true
+					    echo "Auto Repair is set to True (default)"
+				    else
+					    varAutoRepair=false
+						echo "Auto Repair is set to FALSE, the system will not auto repair. If there is an issue you must repair it manually."
+					fi
+					;;
+				l)
+				    if [ "${OPTARG}" = true ]; then
+					    varSystemLockdown=true
+					    echo "Auto Lockdown is set to True (default)"
+				    else
+					    varSystemLockdown=false
+						echo "Auto Lockdown is set to FALSE, the system will not be secured."
+					fi
+					;;
+				\?) echo "Invalid Option Tag: -$OPTARG";;
+				:) echo "Option -$OPTARG requires an argument.";;
+        esac
+done
+
+echo "-------------------------------------------"
+echo "==============================================================="
+echo "SCRAPE ADDRESS: $myScrapeAddress"
+echo "==============================================================="
 ### Prep your VPS (Increase Swap Space and update) ###
 
 if [ "$varExpandSwapFile" = true ]; then
-# This will expand your swap file. It is not necessary if your VPS has more than 4G of ram, but it wont hurt to have
-echo "Expanding the swap file for optimization with low RAM VPS..."
-sudo fallocate -l 4G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
+    # This will expand your swap file. It is not necessary if your VPS has more than 4G of ram, but it wont hurt to have
+    echo "Expanding the swap file for optimization with low RAM VPS..."
+    sudo fallocate -l 4G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
 
-# the following command will append text to fstab to make sure your swap file stays there even after a reboot.
-echo "/swapfile none swap sw 0 0" >> /etc/fstab
-echo "Swap file expanded."
+    # the following command will append text to fstab to make sure your swap file stays there even after a reboot.
+    echo "/swapfile none swap sw 0 0" >> /etc/fstab
+    echo "Swap file expanded."	
+	
+	echo "Current Swap File Status:"
+	echo "sudo swapon -s"
+	sudo swapon -s
+	echo ""
+	echo "Let's check the memory"
+	echo ""
+	echo "free -m"
+	free -m
+	echo ""
+	echo "Ok, now let's check the swapieness"
+	echo "cat /proc/sys/vm/swappiness"
+	cat /proc/sys/vm/swappiness
+	echo ""
+	echo "Desktops usually have a swapieness of 60 or so, VPS's are usually lower. It should not matter for this application. It is just a curiosity."
+	echo "End of Swap File expantion"
+	echo "-------------------------------------------"
 fi
 
 # Ensure that your system is up to date and fully patched
+echo ""
 echo "Updating OS and packages..."
-sudo apt-get update && sudo apt-get -y upgrade
+echo "sleeping for 60 seconds, this is because some VPS's are not fully up if you use this as a startup script"
+sleep 60
+echo "sudo apt-get update"
+sudo apt-get update
+echo "sudo apt-get -y upgrade"
+sudo apt-get -y upgrade
+echo "OS and packages updated."
+echo ""
 
 ## make the directories we are going to use
 mkdir -p $varDynamicBinaries
@@ -125,6 +225,8 @@ mkdir -p $varScriptsDirectory
 
 
 ## Create Scripts ##
+echo "-------------------------------------------"
+echo "Create the scripts we are going to use: "
 mkdir -p $varScriptsDirectory
 
 ### Script #1: Stop dynamicd ###
@@ -244,14 +346,21 @@ echo "Created dynAutoUpdater.sh."
 
 
 ### Functions ###
+
 funcCreateDynamicConfFile ()
 {
  echo "---------------------------------"
  echo "- Creating the configuration file."
  echo "- Creating the dynamic.conf file, this replaces any existing file. "
- 
- Myrpcuser=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
- Myrpcpassword=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+ echo "Need to crate a random password and user name. Check current entropy"
+ sudo cat /proc/sys/kernel/random/entropy_avail
+
+ sleep 1
+ Myrpcuser=$(sudo cat /dev/urandom | sudo tr -dc 'a-zA-Z0-9' | sudo fold -w 32 | sudo head -n 1)
+ echo "Myrpcuser=$Myrpcuser"
+ sleep 1
+ Myrpcpassword=$(sudo cat /dev/urandom | sudo tr -dc 'a-zA-Z0-9' | sudo fold -w 32 | sudo head -n 1)
+ echo "Myrpcpassword=$Myrpcpassword"
  Myrpcport=$(shuf -i 50000-65000 -n 1)
  Myport=$(shuf -i 1-500 -n 1)
  Myport=$((Myrpcport+Myport))
@@ -295,63 +404,58 @@ funcCreateDynamicConfFile ()
 
 ## Quick Start Get Botstrap Data, recomended by the development team.
 if [ "$varQuickBootstrap" = true ]; then
+    echo "Starting Bootstrap and Blockchain download."
+    echo "Step 1a: If the dynamicd process is running, Stop it"
+    sudo ${varScriptsDirectory}dynStopDynamicd.sh
 
-echo "Starting Bootstrap and Blockchain download."
+    echo "Step 1b: Backup wallet.dat files"
+    #We are not backing up the full data directory contrary to the instuctions. The reason is that this is most likely an automated situation and a backup will just waste space
+    myBackupDirectory="${varScriptsDirectory}Backup$(date +%Y%m%d_%H%M%S)/"
+    mkdir -p ${myBackupDirectory}backups/
+    sudo cp -r ${varDynamicConfigDirectory}backups/* ${myBackupDirectory}backups/
+    sudo cp ${varDynamicConfigDirectory}wallet.dat ${myBackupDirectory}
+    sudo cp ${varDynamicConfigDirectory}dynamic.conf ${myBackupDirectory}
+    echo "Files backed up to ${myBackupDirectory}"
 
-echo "Step 1a: If the dynamicd process is running, Stop it"
-sudo ${varScriptsDirectory}dynStopDynamicd.sh
+    echo "Step 2: Delete all data apart from your wallet.dat, conf files and backup folder."
+    rm -fdr $varDynamicConfigDirectory
+    #we make sure the directory is there for the script.
+    mkdir -p $varDynamicConfigDirectory
 
-echo "Step 1b: Backup wallet.dat files"
-#We are not backing up the full data directory contrary to the instuctions. The reason is that this is most likely an automated situation and a backup will just waste space
+    echo "Step 3: Download the bootstrap.dat compressed file"
 
-#$varDynamicConfigDirectory
-myBackupDirectory="${varScriptsDirectory}Backup$(date +%Y%m%d_%H%M%S)/"
-mkdir -p ${myBackupDirectory}backups/
-sudo cp -r ${varDynamicConfigDirectory}backups/* ${myBackupDirectory}backups/
-sudo cp ${varDynamicConfigDirectory}wallet.dat ${myBackupDirectory}
-sudo cp ${varDynamicConfigDirectory}dynamic.conf ${myBackupDirectory}
+    mkdir -p ${varUserDirectory}QuickStart
+    cd ${varUserDirectory}QuickStart
 
-echo "Files backed up to ${myBackupDirectory}"
+    echo "Downloading blockchain bootstrap and extracting to data folder..."
 
-echo "Step 2: Delete all data apart from your wallet.dat, conf files and backup folder."
-rm -fdr $varDynamicConfigDirectory
-#we make sure the directory is there for the script.
-mkdir -p $varDynamicConfigDirectory
+    rm -fdr $varQuickStartCompressedBootstrapFileName
+    mkdir -p $varDynamicConfigDirectory
+    echo "wget $varQuickStartCompressedBootstrapLocation"
+    wget $varQuickStartCompressedBootstrapLocation
 
+    if [ $? -eq 0 ]; then
+        echo "Download succeeded, extract ..."
+        if [ "$varQuickStartCompressedBootstrapFileIsZip" = true ]; then
+            sudo apt-get -y install unzip
+            unzip -o $varQuickStartCompressedBootstrapFileName -d $varDynamicConfigDirectory
+            echo "Extracted Zip file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
+        else
+            tar -xvf $varQuickStartCompressedBootstrapFileName -C $varDynamicConfigDirectory
+            echo "Extracted TAR file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
+        fi
+    else
+        echo "Download of bootstrap failed. setting varQuickBootstrap=false"
+	    varQuickBootstrap=false
+	    echo "because the bootstrap failed, we are going to resort to downloading the blockchain"
+	    varQuickBlockchainDownload=true
+    fi
 
-echo "Step 3: Download the bootstrap.dat compressed file"
-
-mkdir -p ${varUserDirectory}QuickStart
-cd ${varUserDirectory}QuickStart
-
-echo "Downloading blockchain bootstrap and extracting to data folder..."
-
-rm -fdr $varQuickStartCompressedBootstrapFileNameFileName
-wget $varQuickStartCompressedBootstrapLocation
-mkdir -p $varDynamicConfigDirectory
-
-if [ "$varQuickStartCompressedBootstrapFileIsZip" = true ]; then
-  sudo apt-get -y install unzip
-  unzip -o $varQuickStartCompressedBootstrapFileName -d $varDynamicConfigDirectory
-  echo "Extracted Zip file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
-else
-  tar -xvf $varQuickStartCompressedBootstrapFileName -C $varDynamicConfigDirectory
-  echo "Extracted TAR file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
-fi
-
-
-echo "Step 4: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"-loadblock=\" argument when starting Dynamic"
-
-echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compelation if you don't download the binaries"
-##sudo ./dynamicd -loadblock=~/.dynamic/bootstrap.dat
-
-
-echo "Bootstrap Prep completed!"
-sleep 1
-
-
-echo "Finished Bootstrap and Blockchain download."
-
+    echo "Step 4: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"-loadblock=\" argument when starting Dynamic"
+    echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compelation if you don't download the binaries"
+    sleep 1
+    echo "Bootstrap Prep completed!"
+    echo ""
 fi
 
 
@@ -361,38 +465,38 @@ fi
 ## If you are bootstraping, you can still download the blockchain. While the developers recomend you only bootstrap, this will save time while syncing.
 ## 
 if [ "$varQuickBlockchainDownload" = true ]; then
+    echo "Blockchain Download"
+    echo "If the dynamicd process is running, this will kill it."
+    sudo ${varScriptsDirectory}dynStopDynamicd.sh
 
-echo "If the dynamicd process is running, this will kill it."
-sudo ${varScriptsDirectory}dynStopDynamicd.sh
+    mkdir -p ${varUserDirectory}QuickStart
+    cd ${varUserDirectory}QuickStart
 
-mkdir -p ${varUserDirectory}QuickStart
-cd ${varUserDirectory}QuickStart
+    echo "Downloading blockchain bootstrap and extracting to data folder..."
+    sudo apt-get -y install unzip
+    rm -fdr $varQuickStartCompressedBlockChainFileName
+    wget $varQuickStartCompressedBlockChainLocation
+    mkdir -p $varDynamicConfigDirectory
 
-echo "Downloading blockchain bootstrap and extracting to data folder..."
-sudo apt-get -y install unzip
-rm -fdr $varQuickStartCompressedBlockChainFileName
-wget $varQuickStartCompressedBlockChainLocation
-mkdir -p $varDynamicConfigDirectory
+    if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
+        sudo apt-get -y install unzip
+        unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
+        echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
+    else
+        tar -xvf $varQuickStartCompressedBlockChainFileName -C $varDynamicConfigDirectory
+        echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
+    fi
 
-if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
-  sudo apt-get -y install unzip
-  unzip -o $varQuickStartCompressedBlockChainFileNameFileName -d $varDynamicConfigDirectory
-  echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileNameFileName ) to the config directory ( $varDynamicConfigDirectory )"
-else
-  tar -xvf $varQuickStartCompressedBlockChainFileNameFileName -C $varDynamicConfigDirectory
-  echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileNameFileName ) to the config directory ( $varDynamicConfigDirectory )"
+    echo "Finished blockchain download and extraction"
+    echo ""
 fi
-
-echo "Finished blockchain download and extraction"
-
-fi
-
 
 ## Creating the config file. This prevents the boot up, have to shut down thing in dynamicd, We do this here just in case the quickstart stuff deletes the config file.
+echo ""
 echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. no ned to invoke dynamic-cli setgenerate true"
 funcCreateDynamicConfFile
 echo "Now that we have crated the dynamic.conf file, there is no need to do the boot up shut down thing with dyanmicd"
-
+echo ""
 
 
 ## Quick Start (get binaries from the web, not completly safe or reliable, but fast!)
@@ -443,8 +547,8 @@ echo "Creating Boot Start and Scrape Cron jobs..."
 dynStart="${varScriptsDirectory}dynMineStart.sh"
 dynScrape="${varScriptsDirectory}dynScrape.sh"
 
-startLine="@reboot sh $dynStart >> ${varScriptsDirectory}/dynMineStart.log 2>&1"
-scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}/dynScrape.log 2>&1"
+startLine="@reboot sh $dynStart >> ${varScriptsDirectory}dynMineStart.log 2>&1"
+scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}dynScrape.log 2>&1"
 
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
@@ -484,13 +588,23 @@ cd $varGITDynamicPath
 sudo git pull $varRemoteRepository
 
 # Compile the Daemon Client
+echo "-------------------------------------------"
 echo "Compile the Daemon Client"
 cd $varGITDynamicPath
+echo "-----------------"
+echo "sudo ./autogen.sh"
 sudo ./autogen.sh
+echo "-----------------"
+echo "sudo ./configure"
 sudo ./configure
+echo "-----------------"
+echo "sudo make"
 sudo make
+echo "-----------------"
+echo "sudo make install"
 sudo make install
 echo "Compile Finished."
+echo "-------------------------------------------"
 
 echo "If the dynamicd process is running, this will kill it."
 sudo ${varScriptsDirectory}dynStopDynamicd.sh
@@ -529,35 +643,55 @@ echo "Dynamic Wallet created and blockchain should be syncing."
 
 
 ## CREATE CRON JOBS ###
+echo "-------------------------------------------"
 echo "Creating Boot Start and Scrape Cron jobs..."
 
 dynStart="${varScriptsDirectory}dynMineStart.sh"
 dynScrape="${varScriptsDirectory}dynScrape.sh"
 dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
 
-startLine="@reboot sh $dynStart >> ${varScriptsDirectory}/dynMineStart.log 2>&1"
-scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}/dynScrape.log 2>&1"
-
-#we don't want eveyone updating at the same time, that would be bad for the network, so check for updates at a random time.
-AutoUpdaterLine="$(shuf -i 0-59 -n 1) $(shuf -i 0-23 -n 1) * * * $dynAutoUpdater >> ${varScriptsDirectory}/dynAutoUpdater.log 2>&1"
-#this will check once a day, just at a random time of day from other runs of this script. 
+startLine="@reboot sh $dynStart >> ${varScriptsDirectory}dynMineStart.log 2>&1"
+scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}dynScrape.log 2>&1"
 
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
-(crontab -u root -l 2>/dev/null | grep -v -F "$dynAutoUpdater"; echo "$AutoUpdaterLine") | crontab -u root -
+
+if [ "$varAutoUpdate" = true ]; then
+
+  #we don't want eveyone updating at the same time, that would be bad for the network, so check for updates at a random time.
+  AutoUpdaterLine="$(shuf -i 0-59 -n 1) $(shuf -i 0-23 -n 1) * * * $dynAutoUpdater >> ${varScriptsDirectory}dynAutoUpdater.log 2>&1"
+  #this will check once a day, just at a random time of day from other runs of this script. 
+
+  (crontab -u root -l 2>/dev/null | grep -v -F "$dynAutoUpdater"; echo "$AutoUpdaterLine") | crontab -u root -
+  echo "Auto Update cron job has been set: ${AutoUpdaterLine}"
+  echo "Auto Update will run once a day and automatically compile and execute new code if there have been commits to the remote repository."
+  echo "Remote Repository: $varRemoteRepository"
+else
+  echo "Auto Update is set to false. We will not update if new code is updated in the repository: $varRemoteRepository"
+fi
 
 
-
-echo "Created Cron jobs."
+echo "Created cron jobs."
+echo "-------------------------------------------"
 echo "
 
 ===========================================================
-All set! Helpful commands: you may need to navigate to ${varDynamicBinaries} before you can run the commands.
+All set! 
+Helpful commands: 
 \"dynamic-cli getmininginfo\" to check mining and # of blocks synced.
-\"dynamic-cli stop\" stops and \"dynamicd --daemon\" starts.
-\"dynamic-cli setgenerate true\" to start mining.
-\"dynamic-cli listaddressgroupings to see mined balances.
+\"dynamicd --daemon\" starts the daemon.
+\"dynamic-cli stop\" stops the daemon. 
+\"dynamic-cli setgenerate true -1\" to start mining.
+\"dynamic-cli listaddressgroupings\" to see mined balances.
+\"dynamic-cli getblockcount\" gets the current blockcount
+\"dynamic-cli gethashespersec\" gets your current hash rate.
 \"dynamic-cli help\" for a full list of commands.
+
+You may need to navigate to ${varDynamicBinaries} before you can run the commands. 
+This command will navigate to ${varDynamicBinaries} the directory
+cd ${varDynamicBinaries}
+
+Alternitavly you can put the path (directory) before the command
 
 example: Getting the blockcount:
 sudo ${varDynamicBinaries}dynamic-cli getblockcount"
