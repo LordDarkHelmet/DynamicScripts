@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.13 dynStartupScript.sh April 18, 2017 Released by LordDarkHelmet"
+varVersion="1.0.14 dynStartupScript.sh April 20, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -128,47 +128,47 @@ echo "- This applies the values passed in by attributes"
 
 while getopts :s:d:a:r:l: option
 do
-        case "${option}"
-        in
-                s) 
-				    myScrapeAddress=${OPTARG}
-					echo "-s has set myScrapeAddress=${myScrapeAddress}"
-					;;
-                d) 
-				    varDynodePrivateKey=${OPTARG}
-					varDynode=1
-					echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey}"
-					;;
-				a)
-				    if [ "${OPTARG}" = true ]; then
-					    varAutoUpdate=true
-					    echo "-a has set varAutoUpdate to true (default)"
-				    else
-					    varAutoUpdate=false
-						echo "-a has set varAutoUpdate to false, the system will not auto update. If an update occurs, you must do it manually."
-					fi
-					;;
-				r)
-				    if [ "${OPTARG}" = true ]; then
-					    varAutoRepair=true
-					    echo "Auto Repair is set to True (default)"
-				    else
-					    varAutoRepair=false
-						echo "Auto Repair is set to FALSE, the system will not auto repair. If there is an issue you must repair it manually."
-					fi
-					;;
-				l)
-				    if [ "${OPTARG}" = true ]; then
-					    varSystemLockdown=true
-					    echo "Auto Lockdown is set to True (default)"
-				    else
-					    varSystemLockdown=false
-						echo "Auto Lockdown is set to FALSE, the system will not be secured."
-					fi
-					;;
-				\?) echo "Invalid Option Tag: -$OPTARG";;
-				:) echo "Option -$OPTARG requires an argument.";;
-        esac
+    case "${option}"
+    in
+        s) 
+            myScrapeAddress=${OPTARG}
+            echo "-s has set myScrapeAddress=${myScrapeAddress}"
+            ;;
+        d) 
+            varDynodePrivateKey=${OPTARG}
+            varDynode=1
+            echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey}"
+            ;;
+        a)
+            if [ "${OPTARG}" = true ]; then
+                varAutoUpdate=true
+                echo "-a has set varAutoUpdate to true (default)"
+            else
+                varAutoUpdate=false
+                echo "-a has set varAutoUpdate to false, the system will not auto update. If an update occurs, you must do it manually."
+            fi
+            ;;
+        r)
+            if [ "${OPTARG}" = true ]; then
+                varAutoRepair=true
+                echo "Auto Repair is set to True (default)"
+            else
+                varAutoRepair=false
+                echo "Auto Repair is set to FALSE, the system will not auto repair. If there is an issue you must repair it manually."
+            fi
+            ;;
+        l)
+            if [ "${OPTARG}" = true ]; then
+                varSystemLockdown=true
+                echo "Auto Lockdown is set to True (default)"
+            else
+                varSystemLockdown=false
+                echo "Auto Lockdown is set to FALSE, the system will not be secured."
+            fi
+            ;;
+        \?) echo "Invalid Option Tag: -$OPTARG";;
+        :) echo "Option -$OPTARG requires an argument.";;
+    esac
 done
 
 echo "-------------------------------------------"
@@ -356,10 +356,10 @@ funcCreateDynamicConfFile ()
  sudo cat /proc/sys/kernel/random/entropy_avail
 
  sleep 1
- Myrpcuser=$(sudo cat /dev/urandom | sudo tr -dc 'a-zA-Z0-9' | sudo fold -w 32 | sudo head -n 1)
+ Myrpcuser=$(sudo tr -d -c "a-zA-Z0-9" < /dev/urandom | sudo head -c 34)
  echo "Myrpcuser=$Myrpcuser"
  sleep 1
- Myrpcpassword=$(sudo cat /dev/urandom | sudo tr -dc 'a-zA-Z0-9' | sudo fold -w 32 | sudo head -n 1)
+ Myrpcpassword=$(sudo tr -d -c "a-zA-Z0-9" < /dev/urandom | sudo head -c $(shuf -i 30-36 -n 1))
  echo "Myrpcpassword=$Myrpcpassword"
  Myrpcport=$(shuf -i 50000-65000 -n 1)
  Myport=$(shuf -i 1-500 -n 1)
