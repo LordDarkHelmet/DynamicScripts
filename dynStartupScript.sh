@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.14 dynStartupScript.sh April 20, 2017 Released by LordDarkHelmet"
+varVersion="1.0.15 dynStartupScript.sh April 26, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -36,6 +36,9 @@ echo "$varVersion"
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts"
 echo "Local Filename: $0"
 echo "Local Time: $(date +%F_%T)"
+echo "System:"
+uname -a
+cat /etc/*release | grep -v URL
 echo "If you found this script useful please contribute. Feedback is appreciated"
 echo "==========================================================================="
 
@@ -60,6 +63,7 @@ varDynamicConfigDirectory="${varUserDirectory}.dynamic/"
 varDynamicConfigFile="${varUserDirectory}.dynamic/dynamic.conf"
 varGITRootPath="${varUserDirectory}"
 varGITDynamicPath="${varGITRootPath}Dynamic/"
+varBackupDirectory="${varUserDirectory}DYN/Backups/"
 
 # Quick Non-Source Start (get binaries and blockchain from the web, not completly safe or reliable, but fast!)
 
@@ -73,8 +77,8 @@ varQuickStartCompressedFilePathForCLI=dynamic-1.3.0/bin/dynamic-cli
 
 # QuickStart Bootstrap (The developer recomends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=true
-varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-2017-04-17_11-00\(UTC\).tar.gz
-varQuickStartCompressedBootstrapFileName=bootstrap-2017-04-17_11-00\(UTC\).tar.gz
+varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
 # QuickStart Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
@@ -112,6 +116,10 @@ varAutoUpdate=true
 #AutoRepair
 #Future Repair System. 
 varAutoRepair=true
+#Watchdog timer. Check every X min to see if we are still running. (5 min recomended)
+varWatchdogTime=5
+#Turn on or off the watchdog. default is true. 
+varWatchdogEnabled=true
 
 #System Lockdown
 #Future System Lockdown. Firewall, security rules, etc. 
@@ -124,9 +132,16 @@ varSystemLockdown=true
 
 #Read in attributes. This allows someone to run the script with their variables without having to modify this script.
 echo "-------------------------------------------"
-echo "- This applies the values passed in by attributes"
-
-while getopts :s:d:a:r:l: option
+echo "This applies the values passed in by attributes"
+echo " -s Scrape address requires an attirbute Ex.  -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD"
+echo " -d Dynode Private key. if you populate this it will setup a dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
+echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
+echo " -l System Lockdown. (future) Secure the instance. True to lock down your system. ex -l false"
+echo " -w Watchdog. The watchdog restarts proccesses if they fail. true for on, false for off."
+echo ""
+echo "Options passed in: $@"
+while getopts :s:d:a:r:l:w: option
 do
     case "${option}"
     in
@@ -137,37 +152,46 @@ do
         d) 
             varDynodePrivateKey=${OPTARG}
             varDynode=1
-            echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey}"
+            echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a dynode)"
             ;;
         a)
-            if [ "${OPTARG}" = true ]; then
+            if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
                 varAutoUpdate=true
-                echo "-a has set varAutoUpdate to true (default)"
+                echo "-a has set varAutoUpdate to true (default), the system will auto update at a random time every 24 hours"
             else
                 varAutoUpdate=false
                 echo "-a has set varAutoUpdate to false, the system will not auto update. If an update occurs, you must do it manually."
             fi
             ;;
         r)
-            if [ "${OPTARG}" = true ]; then
+            if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
                 varAutoRepair=true
-                echo "Auto Repair is set to True (default)"
+                echo "AUTO REPAIR NOT IMPLEMENTED YET, Auto Repair is set to True (default), the system will auto repair"
             else
                 varAutoRepair=false
-                echo "Auto Repair is set to FALSE, the system will not auto repair. If there is an issue you must repair it manually."
+                echo "AUTO REPAIR NOT IMPLEMENTED YET, Auto Repair is set to FALSE, the system will not auto repair. If there is an issue you must repair it manually."
             fi
             ;;
         l)
-            if [ "${OPTARG}" = true ]; then
+            if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
                 varSystemLockdown=true
-                echo "Auto Lockdown is set to True (default)"
+                echo "AUTO LOCKDOWN NOT IMPLEMENTED YET, Auto Lockdown is set to True (default), System will be secured"
             else
                 varSystemLockdown=false
-                echo "Auto Lockdown is set to FALSE, the system will not be secured."
+                echo "AUTO LOCKDOWN NOT IMPLEMENTED YET, Auto Lockdown is set to FALSE, the system will not be secured."
+            fi
+			;;
+        w)
+            if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
+                varWatchdogEnabled=true
+                echo "varWatchdogEnabled is set to true (default), Watchdog will check every $varWatchdogTime min to see if dynamicd is still running"
+            else
+                varWatchdogEnabled=false
+                echo "varWatchdogEnabled is set to false, Watchdog will be disabled"
             fi
             ;;
         \?) echo "Invalid Option Tag: -$OPTARG";;
-        :) echo "Option -$OPTARG requires an argument.";;
+        :) echo "Option -$OPTARG requires an argument. Using Default Values and continuing.";;
     esac
 done
 
@@ -175,6 +199,9 @@ echo "-------------------------------------------"
 echo "==============================================================="
 echo "SCRAPE ADDRESS: $myScrapeAddress"
 echo "==============================================================="
+
+
+
 ### Prep your VPS (Increase Swap Space and update) ###
 
 if [ "$varExpandSwapFile" = true ]; then
@@ -219,40 +246,57 @@ sudo apt-get -y upgrade
 echo "OS and packages updated."
 echo ""
 
-## make the directories we are going to use
-mkdir -p $varDynamicBinaries
-mkdir -p $varScriptsDirectory
+#Install any untilities you need for the script
+echo ""
+echo "Installing the JSON parser jq"
+sudo apt-get -y install jq
+echo ""
 
+## make the directories we are going to use
+echo "Make the directories we are going to use"
+mkdir -pv $varDynamicBinaries
+mkdir -pv $varScriptsDirectory
+mkdir -pv $varBackupDirectory
 
 ## Create Scripts ##
 echo "-------------------------------------------"
 echo "Create the scripts we are going to use: "
-mkdir -p $varScriptsDirectory
+echo "--"
 
 ### Script #1: Stop dynamicd ###
 # Filename dynStopDynamicd.sh
 cd $varScriptsDirectory
 echo "Creating The Stop dynamicd Script: dynStopDynamicd.sh"
 echo '#!/bin/sh' > dynStopDynamicd.sh
-echo "# This file was generated.  Version: $varVersion" >> dynStopDynamicd.sh
+echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynStopDynamicd.sh
 echo "# This script is here to force stop or force kill dynamicd" >> dynStopDynamicd.sh
-echo "cd $varDynamicBinaries" >> dynStopDynamicd.sh
-echo "echo \"Stopping the dynamicd if it already running \"" >> dynStopDynamicd.sh
-echo "# stop the dynamic daemon if it is running" >> dynStopDynamicd.sh
-echo "sudo ./dynamic-cli stop" >> dynStopDynamicd.sh
-echo "sleep 15" >> dynStopDynamicd.sh
-echo "# Kill the process directly, if it could not be shut down normally." >> dynStopDynamicd.sh
+echo "echo \"\$(date +%F_%T) Stopping the dynamicd if it already running \"" >> dynStopDynamicd.sh
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynStopDynamicd.sh
 echo "if [ \"\" !=  \"\$PID\" ]; then" >> dynStopDynamicd.sh
-echo "  echo \"Rouge dynamicd process found. Killing PID: \$PID\""  >> dynStopDynamicd.sh
-echo "  sudo kill -9 \$PID" >> dynStopDynamicd.sh
+echo "    if [ -e ${varDynamicBinaries}dynamic-cli ]; then"  >> dynStopDynamicd.sh
+echo "        sudo ${varDynamicBinaries}dynamic-cli stop" >> dynStopDynamicd.sh
+echo "        echo \"\$(date +%F_%T) Stop sent, waiting 30 seconds\""  >> dynStopDynamicd.sh
+echo "        sleep 30" >> dynStopDynamicd.sh
+echo "    fi"  >> dynStopDynamicd.sh
+echo "# At this point we should be stopped. Let's recheck and kill if we need to. "  >> dynStopDynamicd.sh
+echo "    PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynStopDynamicd.sh
+echo "    if [ \"\" !=  \"\$PID\" ]; then" >> dynStopDynamicd.sh
+echo "        echo \"\$(date +%F_%T) Rouge dynamicd process found. Killing PID: \$PID\""  >> dynStopDynamicd.sh
+echo "        sudo kill -9 \$PID" >> dynStopDynamicd.sh
+echo "        sleep 5" >> dynStopDynamicd.sh
+echo "        echo \"\$(date +%F_%T) Dynamicd has been Killed! PID: \$PID\""  >> dynStopDynamicd.sh
+echo "    else"  >> dynStopDynamicd.sh
+echo "        echo \"\$(date +%F_%T) Dynamicd has been stopped.\""  >> dynStopDynamicd.sh
+echo "    fi" >> dynStopDynamicd.sh
+echo "else"  >> dynStopDynamicd.sh
+echo "    echo \"\$(date +%F_%T) Dynamic is not running. No need for shutdown commands.\""  >> dynStopDynamicd.sh
 echo "fi" >> dynStopDynamicd.sh
-echo "sleep 1" >> dynStopDynamicd.sh
-echo "echo \"Stop Complete\"" >> dynStopDynamicd.sh
-echo "sleep 1" >> dynStopDynamicd.sh
+echo "# End of generated Script" >> dynStopDynamicd.sh
 echo "Changing the file attributes so we can run the script"
 chmod +x dynStopDynamicd.sh
 echo "Created dynStopDynamicd.sh"
+dynStop="${varScriptsDirectory}dynStopDynamicd.sh"
+echo "--"
 
 ### Script #2: MINING START SCRIPT ###
 # Filename dynMineStart.sh
@@ -260,13 +304,19 @@ cd $varScriptsDirectory
 echo "Creating Mining Start script: dynMineStart.sh"
 echo '#!/bin/sh' > dynMineStart.sh
 echo "" >> dynMineStart.sh
-echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynMineStart.sh
-echo "echo \"Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
+echo "# This file, dynMineStart.sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynMineStart.sh
+echo "echo \"\$(date +%F_%T) Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
 echo "sudo ${varDynamicBinaries}dynamicd --daemon" >> dynMineStart.sh
+echo "echo \"\$(date +%F_%T) Waiting 15 seconds \"" >> dynMineStart.sh
 echo "sleep 15" >> dynMineStart.sh
+echo "# End of generated Script" >> dynMineStart.sh
+#./dynamic-cli settxfee 0.0
+
 echo "Changing the file attributes so we can run the script"
 chmod +x dynMineStart.sh
 echo "Created dynMineStart.sh."
+dynStart="${varScriptsDirectory}dynMineStart.sh"
+echo "--"
 
 ### script #3: GENERATE SCRAPE SCRIPT ###
 # Filename: dynScrape.sh
@@ -274,17 +324,23 @@ cd $varScriptsDirectory
 echo "Creating Scrape script: dynScrape.sh"
 echo '#!/bin/sh' > dynScrape.sh
 echo "" >> dynScrape.sh
-echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynScrape.sh
+echo "# This file, dynScrape.sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynScrape.sh
 echo "" >> dynScrape.sh
 echo "myBalance=\$(sudo ${varDynamicBinaries}dynamic-cli getbalance)" >> dynScrape.sh
-echo "if [ \$myBalance != \"0.00000000\" ];then" >> dynScrape.sh
-echo "echo \"\$(date +%F_%T) Scraping a balance of \$myBalance to $myScrapeAddress \"" >> dynScrape.sh
-echo "sudo ${varDynamicBinaries}dynamic-cli sendtoaddress \"$myScrapeAddress\" \$(sudo ${varDynamicBinaries}dynamic-cli getbalance) \"\" \"\" true " >> dynScrape.sh
+echo "if [ \"\$myBalance\" = \"\" ] ; then" >> dynScrape.sh
+echo "    echo \"\$(date +%F_%T) No Response, is the daemon running, does it exist yet?\"" >> dynScrape.sh
+echo "else" >> dynScrape.sh
+echo "    if [ \$myBalance != \"0.00000000\" ];then" >> dynScrape.sh
+echo "        echo \"\$(date +%F_%T) Scraping a balance of \$myBalance to $myScrapeAddress \"" >> dynScrape.sh
+echo "        sudo ${varDynamicBinaries}dynamic-cli sendtoaddress \"$myScrapeAddress\" \$(sudo ${varDynamicBinaries}dynamic-cli getbalance) \"\" \"\" true " >> dynScrape.sh
+echo "    fi" >> dynScrape.sh
 echo "fi" >> dynScrape.sh
+echo "# End of generated Script" >> dynScrape.sh
 echo "Changing the file attributes so we can run the script"
 chmod +x dynScrape.sh
 echo "Created dynScrape.sh."
-
+dynScrape="${varScriptsDirectory}dynScrape.sh"
+echo "--"
 
 ### script #4: AUTO UPDATER SCRIPT ###
 # Filename: dynAutoUpdater.sh
@@ -292,7 +348,7 @@ cd $varScriptsDirectory
 echo "Creating Scrape script: dynAutoUpdater.sh"
 echo '#!/bin/sh' > dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo "# This file was generated. $(date +%F_%T) Version: $varVersion" >> dynAutoUpdater.sh
+echo "# This file, dynAutoUpdater,sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo "cd $varGITDynamicPath" >> dynAutoUpdater.sh
 echo "if [ \"\`git log --pretty=%H ...refs/heads/master^ | head -n 1\`\" = \"\`git ls-remote $varRemoteRepository -h refs/heads/master |cut -f1\`\" ] ; then " >> dynAutoUpdater.sh
@@ -314,17 +370,26 @@ echo " sudo make" >> dynAutoUpdater.sh
 echo " sudo make install" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile Finished.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo " # 3. Stop the running daemon" >> dynAutoUpdater.sh
+echo " # 3. Scrape if there are any funds before we stop" >> dynAutoUpdater.sh
+echo " echo \"GitCheck \$(date +%F_%T) : Scrape if there are any funds before we stop.\"" >> dynAutoUpdater.sh
+echo " sudo ${dynScrape}" >> dynAutoUpdater.sh
+echo "" >> dynAutoUpdater.sh
+echo "" >> dynAutoUpdater.sh
+echo " echo \"Fix for wallets below 1.4.0\"" >> dynAutoUpdater.sh 
+echo " sudo ${dynPre_1_4_0_Fix}" >> dynAutoUpdater.sh
+echo "" >> dynAutoUpdater.sh
+echo "" >> dynAutoUpdater.sh
+echo " # 4. Stop the running daemon" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Stop the running daemon.\"" >> dynAutoUpdater.sh
-echo " sudo ${varScriptsDirectory}dynStopDynamicd.sh" >> dynAutoUpdater.sh
+echo " sudo ${dynStop}" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo " # 4. Replace the executable files" >> dynAutoUpdater.sh
+echo " # 5. Replace the executable files" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Replace the executable files.\"" >> dynAutoUpdater.sh
-echo " mkdir -p $varDynamicBinaries" >> dynAutoUpdater.sh
-echo " sudo cp ${varGITDynamicPath}src/dynamicd $varDynamicBinaries" >> dynAutoUpdater.sh
-echo " sudo cp ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries" >> dynAutoUpdater.sh
+echo " mkdir -pv $varDynamicBinaries" >> dynAutoUpdater.sh
+echo " sudo cp -v ${varGITDynamicPath}src/dynamicd $varDynamicBinaries" >> dynAutoUpdater.sh
+echo " sudo cp -v ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo " # 5. Start the daemon" >> dynAutoUpdater.sh
+echo " # 6. Start the daemon" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Start the daemon. Mining will automatically start once synced.\"" >> dynAutoUpdater.sh
 echo " sudo ${varDynamicBinaries}dynamicd --daemon" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
@@ -333,14 +398,115 @@ echo " sleep 10" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Now running the latest GIT version.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo "fi" >> dynAutoUpdater.sh
-echo "" >> dynAutoUpdater.sh
+echo "# End of generated Script" >> dynAutoUpdater.sh
 echo "Changing the file attributes so we can run the script"
 chmod +x dynAutoUpdater.sh
 echo "Created dynAutoUpdater.sh."
+dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
+echo "--"
 
-######## Reserverd for Watchdog #############
-# Not implementing for now. Dont want to mask potential issues witht he script by keeping the daemon on life support. 
-######## Reserverd for Watchdog #############
+
+### Script #5: Fix wallet issues in version 1.4.0 and below ###
+# Filename dynPre_1_4_0_Fix.sh
+# This file will be depricated a version or two past where the network no longer connects to versions below 1.4.0
+cd $varScriptsDirectory
+echo "Creating The Stop dynamicd Script: dynPre_1_4_0_Fix.sh"
+echo '#!/bin/sh' > dynPre_1_4_0_Fix.sh
+echo "# This file, dynPre_1_4_0_Fix.sh, was generated.  Version: $varVersion" >> dynPre_1_4_0_Fix.sh
+echo "# This file will be depricated a version or two past where the network no longer connects to versions below 1.4.0" >> dynPre_1_4_0_Fix.sh
+echo "
+echo \"---------------------------------
+\$(date +%F_%T)\ dynPre_1_4_0_Fix Started
+Take care of the wallet upgrade issue from versions earlier that 1.4.0         
+The developers require us to manually export private keys and then import them 
+into a new wallet. This is an issue if you keep coins in the wallet. 
+This script was built to scape all coins in this instances wallet, and transfer
+them to a controller wallet, exchange, or other address. Basically, there 
+should be no coins in this wallet. This allows us to simply transfer the coins 
+out then delete the wallet.dat file.
+
+We are better than that though. In case something went wrong we should create a
+backup of the wallet.dat file, then delete the file.
+
+Step 1: Scrape the coins if they exist\"
+sudo $dynScrape
+
+echo \"
+Setp 2: Create a backup of the wallet.dat file\"
+mkdir -pv ${varBackupDirectory}
+sudo cp -v ${varDynamicConfigDirectory}wallet.dat ${varBackupDirectory}wallet_backup_\$(date +%Y%m%d_%H%M%S).dat
+
+echo \"
+Step 3: If we are not running, or we are running a version less than version then we get rid of the wallet.dat file.\"
+myVersion=\"\$(sudo ./dynamic-cli getinfo | jq -r '.version')\"
+echo \"Current Version returned: \\\"\$myVersion\\\"\"
+
+if [ \"\$myVersion\" = \"\" ] ; then
+    echo \"Because dynamic is not running or not installed we do not know the version. We are going to backup the file anyways\"
+    sudo ${dynStop}
+    mv -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_unknown_\$(date +%Y%m%d_%H%M%S).dat
+else
+    if [ \"\$myVersion\" -ge 1040000 ];then
+        echo \"Our version is greater than or equal to version 1.4.0, backing up the wallet.dat file, but keeping the exising wallet in place\"
+		cp -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${\$myVersion}_\$(date +%Y%m%d_%H%M%S).dat
+    else
+        echo \"Our version is less than 1.4.0, stop dynamic and move the wallet file\"
+		sudo ${dynStop}
+		mv -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${\$myVersion}_\$(date +%Y%m%d_%H%M%S).dat
+    fi
+fi
+sleep 1
+echo \"\$(date +%F_%T) dynPre_1_4_0_Fix Finished\"
+echo \"---------------------------------\"
+#end of generated file" >> dynPre_1_4_0_Fix.sh
+echo "Changing the file attributes so we can run the script"
+chmod +x dynPre_1_4_0_Fix.sh
+echo "Created dynPre_1_4_0_Fix.sh"
+dynPre_1_4_0_Fix="${varScriptsDirectory}dynPre_1_4_0_Fix.sh"
+echo "--"
+
+
+
+
+### Script #5: Watchdog, Checks to see if the process is running and restarts it if it is not. ###
+# Filename dynWatchdog.sh
+# This file will be depricated a version or two past where the network no longer connects to versions below 1.4.0
+cd $varScriptsDirectory
+echo "Creating The Stop dynamicd Script: dynWatchdog.sh"
+echo '#!/bin/sh' > dynWatchdog.sh
+echo "# This file, dynWatchdog.sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynWatchdog.sh
+echo "# This script checks to see if dynamicd is running. If it is not, then it will be restarted. " >> dynWatchdog.sh
+echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
+echo "if [ \"\" =  \"\$PID\" ]; then" >> dynWatchdog.sh
+echo "    if [ -e ${varDynamicBinaries}dynamic-cli ]; then"  >> dynWatchdog.sh
+echo "        echo \"\$(date +%F_%T) STOPPED: Wait 3 minutes. We could be in an auto-update or other momentary restart.\""  >> dynWatchdog.sh
+echo "        sleep 180" >> dynWatchdog.sh
+echo "        PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
+echo "        if [ \"\" =  \"\$PID\" ]; then" >> dynWatchdog.sh
+echo "            echo \"\$(date +%F_%T) Starting: Attempting to start the dynamic daemon \""  >> dynWatchdog.sh
+echo "            sudo ${dynStart}" >> dynWatchdog.sh
+echo "            echo \"\$(date +%F_%T) Starting: Attempt complete. We will see if it worked the next watchdog round. \""  >> dynWatchdog.sh
+echo "        else"  >> dynWatchdog.sh
+echo "            echo \"\$(date +%F_%T) Running: Must have been some reason it was down. \""  >> dynWatchdog.sh
+echo "        fi"  >> dynWatchdog.sh
+echo "    else"  >> dynWatchdog.sh
+echo "        echo \"\$(date +%F_%T) Error the file ${varDynamicBinaries}dynamic-cli does not exist! \""  >> dynWatchdog.sh
+echo "    fi"  >> dynWatchdog.sh
+echo "else"  >> dynWatchdog.sh
+echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
+echo "    myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
+echo "    echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec \""  >> dynWatchdog.sh
+echo "fi" >> dynWatchdog.sh
+echo "# End of generated Script" >> dynWatchdog.sh
+echo "Changing the file attributes so we can run the script"
+chmod +x dynWatchdog.sh
+echo "Created dynWatchdog.sh"
+dynWatchdog="${varScriptsDirectory}dynWatchdog.sh"
+echo "--"
+
+
+echo "Done creating sctipts"
+echo "-------------------------------------------"
 
 
 
@@ -365,7 +531,7 @@ funcCreateDynamicConfFile ()
  Myport=$(shuf -i 1-500 -n 1)
  Myport=$((Myrpcport+Myport))
  
- mkdir -p $varDynamicConfigDirectory
+ mkdir -pv $varDynamicConfigDirectory
  echo "# This file was generated. $(date +%F_%T)  Version: $varVersion" > $varDynamicConfigFile
  echo "# Do not use special characters or spaces with username/password" >> $varDynamicConfigFile
  echo "rpcuser=$Myrpcuser" >> $varDynamicConfigFile
@@ -400,37 +566,43 @@ funcCreateDynamicConfFile ()
 #Perminant lockdown and security of the node/miner. Not implementing before we work out the bugs. (dont want to lock us out from debugging it)
 ####### RESERVED For Security Lockdown Function #############
 
-
+echo "Lets Scrape, if this is an upgrade, you may have mined coins."
+sudo ${dynScrape}
+echo "--"
+echo "Fix for wallets below 1.4.0"
+sudo ${dynPre_1_4_0_Fix}
+echo "--"
 
 ## Quick Start Get Botstrap Data, recomended by the development team.
 if [ "$varQuickBootstrap" = true ]; then
     echo "Starting Bootstrap and Blockchain download."
     echo "Step 1a: If the dynamicd process is running, Stop it"
-    sudo ${varScriptsDirectory}dynStopDynamicd.sh
+    sudo ${dynStop}
 
     echo "Step 1b: Backup wallet.dat files"
     #We are not backing up the full data directory contrary to the instuctions. The reason is that this is most likely an automated situation and a backup will just waste space
-    myBackupDirectory="${varScriptsDirectory}Backup$(date +%Y%m%d_%H%M%S)/"
-    mkdir -p ${myBackupDirectory}backups/
+    myBackupDirectory="${varBackupDirectory}Backup$(date +%Y%m%d_%H%M%S)/"
+    mkdir -pv ${myBackupDirectory}backups/
     sudo cp -r ${varDynamicConfigDirectory}backups/* ${myBackupDirectory}backups/
-    sudo cp ${varDynamicConfigDirectory}wallet.dat ${myBackupDirectory}
-    sudo cp ${varDynamicConfigDirectory}dynamic.conf ${myBackupDirectory}
+    sudo cp -v ${varDynamicConfigDirectory}wallet.dat ${myBackupDirectory}
+    sudo cp -v ${varDynamicConfigDirectory}dynamic.conf ${myBackupDirectory}
+	sudo cp -v ${varDynamicConfigDirectory}dncache.dat ${myBackupDirectory}
     echo "Files backed up to ${myBackupDirectory}"
 
     echo "Step 2: Delete all data apart from your wallet.dat, conf files and backup folder."
     rm -fdr $varDynamicConfigDirectory
     #we make sure the directory is there for the script.
-    mkdir -p $varDynamicConfigDirectory
+    mkdir -pv $varDynamicConfigDirectory
 
     echo "Step 3: Download the bootstrap.dat compressed file"
 
-    mkdir -p ${varUserDirectory}QuickStart
+    mkdir -pv ${varUserDirectory}QuickStart
     cd ${varUserDirectory}QuickStart
 
     echo "Downloading blockchain bootstrap and extracting to data folder..."
 
     rm -fdr $varQuickStartCompressedBootstrapFileName
-    mkdir -p $varDynamicConfigDirectory
+    mkdir -pv $varDynamicConfigDirectory
     echo "wget $varQuickStartCompressedBootstrapLocation"
     wget $varQuickStartCompressedBootstrapLocation
 
@@ -467,16 +639,16 @@ fi
 if [ "$varQuickBlockchainDownload" = true ]; then
     echo "Blockchain Download"
     echo "If the dynamicd process is running, this will kill it."
-    sudo ${varScriptsDirectory}dynStopDynamicd.sh
+    sudo ${dynStop}
 
-    mkdir -p ${varUserDirectory}QuickStart
+    mkdir -pv ${varUserDirectory}QuickStart
     cd ${varUserDirectory}QuickStart
 
     echo "Downloading blockchain bootstrap and extracting to data folder..."
     sudo apt-get -y install unzip
     rm -fdr $varQuickStartCompressedBlockChainFileName
     wget $varQuickStartCompressedBlockChainLocation
-    mkdir -p $varDynamicConfigDirectory
+    mkdir -pv $varDynamicConfigDirectory
 
     if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
         sudo apt-get -y install unzip
@@ -504,9 +676,9 @@ if [ "$varQuickStart" = true ]; then
 echo "Begining QuickStart Executable (binaries) download and start"
 
 echo "If the dynamicd process is running, this will kill it."
-sudo ${varScriptsDirectory}dynStopDynamicd.sh
+sudo ${dynStop}
 
-mkdir -p ${varUserDirectory}QuickStart
+mkdir -pv ${varUserDirectory}QuickStart
 cd ${varUserDirectory}QuickStart
 echo "Downloading and extracting Dynamic binaries"
 rm -fdr $varQuickStartCompressedFileName
@@ -514,9 +686,9 @@ wget $varQuickStartCompressedFileLocation
 tar -xzf $varQuickStartCompressedFileName
 
 echo "Copy QuickStart binaries"
-mkdir -p $varDynamicBinaries
-sudo cp $varQuickStartCompressedFilePathForDaemon $varDynamicBinaries
-sudo cp $varQuickStartCompressedFilePathForCLI $varDynamicBinaries
+mkdir -pv $varDynamicBinaries
+sudo cp -v $varQuickStartCompressedFilePathForDaemon $varDynamicBinaries
+sudo cp -v $varQuickStartCompressedFilePathForCLI $varDynamicBinaries
 
 
 echo "Launching daemon for the first time."
@@ -528,10 +700,28 @@ else
   sudo ${varDynamicBinaries}dynamicd --daemon
 fi
 
-echo "Waiting 60 seconds"
-sleep 60
+echo "The Daemon has started."
 
-echo "The Daemon has started. We are currently on Block:"
+if [ $varQuickBlockchainDownload = true ] ; then
+	# Downloading the blockchain is significantly faster. you will most likely be mining within 5 min. 
+    echo "We have downloaded the blockchain and the binaries, Let's give some time for the blockchain to load"
+	echo "Out of all of the options, this is the fastest and actually has a chance of completing before compiling starts"
+    echo "Sleeping for 15 min"
+    for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+    do
+        sleep 60
+        echo "$i out of 15 min completed"
+    done
+	echo "sudo ${varDynamicBinaries}dynamic-cli gethashespersec"
+    sudo ${varDynamicBinaries}dynamic-cli gethashespersec
+    echo "* note: hash rate may be 0 if the blockchain has not fully synced yet."
+else
+    echo "Waiting 60 seconds"
+    sleep 60
+fi
+
+
+echo "Wait period over We are currently on Block:"
 echo "sudo ${varDynamicBinaries}dynamic-cli getblockcount"
 sudo ${varDynamicBinaries}dynamic-cli getblockcount
 echo "A full sync can take many hours. Mining will automatically start once synced."
@@ -544,21 +734,31 @@ echo ""
 ## CREATE CRON JOBS ###
 echo "Creating Boot Start and Scrape Cron jobs..."
 
-dynStart="${varScriptsDirectory}dynMineStart.sh"
-dynScrape="${varScriptsDirectory}dynScrape.sh"
-
 startLine="@reboot sh $dynStart >> ${varScriptsDirectory}dynMineStart.log 2>&1"
 scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}dynScrape.log 2>&1"
 
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
+echo " cron job $dynStart is setup: $startLine"
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
+echo " cron job $dynScrape is setup: $scrapeLine"
 
-echo "Boot Start and Scrape Cron jobs created"
+if [ "$varWatchdogEnabled" = true ]; then
+    watchdogLine="*/$varWatchdogTime * * * * $dynWatchdog >> ${varScriptsDirectory}dynWatchdog.log 2>&1"
+    (crontab -u root -l 2>/dev/null | grep -v -F "$dynWatchdog"; echo "$watchdogLine") | crontab -u root -
+	echo " cron job $dynWatchdog is setup: $watchdogLine"
+fi
+
+echo "Boot Start and Scrape cron jobs created"
+
 
 echo "QuickStart complete"
 fi
 #End of QuickStart
-
+echo ""
+echo ""
+echo ""
+echo "######### Start Compile #########"
+echo ""
 #Ok If you did a QuickStart, we are going to build a new wallet. 
 #This will happen while you are mining, so it will take super long, but you don't care.
 #when we complete the build we will stop the miner, replace the binary, and continue.  
@@ -578,7 +778,7 @@ sudo apt-get -y update
 sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
 sudo apt-get -y update
 sudo apt-get -y upgrade
-
+echo ""
 # Clone the github repository
 echo "Clone the github repository"
 cd $varGITRootPath
@@ -607,12 +807,12 @@ echo "Compile Finished."
 echo "-------------------------------------------"
 
 echo "If the dynamicd process is running, this will kill it."
-sudo ${varScriptsDirectory}dynStopDynamicd.sh
+sudo ${dynStop}
 
 echo "Copy compiled binaries, if you used QuickStart your binaries are being replaced by the compiled ones"
-mkdir -p $varDynamicBinaries
-sudo cp ${varGITDynamicPath}src/dynamicd $varDynamicBinaries
-sudo cp ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries
+mkdir -pv $varDynamicBinaries
+sudo cp -v ${varGITDynamicPath}src/dynamicd $varDynamicBinaries
+sudo cp -v ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries
 
 if [ "$varQuickBootstrap" = true ]; then
 
@@ -646,15 +846,20 @@ echo "Dynamic Wallet created and blockchain should be syncing."
 echo "-------------------------------------------"
 echo "Creating Boot Start and Scrape Cron jobs..."
 
-dynStart="${varScriptsDirectory}dynMineStart.sh"
-dynScrape="${varScriptsDirectory}dynScrape.sh"
-dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
 
 startLine="@reboot sh $dynStart >> ${varScriptsDirectory}dynMineStart.log 2>&1"
 scrapeLine="*/$varMiningScrapeTime * * * * $dynScrape >> ${varScriptsDirectory}dynScrape.log 2>&1"
 
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynStart"; echo "$startLine") | crontab -u root -
+echo " cron job $dynStart is setup: $startLine"
 (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
+echo " cron job $dynScrape is setup: $scrapeLine"
+
+if [ "$varWatchdogEnabled" = true ]; then
+    watchdogLine="*/$varWatchdogTime * * * * $dynWatchdog >> ${varScriptsDirectory}dynWatchdog.log 2>&1"
+    (crontab -u root -l 2>/dev/null | grep -v -F "$dynWatchdog"; echo "$watchdogLine") | crontab -u root -
+	echo " cron job $dynWatchdog is setup: $watchdogLine"
+fi
 
 if [ "$varAutoUpdate" = true ]; then
 
@@ -663,11 +868,12 @@ if [ "$varAutoUpdate" = true ]; then
   #this will check once a day, just at a random time of day from other runs of this script. 
 
   (crontab -u root -l 2>/dev/null | grep -v -F "$dynAutoUpdater"; echo "$AutoUpdaterLine") | crontab -u root -
-  echo "Auto Update cron job has been set: ${AutoUpdaterLine}"
-  echo "Auto Update will run once a day and automatically compile and execute new code if there have been commits to the remote repository."
-  echo "Remote Repository: $varRemoteRepository"
+  echo " cron job $dynAutoUpdater is setup: $AutoUpdaterLine"
+  echo " Auto Update cron job has been set:"
+  echo " Auto Update will run once a day and automatically compile and execute new code if there have been commits to the remote repository."
+  echo " Remote Repository: $varRemoteRepository"
 else
-  echo "Auto Update is set to false. We will not update if new code is updated in the repository: $varRemoteRepository"
+  echo " Auto Update is set to false. We will not update if new code is updated in the repository: $varRemoteRepository"
 fi
 
 
