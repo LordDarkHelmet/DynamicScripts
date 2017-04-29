@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contanct LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.15 dynStartupScript.sh April 26, 2017 Released by LordDarkHelmet"
+varVersion="1.0.16 dynStartupScript.sh April 27, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Umbuntu 14.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -76,13 +76,13 @@ varQuickStartCompressedFilePathForDaemon=dynamic-1.3.0/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-1.3.0/bin/dynamic-cli
 
 # QuickStart Bootstrap (The developer recomends that you set this to true. This will clean up the blockchain on the network.)
-varQuickBootstrap=true
+varQuickBootstrap=false
 varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
 # QuickStart Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
-varQuickBlockchainDownload=false
+varQuickBlockchainDownload=true
 varQuickStartCompressedBlockChainLocation=http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileName=Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileIsZip=true
@@ -106,7 +106,7 @@ varRemoteRepository=https://github.com/duality-solutions/Dynamic
 #Script Repository
 #This can be used to auto heal and update the script system. 
 #If a future deployment breaks something, an update by the repository owner can run a script on your machine. 
-#This is dangerous becaus
+#This is dangerous and not implemented
 varRemoteScriptRepository=https://github.com/LordDarkHelmet/DynamicScripts
 
 #AutoUpdater
@@ -623,7 +623,7 @@ if [ "$varQuickBootstrap" = true ]; then
 	    varQuickBlockchainDownload=true
     fi
 
-    echo "Step 4: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"-loadblock=\" argument when starting Dynamic"
+    echo "Step 4: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"--loadblock=\" argument when starting Dynamic"
     echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compelation if you don't download the binaries"
     sleep 1
     echo "Bootstrap Prep completed!"
@@ -648,16 +648,22 @@ if [ "$varQuickBlockchainDownload" = true ]; then
     sudo apt-get -y install unzip
     rm -fdr $varQuickStartCompressedBlockChainFileName
     wget $varQuickStartCompressedBlockChainLocation
-    mkdir -pv $varDynamicConfigDirectory
-
-    if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
-        sudo apt-get -y install unzip
-        unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
-        echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
-    else
-        tar -xvf $varQuickStartCompressedBlockChainFileName -C $varDynamicConfigDirectory
-        echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
-    fi
+	
+	if [ $? -eq 0 ]; then
+	    echo "Download succeeded, extract ..."
+        mkdir -pv $varDynamicConfigDirectory
+        if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
+            sudo apt-get -y install unzip
+            unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
+            echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
+        else
+            tar -xvf $varQuickStartCompressedBlockChainFileName -C $varDynamicConfigDirectory
+            echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
+        fi
+	else
+	    echo "Blockchain Download Failed"
+	    varQuickBlockchainDownload=false
+	fi
 
     echo "Finished blockchain download and extraction"
     echo ""
@@ -693,8 +699,8 @@ sudo cp -v $varQuickStartCompressedFilePathForCLI $varDynamicBinaries
 
 echo "Launching daemon for the first time."
 if [ "$varQuickBootstrap" = true ]; then
-  echo "sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat"
-  sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat 
+  echo "sudo ${varDynamicBinaries}dynamicd --daemon --loadblock=${varDynamicConfigDirectory}bootstrap.dat"
+  sudo ${varDynamicBinaries}dynamicd --daemon --loadblock=${varDynamicConfigDirectory}bootstrap.dat 
 else
   echo "sudo ${varDynamicBinaries}dynamicd --daemon"
   sudo ${varDynamicBinaries}dynamicd --daemon
@@ -822,8 +828,8 @@ if [ "$varQuickBootstrap" = true ]; then
 	 sudo ${varDynamicBinaries}dynamicd --daemon
   else
     echo "Doing the bootstrap from step 4 here because we want to boot strap"
-	echo "sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat"
-    sudo ${varDynamicBinaries}dynamicd --daemon -loadblock=${varDynamicConfigDirectory}bootstrap.dat
+	echo "sudo ${varDynamicBinaries}dynamicd --daemon --loadblock=${varDynamicConfigDirectory}bootstrap.dat"
+    sudo ${varDynamicBinaries}dynamicd --daemon --loadblock=${varDynamicConfigDirectory}bootstrap.dat
   fi
 else
   echo "sudo ${varDynamicBinaries}dynamicd --daemon"
