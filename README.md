@@ -3,7 +3,7 @@
 
 You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
 
-wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
+<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD</code>
 
 The above line will download the latest startup script which can: 
  * Create miners
@@ -19,7 +19,7 @@ The above line will download the latest startup script which can:
  
  You can also setup dynodes with one line. Use the -h command to see the full list of capabilietes and options, Examples are provided.  
  
- wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -h
+ <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -h</code>
  
 
 This is a collection of scripts that will assist users in setting up and managing instances of the dynamic wallet.
