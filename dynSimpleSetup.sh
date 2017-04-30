@@ -64,7 +64,7 @@ echo "- Clone the repository" | tee -a DynamicSimpleSetup.log
 sudo git clone https://github.com/LordDarkHelmet/DynamicScripts | tee -a DynamicSimpleSetup.log
 echo "- Navigate to the script" | tee -a DynamicSimpleSetup.log
 cd DynamicScripts
-echo "- Just in case we prevously ran this script, pull the latest from GitHub" | tee -a DynamicSimpleSetup.log
+echo "- Just in case we previously ran this script, pull the latest from GitHub" | tee -a DynamicSimpleSetup.log
 sudo git pull https://github.com/LordDarkHelmet/DynamicScripts | tee -a DynamicSimpleSetup.log
 echo "" | tee -a DynamicSimpleSetup.log
 echo "Step 2: Set permissions so that dynStartupScript.sh can run" | tee -a DynamicSimpleSetup.log
