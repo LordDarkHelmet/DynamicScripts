@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Summary:
-# This script makes setting up Dynamic (DYN) miners and remote dynodes easy! 
-# It will download the latest startup script which can: 
+# This script makes setting up Dynamic (DYN) miners and remote dynodes easy!
+# It will download the latest startup script which can:
 #  * Download and run the executables
 #  * Download the Bootstrap
 #  * Download the Blockchain
@@ -12,11 +12,13 @@
 #  * Startup on reboot
 #  * Can create miners
 #  * Can create remote dynodes
-#  and more... See https://github.com/LordDarkHelmet/DynamicScripts for the latest. 
+#  and more... See https://github.com/LordDarkHelmet/DynamicScripts for the latest.
 #
-
+# You can run this as one command on the command line
+# wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
+#
 echo "===========================================================================" | tee -a DynamicSimpleSetup.log
-echo "Version 1.0.0 of DynamicSimpleSetup.sh" | tee -a DynamicSimpleSetup.log
+echo "Version 1.0.2 of DynamicSimpleSetup.sh" | tee -a DynamicSimpleSetup.log
 echo " Released April 29, 2017 Released by LordDarkHelmet" | tee -a DynamicSimpleSetup.log
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts" | tee -a DynamicSimpleSetup.log
 echo "Local Filename: $0" | tee -a DynamicSimpleSetup.log
@@ -29,8 +31,7 @@ varIsScrapeAddressSet=false
 varShowHelp=false
 while getopts :s:h option
 do
-	case "${option}"
-	in 
+	case "${option}" in
 		h)
 			varShowHelp=true
 			#We are setting this to true because we are going to show help. No need to worry about scraping
@@ -38,7 +39,7 @@ do
 			echo "We are going to show the most recent help info." | tee -a DynamicSimpleSetup.log
 			echo "In order to do this we will still need to download the latest version from GIT." | tee -a DynamicSimpleSetup.log
 			;;
-		s) 
+		s)
 			myScrapeAddress=${OPTARG}
 			echo "-s has set myScrapeAddress=${myScrapeAddress}" | tee -a DynamicSimpleSetup.log
 			varIsScrapeAddressSet=true
@@ -47,12 +48,12 @@ do
 done
 
 if [ "$varIsScrapeAddressSet" = false ]; then
-echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
-echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
-echo "SCRAPE ADDRESS HAS NOT BEEN SET!!! You will be donating your HASH power." | tee -a DynamicSimpleSetup.log
-echo "If you did not intend to do this then please use the -a attribute and set your scrape address!" | tee -a DynamicSimpleSetup.log
-echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
-echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
+	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
+	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
+	echo "SCRAPE ADDRESS HAS NOT BEEN SET!!! You will be donating your HASH power." | tee -a DynamicSimpleSetup.log
+	echo "If you did not intend to do this then please use the -a attribute and set your scrape address!" | tee -a DynamicSimpleSetup.log
+	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
+	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a DynamicSimpleSetup.log
 fi
 
 echo "" | tee -a DynamicSimpleSetup.log
