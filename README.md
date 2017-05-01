@@ -3,7 +3,7 @@
 
 You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
 
-<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD</code>
+<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD</code>
 
 The above line will download the latest startup script which can: 
  * Create miners
