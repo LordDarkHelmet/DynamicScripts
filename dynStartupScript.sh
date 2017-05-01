@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.17 dynStartupScript.sh April 29, 2017 Released by LordDarkHelmet"
+varVersion="1.0.18 dynStartupScript.sh May 1, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04 & 16.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -37,6 +37,7 @@ echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScript
 echo "Local Filename: $0"
 echo "Local Time: $(date +%F_%T)"
 echo "System Info: $(uname -a)"
+echo "User $(id -u -n)  UserID: $(id -u)"
 echo "==========================================================================="
 
 # Variables:
@@ -250,15 +251,26 @@ echo "==============================================================="
 ### Prep your VPS (Increase Swap Space and update) ###
 
 if [ "$varExpandSwapFile" = true ]; then
+    cd $varUserDirectory
     # This will expand your swap file. It is not necessary if your VPS has more than 4G of ram, but it wont hurt to have
     echo "Expanding the swap file for optimization with low RAM VPS..."
-    sudo fallocate -l 4G /swapfile
-    sudo chmod 600 /swapfile
+    echo "sudo fallocate -l 4G /swapfile"
+	sudo fallocate -l 4G /swapfile
+    echo "sudo chmod 600 /swapfile"
+	sudo chmod 600 /swapfile
+	echo "sudo mkswap /swapfile"
     sudo mkswap /swapfile
-    sudo swapon /swapfile
+    echo "sudo swapon /swapfile"
+	sudo swapon /swapfile
 
     # the following command will append text to fstab to make sure your swap file stays there even after a reboot.
-    echo "/swapfile none swap sw 0 0" >> /etc/fstab
+	varSwapFileLine=$(cat /etc/fstab | grep "/swapfile none swap sw 0 0")
+	if [  "varSwapFileLine" = "" ]; then
+	    echo "Adding swap file line to /etc/fstab"
+        echo "/swapfile none swap sw 0 0" >> /etc/fstab
+	else
+	    echo "Swap file line is already in /etc/fstab"
+	fi
     echo "Swap file expanded."	
 	
 	echo "Current Swap File Status:"
@@ -266,7 +278,6 @@ if [ "$varExpandSwapFile" = true ]; then
 	sudo swapon -s
 	echo ""
 	echo "Let's check the memory"
-	echo ""
 	echo "free -m"
 	free -m
 	echo ""
