@@ -19,7 +19,7 @@ The above line will download the latest startup script which can:
  
  You can also setup dynodes with one line. Use the -h command to see the full list of capabilietes and options, Examples are provided.  
  
- <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -h</code>
+ <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -h</code>
  
 
 This is a collection of scripts that will assist users in setting up and managing instances of the dynamic wallet.
