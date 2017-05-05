@@ -18,13 +18,14 @@
 # wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #
 echo "===========================================================================" | tee -a dynSimpleSetup.log
-echo "Version 1.0.3 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
+echo "Version 1.0.4 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
 echo " Released April 30, 2017 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "Local Filename: $0" | tee -a dynSimpleSetup.log
 echo "Local Time: $(date +%F_%T)" | tee -a dynSimpleSetup.log
 echo "System:" | tee -a dynSimpleSetup.log
 uname -a | tee -a dynSimpleSetup.log
+echo "User $(id -u -n)  UserID: $(id -u)" | tee -a dynSimpleSetup.log
 echo "If you found this script useful please contribute. Feedback is appreciated" | tee -a dynSimpleSetup.log
 echo "===========================================================================" | tee -a dynSimpleSetup.log
 varIsScrapeAddressSet=false
@@ -79,12 +80,18 @@ if [ "$varShowHelp" = true ]; then
 	./dynStartupScript.sh -h  | tee -a ../dynSimpleSetup.log
 else
 	varLogFilename="dynStartupScript$(date +%Y%m%d_%H%M%S).log"
-	echo "nohup ./dynStartupScript.sh $@ > $varLogFilename 2>&1 &"
-	nohup ./dynStartupScript.sh $@ > $varLogFilename 2>&1 &
-	PID=`ps -eaf | grep dynStartupScript.sh | grep -v grep | awk '{print \$2}'`
-	echo "The script is now running in the background. PID=${PID}" | tee -a ../dynSimpleSetup.log
+	#Due to the fact that some VPN servers have not enabled RemainAfterExit=yes", which if neglected, causes systemd to terminate all spawned processes from the imageboot unit, we need to schedule the script to run.
+	#echo "sudo setsid ./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &"
+	#sudo setsid ./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &
+	#PID=`ps -eaf | grep dynStartupScript.sh | grep -v grep | awk '{print \$2}'`
+	#echo "The script is now running in the background. PID=${PID}" | tee -a ../dynSimpleSetup.log
+	#Because of that flaw, we are going to use the at command to schedule the process
 	echo "" | tee -a ../dynSimpleSetup.log
-	echo "If you want to follow its progress use the following command:" | tee -a ../dynSimpleSetup.log
+	echo "$(date +%F_%T) Scheduling the script to run 2 min from now. We do this instead of nohup or setsid because some VPSs terminate " | tee -a ../dynSimpleSetup.log
+	echo "We will execute the following command in 2 min:  ./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &" | tee -a ../dynSimpleSetup.log
+	echo "./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &" | at now + 2 minutes  | tee -a ../dynSimpleSetup.log
+	echo "" | tee -a ../dynSimpleSetup.log
+	echo "If you want to follow its progress (once it starts in 2 min) then use the following command:" | tee -a ../dynSimpleSetup.log
 	echo "" | tee -a ../dynSimpleSetup.log
 	echo "tail -f ${PWD}/${varLogFilename}" | tee -a ../dynSimpleSetup.log
 	echo "" | tee -a ../dynSimpleSetup.log
