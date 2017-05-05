@@ -18,8 +18,8 @@
 # wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #
 echo "===========================================================================" | tee -a dynSimpleSetup.log
-echo "Version 1.0.4 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
-echo " Released April 30, 2017 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
+echo "Version 1.0.5 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
+echo " Released May 4, 2017 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "Local Filename: $0" | tee -a dynSimpleSetup.log
 echo "Local Time: $(date +%F_%T)" | tee -a dynSimpleSetup.log
@@ -62,6 +62,8 @@ echo "" | tee -a dynSimpleSetup.log
 echo "Step 1: Download the latest dynStartupScript.sh from GitHub, https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "- To download from GitHub we need to install GIT" | tee -a dynSimpleSetup.log
 sudo apt-get -y install git | tee -a dynSimpleSetup.log
+echo "- we also use the \"at\" command we should install that too. " | tee -a dynSimpleSetup.log
+sudo apt-get -y install at | tee -a dynSimpleSetup.log
 echo "- Clone the repository" | tee -a dynSimpleSetup.log
 sudo git clone https://github.com/LordDarkHelmet/DynamicScripts | tee -a dynSimpleSetup.log
 echo "- Navigate to the script" | tee -a dynSimpleSetup.log
