@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.18 dynStartupScript.sh May 1, 2017 Released by LordDarkHelmet"
+varVersion="1.0.19 dynStartupScript.sh May 5, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04 & 16.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -408,14 +408,17 @@ echo "# This file, dynAutoUpdater,sh, was generated. $(date +%F_%T) Version: $va
 echo "" >> dynAutoUpdater.sh
 echo "cd $varGITDynamicPath" >> dynAutoUpdater.sh
 echo "if [ \"\`git log --pretty=%H ...refs/heads/master^ | head -n 1\`\" = \"\`git ls-remote $varRemoteRepository -h refs/heads/master |cut -f1\`\" ] ; then " >> dynAutoUpdater.sh
-echo " echo \"GitCheck \$(date +%F_%T) : We are up to date.\" " >> dynAutoUpdater.sh
+echo " echo \"GitCheck \$(date +%F_%T) : We are up to date.\"" >> dynAutoUpdater.sh
 echo "else" >> dynAutoUpdater.sh
-echo " echo \"GitCheck \$(date +%F_%T) : Changes to the repository, Preparing to update.\" " >> dynAutoUpdater.sh
+echo " echo \"GitCheck \$(date +%F_%T) : Changes to the repository, Preparing to update.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 1. Download the new source code from the repository if it has been updated" >> dynAutoUpdater.sh
-echo " cd $varGITDynamicPath" >> dynAutoUpdater.sh
-echo " echo \"GitCheck \$(date +%F_%T) : Downloading changes to the source code\" " >> dynAutoUpdater.sh
-echo " sudo git pull $varRemoteRepository" >> dynAutoUpdater.sh
+echo " echo \"GitCheck \$(date +%F_%T) : Remove old repository, we need to do a clean clone for the next version comparison to work. Do not git pull.\"" >> dynAutoUpdater.sh
+echo " rm -fdr $varGITDynamicPath" >> dynAutoUpdater.sh
+echo " mkdir -p $varGITDynamicPath" >> dynAutoUpdater.sh
+echo " cd $varUserDirectory" >> dynAutoUpdater.sh
+echo " echo \"GitCheck \$(date +%F_%T) : Downloading the source code\"" >> dynAutoUpdater.sh
+echo " sudo git clone $varRemoteRepository" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 2. Compile the new code" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile the souce code\"" >> dynAutoUpdater.sh
