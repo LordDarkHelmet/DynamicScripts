@@ -20,7 +20,7 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.19 dynStartupScript.sh May 5, 2017 Released by LordDarkHelmet"
+varVersion="1.0.20 dynStartupScript.sh May 5, 2017 Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04 & 16.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -127,6 +127,13 @@ varWatchdogEnabled=true
 #Future System Lockdown. Firewall, security rules, etc. 
 varSystemLockdown=true
 
+#Filenames of Generated Scripts
+dynStop="${varScriptsDirectory}dynStopDynamicd.sh"
+dynStart="${varScriptsDirectory}dynMineStart.sh"
+dynScrape="${varScriptsDirectory}dynScrape.sh"
+dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
+dynPre_1_4_0_Fix="${varScriptsDirectory}dynPre_1_4_0_Fix.sh"
+dynWatchdog="${varScriptsDirectory}dynWatchdog.sh"
 
 #
 #End of Variables
@@ -306,6 +313,10 @@ echo ""
 echo ""
 echo "Installing the JSON parser jq"
 sudo apt-get -y install jq
+echo "Installing the unzip utility"
+sudo apt-get -y install unzip
+echo "Installing nano"
+sudo apt-get -y install nano
 echo ""
 
 ## make the directories we are going to use
@@ -667,7 +678,6 @@ if [ "$varQuickBootstrap" = true ]; then
     if [ $? -eq 0 ]; then
         echo "Download succeeded, extract ..."
         if [ "$varQuickStartCompressedBootstrapFileIsZip" = true ]; then
-            sudo apt-get -y install unzip
             unzip -o $varQuickStartCompressedBootstrapFileName -d $varDynamicConfigDirectory
             echo "Extracted Zip file ( $varQuickStartCompressedBootstrapFileName ) to the config directory ( $varDynamicConfigDirectory )"
         else
@@ -722,7 +732,6 @@ if [ "$varQuickBlockchainDownload" = true ]; then
     cd ${varUserDirectory}QuickStart
 
     echo "Downloading blockchain bootstrap and extracting to data folder..."
-    sudo apt-get -y install unzip
     rm -fdr $varQuickStartCompressedBlockChainFileName
     wget $varQuickStartCompressedBlockChainLocation
 	
@@ -730,7 +739,6 @@ if [ "$varQuickBlockchainDownload" = true ]; then
 	    echo "Download succeeded, extract ..."
         mkdir -pv $varDynamicConfigDirectory
         if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
-            sudo apt-get -y install unzip
             unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
             echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
         else
