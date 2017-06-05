@@ -20,7 +20,9 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersion="1.0.20 dynStartupScript.sh May 5, 2017 Released by LordDarkHelmet"
+varVersionNumber="1.0.21"
+varVersionDate="June 4, 2017"
+varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04 & 16.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
@@ -51,6 +53,8 @@ varDynode=0
 varDynodeExternalIP=$(hostname -I)
 # This is your dynode private key. To get it run dynamic-cli dynode genkey
 varDynodePrivateKey=ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey
+# This is the label you want to give your dynode
+varDynodeLabel=""
 
 # Location of Dynamic Binaries, GIT Directories, and other useful files
 # Do not use the GIT directory (/Dynamic/) for anything other than GIT stuff
@@ -68,10 +72,10 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # QuickStart Binaries
 varQuickStart=true
 # Quickstart compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v1.3.0.2/Dynamic-Linux-x64-v1.3.0.2.tar.gz
-varQuickStartCompressedFileName=Dynamic-Linux-x64-v1.3.0.2.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-1.3.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-1.3.0/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v1.4.0.0/Dynamic-Linux-x64-v1.4.0.0.tar.gz
+varQuickStartCompressedFileName=Dynamic-Linux-x64-v1.4.0.0.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-1.4.0/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-1.4.0/bin/dynamic-cli
 
 # QuickStart Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=false
@@ -135,7 +139,10 @@ dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
 dynPre_1_4_0_Fix="${varScriptsDirectory}dynPre_1_4_0_Fix.sh"
 dynWatchdog="${varScriptsDirectory}dynWatchdog.sh"
 
-#
+#Vultr API additions
+varVultrAPIKey=""
+varVultrLabelmHz=false
+
 #End of Variables
 
 
@@ -147,7 +154,7 @@ echo "To see all options pass in the -h attribute"
 echo ""
 echo "Options passed in: $@"
 echo ""
-while getopts :s:d:a:r:l:w:c:h option
+while getopts :s:d:y:a:r:l:w:c:v:h option
 do
     case "${option}"
     in
@@ -159,6 +166,10 @@ do
             varDynodePrivateKey=${OPTARG}
             varDynode=1
             echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a dynode)"
+            ;;
+		y) 
+            varDynodeLabel=${OPTARG}
+            echo "-y has set varDynodeLabel=${varDynodeLabel}"
             ;;
         a)
             if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
@@ -199,12 +210,22 @@ do
         c)
             if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
                 varCompile=true
-                echo "-w varCompile is set to true (default), We will compile the code"
+                echo "-c varCompile is set to true (default), We will compile the code"
             else
                 varCompile=false
-                echo "-w varCompile is set to false, We will not compile"
+                echo "-c varCompile is set to false, We will not compile"
                 varAutoUpdate=false
                 echo "   varAutoUpdate is also set to false because it requires compiling"
+            fi
+            ;;
+        v)
+		    myTemp=${OPTARG}
+			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = mhz ]; then
+                varVultrLabelmHz=true
+                echo "-v has set an option to show the server's mHz on the label"
+            else
+                varVultrAPIKey=${myTemp}
+                echo "-v has set varVultrAPIKey=${varVultrAPIKey}"
             fi
             ;;
         h)
@@ -213,11 +234,13 @@ do
 			echo "This script, $0 , can use the following attributes:"
             echo " -s Scrape address requires an attribute Ex.  -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD"
             echo " -d Dynode Private key. if you populate this it will setup a dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+			echo " -y Dynode Label, a human redable label for your dynode. Usefull with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
             echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
             echo " -l System Lockdown. (future) Secure the instance. True to lock down your system. ex -l false"
             echo " -w Watchdog. The watchdog restarts processes if they fail. true for on, false for off."
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
+			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using vultr as an API service, this will change the label to update the last watchdog status"
             echo " -h Display Help then exit."
 			echo ""
 			echo "Example 1: Just set up a simple miner"
@@ -318,6 +341,7 @@ sudo apt-get -y install unzip
 echo "Installing nano"
 sudo apt-get -y install nano
 echo ""
+
 
 ## make the directories we are going to use
 echo "Make the directories we are going to use"
@@ -434,10 +458,14 @@ echo "" >> dynAutoUpdater.sh
 echo " # 2. Compile the new code" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile the souce code\"" >> dynAutoUpdater.sh
 echo " cd $varGITDynamicPath" >> dynAutoUpdater.sh
-echo " sudo ./autogen.sh" >> dynAutoUpdater.sh
-echo " sudo ./configure" >> dynAutoUpdater.sh
-echo " sudo make" >> dynAutoUpdater.sh
-echo " sudo make install" >> dynAutoUpdater.sh
+echo " echo \"Check if we can optimize mining using the avx2 instruction set\"" >> dynAutoUpdater.sh
+echo " varavx2=\$(grep avx2 /proc/cpuinfo)" >> dynAutoUpdater.sh
+echo " if [  \"varavx2\" = \"\" ]; then" >> dynAutoUpdater.sh
+echo "   echo \"avx2 not found, normal compile, no avx2 optimizations\"" >> dynAutoUpdater.sh
+echo " else" >> dynAutoUpdater.sh
+echo "   CPPFLAGS=-march=native" >> dynAutoUpdater.sh
+echo " fi" >> dynAutoUpdater.sh
+echo " sudo ./autogen.sh && sudo ./configure --without-gui && sudo make" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile Finished.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 3. Scrape if there are any funds before we stop" >> dynAutoUpdater.sh
@@ -508,7 +536,7 @@ sudo cp -v ${varDynamicConfigDirectory}wallet.dat ${varBackupDirectory}wallet_ba
 
 echo \"
 Step 3: If we are not running, or we are running a version less than version then we get rid of the wallet.dat file.\"
-myVersion=\"\$(sudo ./dynamic-cli getinfo | jq -r '.version')\"
+myVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\"
 echo \"Current Version returned: \\\"\$myVersion\\\"\"
 
 if [ \"\$myVersion\" = \"\" ] ; then
@@ -538,7 +566,7 @@ echo "--"
 
 
 
-### Script #5: Watchdog, Checks to see if the process is running and restarts it if it is not. ###
+### Script #6: Watchdog, Checks to see if the process is running and restarts it if it is not. ###
 # Filename dynWatchdog.sh
 cd $varScriptsDirectory
 echo "Creating The Stop dynamicd Script: dynWatchdog.sh"
@@ -548,30 +576,113 @@ echo "# This script checks to see if dynamicd is running. If it is not, then it 
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
 echo "if [ \"\" =  \"\$PID\" ]; then" >> dynWatchdog.sh
 echo "    if [ -e ${varDynamicBinaries}dynamic-cli ]; then"  >> dynWatchdog.sh
-echo "        echo \"\$(date +%F_%T) STOPPED: Wait 3 minutes. We could be in an auto-update or other momentary restart.\""  >> dynWatchdog.sh
-echo "        sleep 180" >> dynWatchdog.sh
+echo "        echo \"\$(date +%F_%T) STOPPED: Wait 2 minutes. We could be in an auto-update or other momentary restart.\""  >> dynWatchdog.sh
+echo "        sleep 120" >> dynWatchdog.sh
 echo "        PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
 echo "        if [ \"\" =  \"\$PID\" ]; then" >> dynWatchdog.sh
 echo "            echo \"\$(date +%F_%T) Starting: Attempting to start the dynamic daemon \""  >> dynWatchdog.sh
 echo "            sudo ${dynStart}" >> dynWatchdog.sh
 echo "            echo \"\$(date +%F_%T) Starting: Attempt complete. We will see if it worked the next watchdog round. \""  >> dynWatchdog.sh
+echo "            myVultrStatusInfo=\"Starting ...\""  >> dynWatchdog.sh
 echo "        else"  >> dynWatchdog.sh
 echo "            echo \"\$(date +%F_%T) Running: Must have been some reason it was down. \""  >> dynWatchdog.sh
+echo "            myVultrStatusInfo=\"Running ...\""  >> dynWatchdog.sh
 echo "        fi"  >> dynWatchdog.sh
 echo "    else"  >> dynWatchdog.sh
 echo "        echo \"\$(date +%F_%T) Error the file ${varDynamicBinaries}dynamic-cli does not exist! \""  >> dynWatchdog.sh
+echo "        myVultrStatusInfo=\"Error: dynamic-cli does not exist!\""  >> dynWatchdog.sh
 echo "    fi"  >> dynWatchdog.sh
 echo "else"  >> dynWatchdog.sh
 echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
 echo "    myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
-echo "    echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec \""  >> dynWatchdog.sh
+#echo "    myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
+echo "    myNetworkHPS=\$(sudo ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
+echo "    myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
+echo "    echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS \""  >> dynWatchdog.sh
 echo "fi" >> dynWatchdog.sh
+
+if [ "" = "$varVultrAPIKey" ]; then
+    echo "No Vultr API Key, skipping Vultr specific label updater"
+else
+    myCommand="mySUBID=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=$(hostname -I) | jq -r '.[].SUBID')"
+    echo $myCommand
+	eval $myCommand
+	echo "Vultr SUBID=${mySUBID}" 
+    echo "mySUBIDStr=\"'SUBID=${mySUBID}'\""  >> dynWatchdog.sh
+
+	if [ "$varVultrLabelmHz" = true ]; then
+		echo "myMHz=\"| \$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-) MHz \""  >> dynWatchdog.sh
+    fi
+	
+	if [ "$varDynode" = 1 ]; then
+		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
+	else
+		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
+	fi
+	
+    echo "#due to API rate limiting lets go at a random time in the next 3 min."  >> dynWatchdog.sh
+    echo "sleep \$(shuf -i 1-180 -n 1)"  >> dynWatchdog.sh
+    echo "myCommand=\"curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\""  >> dynWatchdog.sh
+    echo "eval \$myCommand" >> dynWatchdog.sh
+fi
+
+
+
+
 echo "# End of generated Script" >> dynWatchdog.sh
 echo "Changing the file attributes so we can run the script"
 chmod +x dynWatchdog.sh
 echo "Created dynWatchdog.sh"
 dynWatchdog="${varScriptsDirectory}dynWatchdog.sh"
 echo "--"
+
+
+### Script #7: Vultr Label Update ###
+# Filename vultr.sh
+# This file will be deprecated a version or two past where the network no longer connects to versions below 1.4.0
+cd $varScriptsDirectory
+echo "Creating The Stop dynamicd Script: vultr.sh"
+echo '#!/bin/sh' > vultr.sh
+echo "# This file, vultr.sh, was generated. $(date +%F_%T) Version: $varVersion" >> vultr.sh
+echo "# This file Updates the Vultr Label using the Vultr API-Key" >> vultr.sh
+echo "" >> vultr.sh
+echo "echo \"---------------------------------\"" >> vultr.sh
+echo "mySUBID=\$(curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=\$(hostname -I) | jq -r '.[].SUBID')" >> vultr.sh
+echo "mySUBIDStr=\"'SUBID=\${mySUBID}'\"" >> vultr.sh
+
+if [ "$varVultrLabelmHz" = true ]; then
+    echo "myMHz=\$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-)" >> vultr.sh
+    echo "myMHz=\"| \${myMHz} MHz \"" >> vultr.sh
+fi
+
+if [ "$varDynode" = 1 ]; then
+	echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
+else
+	echo "myLabel=\"'label=v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
+fi
+
+
+echo "myCommand=\"curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\"" >> vultr.sh
+echo "eval \$myCommand" >> vultr.sh
+echo "echo \"---------------------------------\"" >> vultr.sh
+echo "#end of generated file" >> vultr.sh
+
+echo "Changing the file attributes so we can run the script"
+chmod +x vultr.sh
+echo "Created vultr.sh"
+vultr="${varScriptsDirectory}vultr.sh"
+echo "--"
+
+
+if [ "" = "$varVultrAPIKey" ]; then
+    echo "No Vultr API Key, skipping Vultr specific initial label"
+else
+    #due to API rate limiting lets go at a random time in the next 40 seconds.
+    sleep $(shuf -i 1-40 -n 1)
+    sudo ${vultr}
+fi
+
+
 
 
 echo "Done creating scripts"
@@ -630,10 +741,50 @@ funcCreateDynamicConfFile ()
 }
 
 
-
-####### RESERVED For Security Lockdown Function #############
+####### Security Lockdown Function #############
 #Permanent lockdown and security of the node/miner. Not implementing before we work out the bugs. (don't want to lock us out from debugging it)
-####### RESERVED For Security Lockdown Function #############
+funcLockdown ()
+{
+    echo "---------------------------------"
+    echo "-Permanent lockdown and security of the node and or miner."
+ 
+    echo "-Remove SSH Access, Usually on Port 22. This will lock you out as well."
+	#edit /etc/ssh/sshd_config to remove the line or change the line that says Port 22
+	# it is suggested that you use a port between 49152 and 65535    MySSHport=$(shuf -i 49152-65535 -n 1)
+	# note: To check is a port is in use netstat -an | grep “port”
+	# Save the file and return to the console
+    # At this point the sshd_config file has been changed, but the SSH service needs to be restarted in order for those changes to take effect.
+    # sudo service ssh restart
+    # When you connect back to your VPS via an SSH client, be sure to change the port to the one you specified in your sshd_config file. While you are more secure because you changed the port and you have a really secure password, an attacker can still find your port and attempt to break your password via a brute force attack. To prevent this you will need a firewall to limit the number of attempts per second, making a brute force attack impossibly long.
+ 
+    # Install a Firewalledit
+    # The Uncomplicated Firewall (UFW) is the default firewall configuration tool for Ubuntu.
+    # 
+    # The following commands can be used to install and setup your UFW to help protect your system.
+    # 
+    # sudo apt-get install ufw # this installs UFW
+    # sudo ufw default deny # By default UFW will deny all connections. 
+    # sudo ufw allow XXXXX/tcp # replace XXXXX with your SSH port chosen earlier
+    # sudo ufw limit XXXXX/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds
+    # sudo ufw allow YYYYY/tcp # replace YYYYY with your iond port (ion.conf file under port=#####)
+    # sudo ufw allow ZZZZZ/tcp # replace ZZZZZ with your rpc port (ion.conf file under rpcport=#####)
+    # sudo ufw logging on # this turns the log on, optional, but helps itentify attacks ans issues
+    # sudo ufw enable # This will start the firewall, you only need to do this once after you install
+    # 
+    # You can verify that your firewall is running and the rules it has by using the following command
+    # 
+    # sudo ufw status
+ 
+ #Lessons fromthe ncident Report on DDoS attack against Dash’s Masternode P2P network: https://www.dash.org/2017/03/08/DDoSReport.html
+ # Suggested IP Table rules: https://gist.github.com/chaeplin/5dabcef736f599f3bc64bdce7b62b817
+ 
+ 
+ 
+
+}
+####### Security Lockdown Function #############
+
+
 
 echo "Lets Scrape, if this is an upgrade, you may have mined coins."
 sudo ${dynScrape}
@@ -873,6 +1024,8 @@ if [ "$varCompile" = true ]; then
     sudo apt-get -y update
     sudo apt-get -y upgrade
     echo ""
+
+	
 # Clone the github repository
     echo "Clone the github repository"
     cd $varGITRootPath
@@ -882,25 +1035,39 @@ if [ "$varCompile" = true ]; then
     sudo git pull $varRemoteRepository
     
 # Compile the Daemon Client
+
+
     echo "-------------------------------------------"
     echo "Compile the Daemon Client"
     cd $varGITDynamicPath
     echo "-----------------"
-    echo "sudo ./autogen.sh"
-    sudo ./autogen.sh
+	echo "Check if we can optimize mining using the avx2 instruction set"
+	varavx2=$(grep avx2 /proc/cpuinfo)
+	if [  "varavx2" = "" ]; then
+	  echo "avx2 not found, normal compile, no avx2 optimizations"
+	  echo "Just creating the CLI and Deamon Only"
+	  echo "sudo ./autogen.sh && sudo ./configure --without-gui && sudo make"
+      sudo ./autogen.sh && sudo ./configure --without-gui && sudo make
+	else
+	  echo "avx2 found, avx2 optimizations enabled"
+	  echo "Just creating the CLI and Deamon Only"
+	  echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure --without-gui && sudo make"
+      CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure --without-gui && sudo make
+	fi
     echo "-----------------"
-    echo "sudo ./configure"
-    sudo ./configure
-    echo "-----------------"
-    echo "sudo make"
-    sudo make
-    echo "-----------------"
-    echo "sudo make install"
-    sudo make install
     echo "Compile Finished."
     echo "-------------------------------------------"
+
     
     echo "If the dynamicd process is running, this will kill it."
+
+    echo "Lets Scrape, if this is an upgrade, you may have mined coins."
+    sudo ${dynScrape}
+    echo "--"
+    echo "Fix for wallets below 1.4.0"
+    sudo ${dynPre_1_4_0_Fix}
+    echo "--"
+
     sudo ${dynStop}
 
     echo "Copy compiled binaries, if you used QuickStart your binaries are being replaced by the compiled ones"
