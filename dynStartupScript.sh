@@ -20,11 +20,11 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.21"
-varVersionDate="June 4, 2017"
+varVersionNumber="1.0.22"
+varVersionDate="June 8, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
-# The script was tested using on Vultr. Ubuntu 14.04 & 16.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
+# The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
@@ -604,9 +604,17 @@ echo "fi" >> dynWatchdog.sh
 if [ "" = "$varVultrAPIKey" ]; then
     echo "No Vultr API Key, skipping Vultr specific label updater"
 else
+
     myCommand="mySUBID=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=$(hostname -I) | jq -r '.[].SUBID')"
     echo $myCommand
 	eval $myCommand
+	if [ "$mySUBID" = "" ]; then
+		#if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
+		sleep $(shuf -i 1-60 -n 1)
+		echo "Second attempt to get the SUBID"
+		eval $myCommand
+	fi
+		
 	echo "Vultr SUBID=${mySUBID}" 
     echo "mySUBIDStr=\"'SUBID=${mySUBID}'\""  >> dynWatchdog.sh
 
@@ -623,7 +631,15 @@ else
     echo "#due to API rate limiting lets go at a random time in the next 3 min."  >> dynWatchdog.sh
     echo "sleep \$(shuf -i 1-180 -n 1)"  >> dynWatchdog.sh
     echo "myCommand=\"curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\""  >> dynWatchdog.sh
-    echo "eval \$myCommand" >> dynWatchdog.sh
+	
+	if [ "$mySUBID" = "" ]; then
+	    echo "#We did not find the SUBID, so we are not going to execute the API command to update the Vultr hosted label." >> dynWatchdog.sh
+		echo "#You can get it by running this command: mySUBID=\$(curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=\$(hostname -I) | jq -r '.[].SUBID')" >> dynWatchdog.sh
+		echo "#eval \$myCommand" >> dynWatchdog.sh
+	else
+		echo "eval \$myCommand" >> dynWatchdog.sh
+	fi
+	
 fi
 
 
