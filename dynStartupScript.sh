@@ -20,8 +20,8 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.22"
-varVersionDate="June 8, 2017"
+varVersionNumber="1.0.23"
+varVersionDate="June 10, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -103,8 +103,8 @@ varExpandSwapFile=true
 varMining0ForNo1ForYes=1
 #varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them)
 varMiningProcessorLimit=-1
-#varMiningScrapeTime is the amount of time in minutes between scrapes use 15 recommended
-varMiningScrapeTime=15
+#varMiningScrapeTime is the amount of time in minutes between scrapes use 5 recommended
+varMiningScrapeTime=5
 
 #Dynamic GIT
 varRemoteRepository=https://github.com/duality-solutions/Dynamic
@@ -486,6 +486,8 @@ echo " echo \"GitCheck \$(date +%F_%T) : Replace the executable files.\"" >> dyn
 echo " mkdir -pv $varDynamicBinaries" >> dynAutoUpdater.sh
 echo " sudo cp -v ${varGITDynamicPath}src/dynamicd $varDynamicBinaries" >> dynAutoUpdater.sh
 echo " sudo cp -v ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries" >> dynAutoUpdater.sh
+echo " sudo cp -v ${varGITDynamicPath}src/dynamicd /usr/local/bin" >> dynAutoUpdater.sh
+echo " sudo cp -v ${varGITDynamicPath}src/dynamic-cli /usr/local/bin" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 6. Start the daemon" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Start the daemon. Mining will automatically start once synced.\"" >> dynAutoUpdater.sh
@@ -546,11 +548,11 @@ if [ \"\$myVersion\" = \"\" ] ; then
 else
     if [ \"\$myVersion\" -ge 1040000 ];then
         echo \"Our version is greater than or equal to version 1.4.0, backing up the wallet.dat file, but keeping the exising wallet in place\"
-		cp -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${\$myVersion}_\$(date +%Y%m%d_%H%M%S).dat
+		cp -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${myVersion}_\$(date +%Y%m%d_%H%M%S).dat
     else
         echo \"Our version is less than 1.4.0, stop dynamic and move the wallet file\"
 		sudo ${dynStop}
-		mv -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${\$myVersion}_\$(date +%Y%m%d_%H%M%S).dat
+		mv -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${myVersion}_\$(date +%Y%m%d_%H%M%S).dat
     fi
 fi
 sleep 1
@@ -623,7 +625,8 @@ else
     fi
 	
 	if [ "$varDynode" = 1 ]; then
-		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
+	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode debug)"  >> dynWatchdog.sh
+		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} | \${myMNStatus} '\""  >> dynWatchdog.sh
 	else
 		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
 	fi
@@ -694,6 +697,7 @@ if [ "" = "$varVultrAPIKey" ]; then
     echo "No Vultr API Key, skipping Vultr specific initial label"
 else
     #due to API rate limiting lets go at a random time in the next 40 seconds.
+	echo "Waiting a random period of time, no more than 40 seconds to prevent pegging the vultr API server"
     sleep $(shuf -i 1-40 -n 1)
     sudo ${vultr}
 fi
@@ -839,8 +843,8 @@ if [ "$varQuickBootstrap" = true ]; then
 
     rm -fdr $varQuickStartCompressedBootstrapFileName
     mkdir -pv $varDynamicConfigDirectory
-    echo "wget $varQuickStartCompressedBootstrapLocation"
-    wget $varQuickStartCompressedBootstrapLocation
+    echo "wget -o /dev/null $varQuickStartCompressedBootstrapLocation"
+    wget -o /dev/null $varQuickStartCompressedBootstrapLocation
 
     if [ $? -eq 0 ]; then
         echo "Download succeeded, extract ..."
@@ -900,7 +904,8 @@ if [ "$varQuickBlockchainDownload" = true ]; then
 
     echo "Downloading blockchain bootstrap and extracting to data folder..."
     rm -fdr $varQuickStartCompressedBlockChainFileName
-    wget $varQuickStartCompressedBlockChainLocation
+	echo "wget -o /dev/null $varQuickStartCompressedBlockChainLocation"
+    wget -o /dev/null $varQuickStartCompressedBlockChainLocation
 	
 	if [ $? -eq 0 ]; then
 	    echo "Download succeeded, extract ..."
@@ -940,13 +945,16 @@ mkdir -pv ${varUserDirectory}QuickStart
 cd ${varUserDirectory}QuickStart
 echo "Downloading and extracting Dynamic binaries"
 rm -fdr $varQuickStartCompressedFileName
-wget $varQuickStartCompressedFileLocation
+echo "wget -o /dev/null $varQuickStartCompressedFileLocation"
+wget -o /dev/null $varQuickStartCompressedFileLocation
 tar -xzf $varQuickStartCompressedFileName
 
 echo "Copy QuickStart binaries"
 mkdir -pv $varDynamicBinaries
 sudo cp -v $varQuickStartCompressedFilePathForDaemon $varDynamicBinaries
 sudo cp -v $varQuickStartCompressedFilePathForCLI $varDynamicBinaries
+sudo cp -v $varQuickStartCompressedFilePathForDaemon /usr/local/bin
+sudo cp -v $varQuickStartCompressedFilePathForCLI /usr/local/bin
 
 
 echo "Launching daemon for the first time."
@@ -1090,6 +1098,9 @@ if [ "$varCompile" = true ]; then
     mkdir -pv $varDynamicBinaries
     sudo cp -v ${varGITDynamicPath}src/dynamicd $varDynamicBinaries
     sudo cp -v ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries
+	sudo cp -v ${varGITDynamicPath}src/dynamicd /usr/local/bin
+    sudo cp -v ${varGITDynamicPath}src/dynamic-cli /usr/local/bin
+	
     
     if [ "$varQuickBootstrap" = true ]; then
     
