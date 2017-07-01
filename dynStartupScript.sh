@@ -20,11 +20,12 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.23"
-varVersionDate="June 10, 2017"
+varVersionNumber="1.0.24"
+varVersionDate="July 1, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
+# We recomend running Ubuntu 16.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 18.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
@@ -624,11 +625,14 @@ else
 		echo "myMHz=\"| \$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-) MHz \""  >> dynWatchdog.sh
     fi
 	
+	echo "myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
+	
+	
 	if [ "$varDynode" = 1 ]; then
 	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode debug)"  >> dynWatchdog.sh
-		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} | \${myMNStatus} '\""  >> dynWatchdog.sh
+		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | \${myMNStatus} '\""  >> dynWatchdog.sh
 	else
-		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
+		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
 	fi
 	
     echo "#due to API rate limiting lets go at a random time in the next 3 min."  >> dynWatchdog.sh
@@ -727,17 +731,22 @@ funcCreateDynamicConfFile ()
  sleep 1
  Myrpcpassword=$(sudo tr -d -c "a-zA-Z0-9" < /dev/urandom | sudo head -c $(shuf -i 30-36 -n 1))
  echo "Myrpcpassword=$Myrpcpassword"
- Myrpcport=$(shuf -i 50000-65000 -n 1)
- Myport=$(shuf -i 1-500 -n 1)
- Myport=$((Myrpcport+Myport))
+ Myport=$(shuf -i 50000-65000 -n 1)
+ Myrpcport=$(shuf -i 1-500 -n 1)
+ Myrpcport=$((Myrpcport+Myport))
+ 
+ if [ "$varDynode" = 1 ]; then
+    Myrpcport=31350
+    Myport=31300
+ fi
  
  mkdir -pv $varDynamicConfigDirectory
  echo "# This file was generated. $(date +%F_%T)  Version: $varVersion" > $varDynamicConfigFile
  echo "# Do not use special characters or spaces with username/password" >> $varDynamicConfigFile
  echo "rpcuser=$Myrpcuser" >> $varDynamicConfigFile
  echo "rpcpassword=$Myrpcpassword" >> $varDynamicConfigFile
- echo "rpcport=31350" >> $varDynamicConfigFile
- echo "port=31300" >> $varDynamicConfigFile
+ echo "rpcport=$Myrpcport" >> $varDynamicConfigFile
+ echo "port=$Myport" >> $varDynamicConfigFile
  echo "" >> $varDynamicConfigFile
  echo "# MINIMG:  These are your mining variables" >> $varDynamicConfigFile
  echo "# Gen can be 0 or 1. 1=mining, 0=No mining" >> $varDynamicConfigFile
@@ -763,12 +772,15 @@ funcCreateDynamicConfFile ()
 
 ####### Security Lockdown Function #############
 #Permanent lockdown and security of the node/miner. Not implementing before we work out the bugs. (don't want to lock us out from debugging it)
+#For now we are just setting up a basic firewall. We are also using random ports for miners, but dynodes are using the default ports. 
+#basically you are just putting up a firewall with three open ports, SSH dynamic port, and dynamic RPC port.
 funcLockdown ()
 {
     echo "---------------------------------"
-    echo "-Permanent lockdown and security of the node and or miner."
+	echo "-Basic lockdown and security of the node and or miner."
+    #echo "-Permanent lockdown and security of the node and or miner."
  
-    echo "-Remove SSH Access, Usually on Port 22. This will lock you out as well."
+    #echo "-Remove SSH Access, Usually on Port 22. This will lock you out as well."
 	#edit /etc/ssh/sshd_config to remove the line or change the line that says Port 22
 	# it is suggested that you use a port between 49152 and 65535    MySSHport=$(shuf -i 49152-65535 -n 1)
 	# note: To check is a port is in use netstat -an | grep “port”
@@ -782,23 +794,32 @@ funcLockdown ()
     # 
     # The following commands can be used to install and setup your UFW to help protect your system.
     # 
-    # sudo apt-get install ufw # this installs UFW
-    # sudo ufw default deny # By default UFW will deny all connections. 
-    # sudo ufw allow XXXXX/tcp # replace XXXXX with your SSH port chosen earlier
-    # sudo ufw limit XXXXX/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds
-    # sudo ufw allow YYYYY/tcp # replace YYYYY with your iond port (ion.conf file under port=#####)
-    # sudo ufw allow ZZZZZ/tcp # replace ZZZZZ with your rpc port (ion.conf file under rpcport=#####)
-    # sudo ufw logging on # this turns the log on, optional, but helps itentify attacks ans issues
-    # sudo ufw enable # This will start the firewall, you only need to do this once after you install
+    echo "sudo apt-get -y install ufw # this installs UFW"
+	sudo apt-get -y install ufw
+    echo "sudo ufw default deny # By default UFW will deny all connections. "
+	sudo ufw default deny
+    echo "sudo ufw allow XXXXX/tcp # replace XXXXX with your SSH port chosen earlier"
+	sudo ufw allow 22/tcp
+    echo "sudo ufw limit XXXXX/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds"
+	sudo ufw limit 22/tcp
+    echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is 31300 by default."
+	sudo ufw allow $Myport/tcp
+    echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####)"
+	sudo ufw allow $Myrpcport/tcp
+    #echo "sudo ufw logging on # this turns the log on, optional, but helps itentify attacks ans issues"
+	#sudo ufw logging on
+    echo "sudo ufw enable # This will start the firewall, you only need to do this once after you install"
+	sudo ufw enable
     # 
     # You can verify that your firewall is running and the rules it has by using the following command
     # 
-    # sudo ufw status
+    echo "sudo ufw status"
+	sudo ufw status
  
  #Lessons fromthe ncident Report on DDoS attack against Dash’s Masternode P2P network: https://www.dash.org/2017/03/08/DDoSReport.html
  # Suggested IP Table rules: https://gist.github.com/chaeplin/5dabcef736f599f3bc64bdce7b62b817
  
- 
+    echo "---------------------------------"
  
 
 }
@@ -861,6 +882,9 @@ if [ "$varQuickBootstrap" = true ]; then
 	    echo "because the bootstrap failed, we are going to resort to downloading the blockchain"
 	    varQuickBlockchainDownload=true
     fi
+	
+	echo "Lets free up some space, now that we have extracted the bootstrap, we should delete the compressed file."
+	rm -fdr $varQuickStartCompressedBootstrapFileName
 
     echo "Step 5: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"--loadblock=\" argument when starting Dynamic"
     echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compellation if you don't download the binaries"
@@ -921,6 +945,9 @@ if [ "$varQuickBlockchainDownload" = true ]; then
 	    echo "Blockchain Download Failed"
 	    varQuickBlockchainDownload=false
 	fi
+	
+	echo "Lets free up some space, now that we have extracted the blockchain, we should delete the compressed file."
+	rm -fdr $varQuickStartCompressedBlockChainFileName
 
     echo "Finished blockchain download and extraction"
     echo ""
@@ -932,6 +959,13 @@ echo "Ok, now we are going to modify the dynamic.conf file so that when you boot
 funcCreateDynamicConfFile
 echo "Now that we have crated the dynamic.conf file, there is no need to do the boot up shut down thing with dyanmicd"
 echo ""
+
+if [ "$varSystemLockdown" = true ]; then
+  echo ""
+  echo "We are going to secure the system."
+  funcLockdown
+  echo ""
+fi
 
 
 ## Quick Start (get binaries from the web, not completely safe or reliable, but fast!)
