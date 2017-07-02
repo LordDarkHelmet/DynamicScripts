@@ -20,8 +20,8 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.24"
-varVersionDate="July 1, 2017"
+varVersionNumber="1.0.25"
+varVersionDate="July 2, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -128,8 +128,7 @@ varWatchdogTime=5
 #Turn on or off the watchdog. default is true. 
 varWatchdogEnabled=true
 
-#System Lockdown
-#Future System Lockdown. Firewall, security rules, etc. 
+#System Lockdown, Firewall, security rules, etc. 
 varSystemLockdown=true
 
 #Filenames of Generated Scripts
@@ -193,10 +192,10 @@ do
         l)
             if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = true ]; then
                 varSystemLockdown=true
-                echo "-l AUTO LOCKDOWN NOT IMPLEMENTED YET, Auto Lockdown is set to True (default), System will be secured"
+                echo "-l AUTO LOCKDOWN, Auto Lockdown is set to True (default), System will be secured"
             else
                 varSystemLockdown=false
-                echo "-l AUTO LOCKDOWN NOT IMPLEMENTED YET, Auto Lockdown is set to FALSE, the system will not be secured."
+                echo "-l AUTO LOCKDOWN, Auto Lockdown is set to FALSE, the system will not be secured."
             fi
 			;;
         w)
@@ -238,7 +237,7 @@ do
 			echo " -y Dynode Label, a human redable label for your dynode. Usefull with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
             echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
-            echo " -l System Lockdown. (future) Secure the instance. True to lock down your system. ex -l false"
+            echo " -l System Lockdown. Secure the instance. True to lock down your system. ex -l true"
             echo " -w Watchdog. The watchdog restarts processes if they fail. true for on, false for off."
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
 			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using vultr as an API service, this will change the label to update the last watchdog status"
@@ -748,7 +747,7 @@ funcCreateDynamicConfFile ()
  echo "rpcport=$Myrpcport" >> $varDynamicConfigFile
  echo "port=$Myport" >> $varDynamicConfigFile
  echo "" >> $varDynamicConfigFile
- echo "# MINIMG:  These are your mining variables" >> $varDynamicConfigFile
+ echo "# MINING:  These are your mining variables" >> $varDynamicConfigFile
  echo "# Gen can be 0 or 1. 1=mining, 0=No mining" >> $varDynamicConfigFile
  echo "gen=$varMining0ForNo1ForYes" >> $varDynamicConfigFile
  echo "# genproclimit sets the number of processors you want to use -1 for unbounded (all of them)" >> $varDynamicConfigFile
@@ -781,6 +780,7 @@ funcLockdown ()
     #echo "-Permanent lockdown and security of the node and or miner."
  
     #echo "-Remove SSH Access, Usually on Port 22. This will lock you out as well."
+	mysshPort=22
 	#edit /etc/ssh/sshd_config to remove the line or change the line that says Port 22
 	# it is suggested that you use a port between 49152 and 65535    MySSHport=$(shuf -i 49152-65535 -n 1)
 	# note: To check is a port is in use netstat -an | grep “port”
@@ -798,10 +798,10 @@ funcLockdown ()
 	sudo apt-get -y install ufw
     echo "sudo ufw default deny # By default UFW will deny all connections. "
 	sudo ufw default deny
-    echo "sudo ufw allow XXXXX/tcp # replace XXXXX with your SSH port chosen earlier"
-	sudo ufw allow 22/tcp
-    echo "sudo ufw limit XXXXX/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds"
-	sudo ufw limit 22/tcp
+    echo "sudo ufw allow ${mysshPort}/tcp # replace XXXXX with your SSH port chosen earlier"
+	sudo ufw allow $mysshPort/tcp
+    echo "sudo ufw limit ${mysshPort}/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds"
+	sudo ufw limit $mysshPort/tcp
     echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is 31300 by default."
 	sudo ufw allow $Myport/tcp
     echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####)"
@@ -809,7 +809,8 @@ funcLockdown ()
     #echo "sudo ufw logging on # this turns the log on, optional, but helps itentify attacks ans issues"
 	#sudo ufw logging on
     echo "sudo ufw enable # This will start the firewall, you only need to do this once after you install"
-	sudo ufw enable
+	#the yes command will automatically answer yes to everyting, but we are just going to use an echo so we dont get a broken pipe message. We only need one yes. 
+	echo "y" | ufw enable
     # 
     # You can verify that your firewall is running and the rules it has by using the following command
     # 
