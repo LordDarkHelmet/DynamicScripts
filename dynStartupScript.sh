@@ -20,8 +20,8 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.25"
-varVersionDate="July 2, 2017"
+varVersionNumber="1.0.26"
+varVersionDate="July 10, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -154,7 +154,7 @@ echo "To see all options pass in the -h attribute"
 echo ""
 echo "Options passed in: $@"
 echo ""
-while getopts :s:d:y:a:r:l:w:c:v:h option
+while getopts :s:d:y:a:r:l:w:c:v:b:h option
 do
     case "${option}"
     in
@@ -228,6 +228,24 @@ do
                 echo "-v has set varVultrAPIKey=${varVultrAPIKey}"
             fi
             ;;
+		b)
+		    myTemp=${OPTARG}
+			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = bootstrap ]; then
+                varQuickBlockchainDownload=false
+				varQuickBootstrap=true
+                echo "-b has set the bootstrap download only configuration"
+			elif [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = blockchain ]; then
+                varQuickBlockchainDownload=true
+				varQuickBootstrap=false
+                echo "-b has set the bootstrap download only configuration"
+			elif [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = none ]; then
+                varQuickBlockchainDownload=false
+				varQuickBootstrap=false
+                echo "-b We will not use a bootstrap or a blockchain download"
+            else
+                echo "-b ${myTemp} is not a valid option"
+            fi
+            ;;
         h)
             echo ""
 			echo "Help:"
@@ -241,6 +259,7 @@ do
             echo " -w Watchdog. The watchdog restarts processes if they fail. true for on, false for off."
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
 			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using vultr as an API service, this will change the label to update the last watchdog status"
+			echo " -b bootstrap or blockchain. Downoad an external bootstrap, blockchain or none, ex\"-b bootstrap\""
             echo " -h Display Help then exit."
 			echo ""
 			echo "Example 1: Just set up a simple miner"
@@ -325,8 +344,8 @@ echo ""
 echo "Updating OS and packages..."
 echo "sleeping for 60 seconds, this is because some VPS's are not fully up if you use this as a startup script"
 sleep 60
-echo "sudo apt-get update"
-sudo apt-get update
+echo "sudo apt-get -y update"
+sudo apt-get -y update
 echo "sudo apt-get -y upgrade"
 sudo apt-get -y upgrade
 echo "OS and packages updated."
@@ -338,6 +357,8 @@ echo "Installing the JSON parser jq"
 sudo apt-get -y install jq
 echo "Installing the unzip utility"
 sudo apt-get -y install unzip
+echo "Installing the unrar utility"
+sudo apt-get -y install unrar
 echo "Installing nano"
 sudo apt-get -y install nano
 echo ""
@@ -936,8 +957,11 @@ if [ "$varQuickBlockchainDownload" = true ]; then
 	    echo "Download succeeded, extract ..."
         mkdir -pv $varDynamicConfigDirectory
         if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
-            unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
-            echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
+            #unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
+			echo "Using unrar to decompress compressed blockchain"
+			echo "unrar x -y $varQuickStartCompressedBlockChainFileName $varDynamicConfigDirectory"
+			unrar x -y $varQuickStartCompressedBlockChainFileName $varDynamicConfigDirectory
+			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"			
         else
             tar -xvf $varQuickStartCompressedBlockChainFileName -C $varDynamicConfigDirectory
             echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
