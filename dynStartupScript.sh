@@ -20,8 +20,8 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.26"
-varVersionDate="July 10, 2017"
+varVersionNumber="1.0.27"
+varVersionDate="July 14, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -957,10 +957,13 @@ if [ "$varQuickBlockchainDownload" = true ]; then
 	    echo "Download succeeded, extract ..."
         mkdir -pv $varDynamicConfigDirectory
         if [ "$varQuickStartCompressedBlockChainFileIsZip" = true ]; then
-            #unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
 			echo "Using unrar to decompress compressed blockchain"
 			echo "unrar x -y $varQuickStartCompressedBlockChainFileName $varDynamicConfigDirectory"
 			unrar x -y $varQuickStartCompressedBlockChainFileName $varDynamicConfigDirectory
+			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"		
+			echo "There was a historical issue with the blockchain provider using a file that was unzip vs unrar compatible. We are going to unzip even if unrar was successful. We may overwrite files, but that is OK."
+			echo "Using unzip to decompress compressed blockchain"
+			unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
 			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"			
         else
             tar -xvf $varQuickStartCompressedBlockChainFileName -C $varDynamicConfigDirectory
