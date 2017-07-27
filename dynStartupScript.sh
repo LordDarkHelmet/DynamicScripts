@@ -20,8 +20,8 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.27"
-varVersionDate="July 14, 2017"
+varVersionNumber="1.0.28"
+varVersionDate="July 26, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -631,10 +631,18 @@ else
     myCommand="mySUBID=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=$(hostname -I) | jq -r '.[].SUBID')"
     echo $myCommand
 	eval $myCommand
+	#Try 2
 	if [ "$mySUBID" = "" ]; then
 		#if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
 		sleep $(shuf -i 1-60 -n 1)
 		echo "Second attempt to get the SUBID"
+		eval $myCommand
+	fi
+	#Try 3, three strikes you are out. It can happen but it is less likely. 
+	if [ "$mySUBID" = "" ]; then
+		#if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
+		sleep $(shuf -i 1-60 -n 1)
+		echo "Third attempt to get the SUBID"
 		eval $myCommand
 	fi
 		
@@ -682,44 +690,48 @@ echo "--"
 
 ### Script #7: Vultr Label Update ###
 # Filename vultr.sh
-# This file will be deprecated a version or two past where the network no longer connects to versions below 1.4.0
-cd $varScriptsDirectory
-echo "Creating The Stop dynamicd Script: vultr.sh"
-echo '#!/bin/sh' > vultr.sh
-echo "# This file, vultr.sh, was generated. $(date +%F_%T) Version: $varVersion" >> vultr.sh
-echo "# This file Updates the Vultr Label using the Vultr API-Key" >> vultr.sh
-echo "" >> vultr.sh
-echo "echo \"---------------------------------\"" >> vultr.sh
-echo "mySUBID=\$(curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=\$(hostname -I) | jq -r '.[].SUBID')" >> vultr.sh
-echo "mySUBIDStr=\"'SUBID=\${mySUBID}'\"" >> vultr.sh
-
-if [ "$varVultrLabelmHz" = true ]; then
-    echo "myMHz=\$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-)" >> vultr.sh
-    echo "myMHz=\"| \${myMHz} MHz \"" >> vultr.sh
-fi
-
-if [ "$varDynode" = 1 ]; then
-	echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
-else
-	echo "myLabel=\"'label=v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
-fi
-
-
-echo "myCommand=\"curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\"" >> vultr.sh
-echo "eval \$myCommand" >> vultr.sh
-echo "echo \"---------------------------------\"" >> vultr.sh
-echo "#end of generated file" >> vultr.sh
-
-echo "Changing the file attributes so we can run the script"
-chmod +x vultr.sh
-echo "Created vultr.sh"
-vultr="${varScriptsDirectory}vultr.sh"
-echo "--"
-
+# Vultr Initial update
 
 if [ "" = "$varVultrAPIKey" ]; then
     echo "No Vultr API Key, skipping Vultr specific initial label"
-else
+else 
+	cd $varScriptsDirectory
+	echo "Creating The Stop dynamicd Script: vultr.sh"
+	echo '#!/bin/sh' > vultr.sh
+	echo "# This file, vultr.sh, was generated. $(date +%F_%T) Version: $varVersion" >> vultr.sh
+	echo "# This file Updates the Vultr Label using the Vultr API-Key" >> vultr.sh
+	echo "" >> vultr.sh
+	echo "echo \"---------------------------------\"" >> vultr.sh
+
+	if [ "$mySUBID" = "" ]; then
+		echo "echo \"Error: No SUBID found. \"" >> vultr.sh
+	else 
+		echo "mySUBIDStr=\"'SUBID=${mySUBID}'\"" >> vultr.sh
+
+		if [ "$varVultrLabelmHz" = true ]; then
+			echo "myMHz=\$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-)" >> vultr.sh
+			echo "myMHz=\"| \${myMHz} MHz \"" >> vultr.sh
+		fi
+
+		if [ "$varDynode" = 1 ]; then
+			echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
+		else
+			echo "myLabel=\"'label=v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
+		fi
+
+		echo "myCommand=\"curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\"" >> vultr.sh
+		echo "eval \$myCommand" >> vultr.sh
+	fi
+
+	echo "echo \"---------------------------------\"" >> vultr.sh
+	echo "#end of generated file" >> vultr.sh
+
+	echo "Changing the file attributes so we can run the script"
+	chmod +x vultr.sh
+	echo "Created vultr.sh"
+	vultr="${varScriptsDirectory}vultr.sh"
+	echo "--"
+
     #due to API rate limiting lets go at a random time in the next 40 seconds.
 	echo "Waiting a random period of time, no more than 40 seconds to prevent pegging the vultr API server"
     sleep $(shuf -i 1-40 -n 1)
