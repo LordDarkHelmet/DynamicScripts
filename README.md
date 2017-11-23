@@ -1,9 +1,11 @@
 # DynamicScripts
 <b>Scripts for the Dynamic (DYN) Cryptocurrency</b>
 
+<b> NOTE: Version 1.0.29 is for the 1.5v1 test net only. This is a test run by duality. Mined coins will be swapped by duality 1:1. Dynode rewards will not be creditied in any way. </b>
+
 You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
 
-<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD</code>
+<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z</code>
 
 The above line will download the latest startup script which can: 
  * Create miners
