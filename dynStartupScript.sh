@@ -7,7 +7,7 @@
 # myScrapeAddress: This is the address that the wallet will scrape mining coins to:
 # "IF YOU DON'T USE ATTRIBUTES TO PASS IN YOUR VALUES THEN:"
 # "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
-myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
+myScrapeAddress=DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z
 # "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
 # "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
 
@@ -20,8 +20,8 @@ myScrapeAddress=DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.28"
-varVersionDate="July 26, 2017"
+varVersionNumber="1.0.29"
+varVersionDate="November 22, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -73,10 +73,10 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # QuickStart Binaries
 varQuickStart=true
 # Quickstart compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v1.4.0.0/Dynamic-Linux-x64-v1.4.0.0.tar.gz
-varQuickStartCompressedFileName=Dynamic-Linux-x64-v1.4.0.0.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-1.4.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-1.4.0/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic-1.5-WIP/releases/download/Test1.5-v1/dynamic-1.5.0-linux64.tar.gz
+varQuickStartCompressedFileName=dynamic-1.5.0-linux64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-1.5.0/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-1.5.0/bin/dynamic-cli
 
 # QuickStart Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=false
@@ -85,14 +85,14 @@ varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
 # QuickStart Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
-varQuickBlockchainDownload=true
+varQuickBlockchainDownload=false
 varQuickStartCompressedBlockChainLocation=http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileName=Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileIsZip=true
 
 # Compile
 # -varCompile will compile the code
-varCompile=true
+varCompile=false
 
 
 #
@@ -129,14 +129,13 @@ varWatchdogTime=5
 varWatchdogEnabled=true
 
 #System Lockdown, Firewall, security rules, etc. 
-varSystemLockdown=true
+varSystemLockdown=false
 
 #Filenames of Generated Scripts
 dynStop="${varScriptsDirectory}dynStopDynamicd.sh"
 dynStart="${varScriptsDirectory}dynMineStart.sh"
 dynScrape="${varScriptsDirectory}dynScrape.sh"
 dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
-dynPre_1_4_0_Fix="${varScriptsDirectory}dynPre_1_4_0_Fix.sh"
 dynWatchdog="${varScriptsDirectory}dynWatchdog.sh"
 
 #Vultr API additions
@@ -494,10 +493,6 @@ echo " echo \"GitCheck \$(date +%F_%T) : Scrape if there are any funds before we
 echo " sudo ${dynScrape}" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo " echo \"Fix for wallets below 1.4.0\"" >> dynAutoUpdater.sh 
-echo " sudo ${dynPre_1_4_0_Fix}" >> dynAutoUpdater.sh
-echo "" >> dynAutoUpdater.sh
-echo "" >> dynAutoUpdater.sh
 echo " # 4. Stop the running daemon" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Stop the running daemon.\"" >> dynAutoUpdater.sh
 echo " sudo ${dynStop}" >> dynAutoUpdater.sh
@@ -527,64 +522,6 @@ dynAutoUpdater="${varScriptsDirectory}dynAutoUpdater.sh"
 echo "--"
 
 
-### Script #5: Fix wallet issues in version 1.4.0 and below ###
-# Filename dynPre_1_4_0_Fix.sh
-# This file will be deprecated a version or two past where the network no longer connects to versions below 1.4.0
-cd $varScriptsDirectory
-echo "Creating The Stop dynamicd Script: dynPre_1_4_0_Fix.sh"
-echo '#!/bin/sh' > dynPre_1_4_0_Fix.sh
-echo "# This file, dynPre_1_4_0_Fix.sh, was generated.  Version: $varVersion" >> dynPre_1_4_0_Fix.sh
-echo "# This file will be deprecated a version or two past where the network no longer connects to versions below 1.4.0" >> dynPre_1_4_0_Fix.sh
-echo "
-echo \"---------------------------------
-\$(date +%F_%T)\ dynPre_1_4_0_Fix Started
-Take care of the wallet upgrade issue from versions earlier that 1.4.0         
-The developers require us to manually export private keys and then import them 
-into a new wallet. This is an issue if you keep coins in the wallet. 
-This script was built to scape all coins in this instances wallet, and transfer
-them to a controller wallet, exchange, or other address. Basically, there 
-should be no coins in this wallet. This allows us to simply transfer the coins 
-out then delete the wallet.dat file.
-
-We are better than that though. In case something went wrong we should create a
-backup of the wallet.dat file, then delete the file.
-
-Step 1: Scrape the coins if they exist\"
-sudo $dynScrape
-
-echo \"
-Setp 2: Create a backup of the wallet.dat file\"
-mkdir -pv ${varBackupDirectory}
-sudo cp -v ${varDynamicConfigDirectory}wallet.dat ${varBackupDirectory}wallet_backup_\$(date +%Y%m%d_%H%M%S).dat
-
-echo \"
-Step 3: If we are not running, or we are running a version less than version then we get rid of the wallet.dat file.\"
-myVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\"
-echo \"Current Version returned: \\\"\$myVersion\\\"\"
-
-if [ \"\$myVersion\" = \"\" ] ; then
-    echo \"Because dynamic is not running or not installed we do not know the version. We are going to backup the file anyways\"
-    sudo ${dynStop}
-    mv -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_unknown_\$(date +%Y%m%d_%H%M%S).dat
-else
-    if [ \"\$myVersion\" -ge 1040000 ];then
-        echo \"Our version is greater than or equal to version 1.4.0, backing up the wallet.dat file, but keeping the exising wallet in place\"
-		cp -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${myVersion}_\$(date +%Y%m%d_%H%M%S).dat
-    else
-        echo \"Our version is less than 1.4.0, stop dynamic and move the wallet file\"
-		sudo ${dynStop}
-		mv -v ${varDynamicConfigDirectory}wallet.dat ${varDynamicConfigDirectory}wallet_backup_Version_\${myVersion}_\$(date +%Y%m%d_%H%M%S).dat
-    fi
-fi
-sleep 1
-echo \"\$(date +%F_%T) dynPre_1_4_0_Fix Finished\"
-echo \"---------------------------------\"
-#end of generated file" >> dynPre_1_4_0_Fix.sh
-echo "Changing the file attributes so we can run the script"
-chmod +x dynPre_1_4_0_Fix.sh
-echo "Created dynPre_1_4_0_Fix.sh"
-dynPre_1_4_0_Fix="${varScriptsDirectory}dynPre_1_4_0_Fix.sh"
-echo "--"
 
 
 
@@ -794,6 +731,32 @@ funcCreateDynamicConfFile ()
   echo "dynodeprivkey=$varDynodePrivateKey" >> $varDynamicConfigFile
   echo "" >> $varDynamicConfigFile
  fi
+ 
+ echo "#temporary nodes for connections
+addnode=207.246.81.201:32300
+addnode=45.77.166.135:32300
+addnode=198.98.111.248:32300
+addnode=108.61.204.207:32300
+addnode=104.238.128.215:32300
+addnode=158.69.121.24:32300
+addnode=45.63.78.59:32300
+addnode=45.77.106.107:32300
+addnode=134.3.76.188:32300
+addnode=35.205.91.111:32300
+addnode=35.196.201.112:32300
+addnode=83.46.213.252:32300
+addnode=82.73.162.116:32300
+addnode=134.3.76.188:32300
+addnode=173.208.242.179:49450
+addnode=93.77.160.162:51142
+addnode=158.69.120.22:39552
+addnode=216.75.121.174:51545
+addnode=92.112.166.63:52488
+addnode=158.69.122.63:52244
+addnode=54.173.15.232:44316
+addnode=95.90.216.53:35668
+addnode=176.58.207.76:26643
+" >> $varDynamicConfigFile
 
  echo "# End of generated file" >> $varDynamicConfigFile
  echo "- Finished creating dynamic.conf"
@@ -864,9 +827,7 @@ funcLockdown ()
 echo "Lets Scrape, if this is an upgrade, you may have mined coins."
 sudo ${dynScrape}
 echo "--"
-echo "Fix for wallets below 1.4.0"
-sudo ${dynPre_1_4_0_Fix}
-echo "--"
+
 
 ## Quick Start Get Botstrap Data, recommended by the development team.
 if [ "$varQuickBootstrap" = true ]; then
@@ -1162,9 +1123,7 @@ if [ "$varCompile" = true ]; then
     echo "Lets Scrape, if this is an upgrade, you may have mined coins."
     sudo ${dynScrape}
     echo "--"
-    echo "Fix for wallets below 1.4.0"
-    sudo ${dynPre_1_4_0_Fix}
-    echo "--"
+
 
     sudo ${dynStop}
 
