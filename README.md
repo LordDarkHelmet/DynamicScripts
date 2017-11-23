@@ -34,4 +34,4 @@ This script is a one stop shop. Run it on your VPS and it will do everything han
 
 
 Dynamic (DYN) is a cryptocurrency. You can find out more at:
-https://dynamic.duality.solutions/
+https://duality.solutions/dynamic/
