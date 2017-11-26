@@ -20,8 +20,8 @@ myScrapeAddress=DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.29"
-varVersionDate="November 22, 2017"
+varVersionNumber="1.0.30"
+varVersionDate="November 25, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -705,8 +705,8 @@ funcCreateDynamicConfFile ()
  Myrpcport=$((Myrpcport+Myport))
  
  if [ "$varDynode" = 1 ]; then
-    Myrpcport=31350
-    Myport=31300
+    Myrpcport=32350
+    Myport=32300
  fi
  
  mkdir -pv $varDynamicConfigDirectory
