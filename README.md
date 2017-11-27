@@ -1,7 +1,7 @@
 # DynamicScripts
 <b>Scripts for the Dynamic (DYN) Cryptocurrency</b>
 
-<b> NOTE: Version 1.0.29 is for the 1.5v1 test net only. This is a test run by duality. Mined coins will be swapped by duality 1:1. Dynode rewards will not be creditied in any way. </b>
+<b> NOTE: Version 1.0.30 is for the 1.5v1 test net only. This is a test run by duality. Mined coins will be swapped by duality 1:1. <em>Dynode rewards will not be creditied in any way.</em> </b>
 
 You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
 
