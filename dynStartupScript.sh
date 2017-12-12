@@ -20,8 +20,8 @@ myScrapeAddress=DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.30"
-varVersionDate="November 25, 2017"
+varVersionNumber="1.0.31"
+varVersionDate="December 11, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
@@ -94,6 +94,9 @@ varQuickStartCompressedBlockChainFileIsZip=true
 # -varCompile will compile the code
 varCompile=false
 
+#Default Dynode Ports
+DefaultDynode_rpcport=32350
+DefaultDynode_port=32300
 
 #
 #Expand Swap File
@@ -153,7 +156,7 @@ echo "To see all options pass in the -h attribute"
 echo ""
 echo "Options passed in: $@"
 echo ""
-while getopts :s:d:y:a:r:l:w:c:v:b:h option
+while getopts :s:d:y:a:r:l:w:c:v:b:t:h option
 do
     case "${option}"
     in
@@ -243,6 +246,21 @@ do
                 echo "-b We will not use a bootstrap or a blockchain download"
             else
                 echo "-b ${myTemp} is not a valid option"
+            fi
+            ;;
+        t)
+		    myTemp=${OPTARG}
+			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = test1_5_Phase2 ]; then
+                varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic-1.5-WIP/releases/download/Test1.5-PHASE-2/Dynamic-PHASE_2-Linux64.tar.gz
+				varQuickStartCompressedFileName=Dynamic-PHASE_2-Linux64.tar.gz
+				varQuickStartCompressedFilePathForDaemon=dynamic-1.5.0/bin/dynamicd
+				varQuickStartCompressedFilePathForCLI=dynamic-1.5.0/bin/dynamic-cli
+				DefaultDynode_rpcport=33350
+				DefaultDynode_port=33300
+                echo "-t Changing variables to 1.5 Phase 2"
+            else
+                varVultrAPIKey=${myTemp}
+                echo "-v has set varVultrAPIKey=${varVultrAPIKey}"
             fi
             ;;
         h)
@@ -705,8 +723,8 @@ funcCreateDynamicConfFile ()
  Myrpcport=$((Myrpcport+Myport))
  
  if [ "$varDynode" = 1 ]; then
-    Myrpcport=32350
-    Myport=32300
+    Myrpcport=$DefaultDynode_rpcport
+    Myport=$DefaultDynode_port
  fi
  
  mkdir -pv $varDynamicConfigDirectory
