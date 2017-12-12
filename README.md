@@ -3,7 +3,7 @@
 
 <b> NOTE: Version 1.0.30 is for the 1.5v1 test net only. This is a test run by duality. Mined coins will be swapped by duality 1:1. <em>Dynode rewards will not be creditied in any way.</em> </b>
 
-<b> NOTE" Version 1.5 Phase 2: If you want to be on Phase 2, use the attribute: <code>-t test1_5_phase2</code><br>
+<b> NOTE: Version 1.5 Phase 2: If you want to be on Phase 2, use the attribute: <code>-t test1_5_phase2</code><br>
 <em>Testing only, no reinbursements or swaps.</em> <b>
 
 You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
