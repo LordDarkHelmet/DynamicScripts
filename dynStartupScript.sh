@@ -20,7 +20,7 @@ myScrapeAddress=DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.31"
+varVersionNumber="1.0.32"
 varVersionDate="December 11, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -145,6 +145,9 @@ dynWatchdog="${varScriptsDirectory}dynWatchdog.sh"
 varVultrAPIKey=""
 varVultrLabelmHz=false
 
+#Other and Test
+Is_1_5_Phase_2=false 
+
 #End of Variables
 
 
@@ -250,17 +253,17 @@ do
             ;;
         t)
 		    myTemp=${OPTARG}
-			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = test1_5_Phase2 ]; then
+			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = test1_5_phase2 ]; then
                 varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic-1.5-WIP/releases/download/Test1.5-PHASE-2/Dynamic-PHASE_2-Linux64.tar.gz
 				varQuickStartCompressedFileName=Dynamic-PHASE_2-Linux64.tar.gz
 				varQuickStartCompressedFilePathForDaemon=dynamic-1.5.0/bin/dynamicd
 				varQuickStartCompressedFilePathForCLI=dynamic-1.5.0/bin/dynamic-cli
 				DefaultDynode_rpcport=33350
 				DefaultDynode_port=33300
+				Is_1_5_Phase_2=true
                 echo "-t Changing variables to 1.5 Phase 2"
             else
-                varVultrAPIKey=${myTemp}
-                echo "-v has set varVultrAPIKey=${varVultrAPIKey}"
+                echo "-t Unknown attribute =${myTemp}"
             fi
             ;;
         h)
@@ -269,13 +272,13 @@ do
 			echo "This script, $0 , can use the following attributes:"
             echo " -s Scrape address requires an attribute Ex.  -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD"
             echo " -d Dynode Private key. if you populate this it will setup a dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
-			echo " -y Dynode Label, a human redable label for your dynode. Usefull with the -v option."
+			echo " -y Dynode Label, a human redable label for your dynode. Useful with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
             echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
             echo " -l System Lockdown. Secure the instance. True to lock down your system. ex -l true"
             echo " -w Watchdog. The watchdog restarts processes if they fail. true for on, false for off."
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
-			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using vultr as an API service, this will change the label to update the last watchdog status"
+			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using Vultr as an API service, this will change the label to update the last watchdog status"
 			echo " -b bootstrap or blockchain. Downoad an external bootstrap, blockchain or none, ex\"-b bootstrap\""
             echo " -h Display Help then exit."
 			echo ""
@@ -750,7 +753,20 @@ funcCreateDynamicConfFile ()
   echo "" >> $varDynamicConfigFile
  fi
  
- echo "#temporary nodes for connections
+ if [ "$Is_1_5_Phase_2" = true ]; then
+	echo "#temporary nodes for connections
+addnode=158.69.70.204:33300
+addnode=212.24.103.6:33300
+addnode=128.0.244.253:57580
+addnode=198.98.111.249:33300
+addnode=198.98.111.248:33300
+addnode=173.208.236.78:33300
+addnode=173.208.236.77:33300
+addnode=173.208.242.179:33300
+addnode=109.192.146.247:33300
+" >> $varDynamicConfigFile
+ else
+	echo "#temporary nodes for connections
 addnode=207.246.81.201:32300
 addnode=45.77.166.135:32300
 addnode=198.98.111.248:32300
@@ -775,6 +791,8 @@ addnode=54.173.15.232:44316
 addnode=95.90.216.53:35668
 addnode=176.58.207.76:26643
 " >> $varDynamicConfigFile
+ fi
+
 
  echo "# End of generated file" >> $varDynamicConfigFile
  echo "- Finished creating dynamic.conf"
