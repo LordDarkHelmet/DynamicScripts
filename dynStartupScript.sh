@@ -20,12 +20,12 @@ myScrapeAddress=DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.32"
-varVersionDate="December 11, 2017"
+varVersionNumber="1.0.33"
+varVersionDate="December 12, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
-# We recomend running Ubuntu 16.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 18.04
+# We recommend running Ubuntu 16.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 18.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
@@ -755,41 +755,67 @@ funcCreateDynamicConfFile ()
  
  if [ "$Is_1_5_Phase_2" = true ]; then
 	echo "#temporary nodes for connections
-addnode=158.69.70.204:33300
-addnode=212.24.103.6:33300
+addnode=104.151.77.252:33300
+addnode=104.151.77.254:33300
+addnode=109.192.146.247:33300
 addnode=128.0.244.253:57580
-addnode=198.98.111.249:33300
-addnode=198.98.111.248:33300
+addnode=158.69.70.204:33300
 addnode=173.208.236.78:33300
 addnode=173.208.236.77:33300
 addnode=173.208.242.179:33300
-addnode=109.192.146.247:33300
+addnode=188.166.173.136:33300
+addnode=192.187.123.157:33300
+addnode=194.135.81.73:33300
+addnode=195.181.244.172:33300
+addnode=195.181.245.17:33300
+addnode=198.98.111.249:33300
+addnode=198.98.111.248:33300
+addnode=198.98.111.250:33300
+addnode=198.98.111.253:33300
+addnode=212.24.103.6:33300
+addnode=212.24.110.41:33300
+addnode=23.89.208.188:33300
+addnode=23.89.208.190:33300
+addnode=80.209.238.99:33300
+addnode=80.209.238.100:33300
+addnode=80.209.238.102:33300
+addnode=80.209.238.106:33300
+addnode=80.209.238.109:33300
+addnode=82.73.162.116:33300
+addnode=94.176.233.45:33300
 " >> $varDynamicConfigFile
  else
 	echo "#temporary nodes for connections
-addnode=207.246.81.201:32300
-addnode=45.77.166.135:32300
-addnode=198.98.111.248:32300
-addnode=108.61.204.207:32300
+addnode=104.207.148.94:32300
 addnode=104.238.128.215:32300
-addnode=158.69.121.24:32300
-addnode=45.63.78.59:32300
-addnode=45.77.106.107:32300
+addnode=108.61.165.150:32300
+addnode=108.61.204.207:32300
+addnode=198.98.111.248:32300
 addnode=134.3.76.188:32300
-addnode=35.205.91.111:32300
+addnode=142.44.244.78:32300
+addnode=158.69.120.22:39552
+addnode=158.69.121.24:32300
+addnode=158.69.122.63:52244
+addnode=176.58.207.76:26643
+addnode=173.208.242.179:49450
+addnode=207.246.67.209:32300
+addnode=207.246.81.201:32300
+addnode=216.75.121.174:51545
 addnode=35.196.201.112:32300
+addnode=35.205.91.111:32300
+addnode=45.32.224.207:32300
+addnode=45.63.78.59:32300
+addnode=45.77.73.130:32300
+addnode=45.77.106.107:32300
+addnode=45.77.166.135:32300
+addnode=54.173.15.232:44316
+addnode=66.70.187.136:32300
 addnode=83.46.213.252:32300
 addnode=82.73.162.116:32300
-addnode=134.3.76.188:32300
-addnode=173.208.242.179:49450
-addnode=93.77.160.162:51142
-addnode=158.69.120.22:39552
-addnode=216.75.121.174:51545
 addnode=92.112.166.63:52488
-addnode=158.69.122.63:52244
-addnode=54.173.15.232:44316
+addnode=93.77.160.162:51142
 addnode=95.90.216.53:35668
-addnode=176.58.207.76:26643
+
 " >> $varDynamicConfigFile
  fi
 
