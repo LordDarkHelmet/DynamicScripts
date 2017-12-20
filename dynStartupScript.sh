@@ -7,24 +7,24 @@
 # myScrapeAddress: This is the address that the wallet will scrape mining coins to:
 # "IF YOU DON'T USE ATTRIBUTES TO PASS IN YOUR VALUES THEN:"
 # "CHANGE THE ADDRESS BELOW TO BE THE ONE FOR YOUR WALLET"
-myScrapeAddress=DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z
+myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 # "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
 # "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
 
 # Credit:
 # Written by those who are dedicated to teaching other about ion (ionomy.com) and other cryptocurrencies. 
 # Contributors:         DYN Donation Address                      BTC Address
-#   LordDarkHelmet      DJnERexmBy1oURgpp2JpzVzHcE17LTFavD        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
-#   Broyhill            DQDAmUJKGyErmgVHSnSkVrrzssz3RedW2V
-#   Coinkiller          DLvnNNYzbUxtDyADbyGDSio9ghazEcvRBk
+#   LordDarkHelmet      D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
+#   Broyhill            
+#   Coinkiller          
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="1.0.33"
-varVersionDate="December 12, 2017"
+varVersionNumber="2.0.0"
+varVersionDate="December 19, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
-# The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwith
+# The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
 # We recommend running Ubuntu 16.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 18.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
@@ -50,11 +50,11 @@ echo "==========================================================================
 # Are you setting up a Dynode? if so you want to set these variables
 # Set varDynode to 1 if you want to run a node, otherwise set it to zero. 
 varDynode=0
-# This will set the external IP to your IP address (linux only), or you can put your IP address in here
-varDynodeExternalIP=$(hostname -I)
-# This is your dynode private key. To get it run dynamic-cli dynode genkey
+# This will set the external IP to your IP address (Linux only), or you can put your IP address in here
+varDynodeExternalIP=$(hostname -I | cut -d' ' -f1)
+# This is your Dynode private key. To get it run dynamic-cli Dynode genkey
 varDynodePrivateKey=ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey
-# This is the label you want to give your dynode
+# This is the label you want to give your Dynode
 varDynodeLabel=""
 
 # Location of Dynamic Binaries, GIT Directories, and other useful files
@@ -70,21 +70,21 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 
 # Quick Non-Source Start (get binaries and blockchain from the web, not completely safe or reliable, but fast!)
 
-# QuickStart Binaries
+# Quick Start Binaries
 varQuickStart=true
-# Quickstart compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic-1.5-WIP/releases/download/Test1.5-v1/dynamic-1.5.0-linux64.tar.gz
-varQuickStartCompressedFileName=dynamic-1.5.0-linux64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-1.5.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-1.5.0/bin/dynamic-cli
+# Quick Start compressed file location and name
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.0.0.0/Dynamic-2.0.0.0-Linux64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.0.0.0-Linux64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.0.0/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.0.0/bin/dynamic-cli
 
-# QuickStart Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
+# Quick Start Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=false
 varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
-# QuickStart Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
+# Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
 varQuickBlockchainDownload=false
 varQuickStartCompressedBlockChainLocation=http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileName=Dynamic_blockchain.zip
@@ -92,11 +92,14 @@ varQuickStartCompressedBlockChainFileIsZip=true
 
 # Compile
 # -varCompile will compile the code
-varCompile=false
+varCompile=true
 
 #Default Dynode Ports
-DefaultDynode_rpcport=32350
-DefaultDynode_port=32300
+DefaultDynode_rpcport=33350
+DefaultDynode_port=33300
+
+# P2P
+DefaultP2P_Port=33300
 
 #
 #Expand Swap File
@@ -132,7 +135,7 @@ varWatchdogTime=5
 varWatchdogEnabled=true
 
 #System Lockdown, Firewall, security rules, etc. 
-varSystemLockdown=false
+varSystemLockdown=true
 
 #Filenames of Generated Scripts
 dynStop="${varScriptsDirectory}dynStopDynamicd.sh"
@@ -146,7 +149,7 @@ varVultrAPIKey=""
 varVultrLabelmHz=false
 
 #Other and Test
-Is_1_5_Phase_2=false 
+Is_TestNet=false
 
 #End of Variables
 
@@ -170,7 +173,7 @@ do
         d) 
             varDynodePrivateKey=${OPTARG}
             varDynode=1
-            echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a dynode)"
+            echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a Dynode)"
             ;;
 		y) 
             varDynodeLabel=${OPTARG}
@@ -253,15 +256,11 @@ do
             ;;
         t)
 		    myTemp=${OPTARG}
-			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = test1_5_phase2 ]; then
-                varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic-1.5-WIP/releases/download/Test1.5-PHASE-2/Dynamic-PHASE_2-Linux64.tar.gz
-				varQuickStartCompressedFileName=Dynamic-PHASE_2-Linux64.tar.gz
-				varQuickStartCompressedFilePathForDaemon=dynamic-1.5.0/bin/dynamicd
-				varQuickStartCompressedFilePathForCLI=dynamic-1.5.0/bin/dynamic-cli
-				DefaultDynode_rpcport=33350
-				DefaultDynode_port=33300
-				Is_1_5_Phase_2=true
-                echo "-t Changing variables to 1.5 Phase 2"
+			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = testnet ]; then
+				DefaultDynode_rpcport=33450
+				DefaultDynode_port=33400
+				Is_TestNet=true
+                echo "-t Changing variables to TestNet"
             else
                 echo "-t Unknown attribute =${myTemp}"
             fi
@@ -270,31 +269,32 @@ do
             echo ""
 			echo "Help:"
 			echo "This script, $0 , can use the following attributes:"
-            echo " -s Scrape address requires an attribute Ex.  -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD"
-            echo " -d Dynode Private key. if you populate this it will setup a dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
-			echo " -y Dynode Label, a human redable label for your dynode. Useful with the -v option."
+            echo " -s Scrape address requires an attribute Ex.  -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
+            echo " -d Dynode Private key. if you populate this it will setup a Dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+			echo " -y Dynode Label, a human readable label for your Dynode. Useful with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
             echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
             echo " -l System Lockdown. Secure the instance. True to lock down your system. ex -l true"
             echo " -w Watchdog. The watchdog restarts processes if they fail. true for on, false for off."
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
 			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using Vultr as an API service, this will change the label to update the last watchdog status"
-			echo " -b bootstrap or blockchain. Downoad an external bootstrap, blockchain or none, ex\"-b bootstrap\""
+			echo " -b bootstrap or blockchain. Download an external bootstrap, blockchain or none, ex\"-b bootstrap\""
+			echo " -t Various test attributes (in development)"
             echo " -h Display Help then exit."
 			echo ""
 			echo "Example 1: Just set up a simple miner"
-			echo "sudo sh $0 -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD"
+			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
 			echo ""
-			echo "Example 2: Setup a remote dynode"
-			echo "sudo sh $0 -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+			echo "Example 2: Setup a remote Dynode"
+			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
 			echo ""
 			echo "Example 3: Run a miner, but don't compile (auto update will be turned off by default), useful for low RAM VPS's that don't allow for SWAP files"
-			echo "sudo sh $0 -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD -c false"			
+			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR -c false"			
 			echo ""
-			echo "Example 4: Turn off auto update on a dynode, you will be required to manually update if a new version comes along"
-			echo "sudo sh $0 -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -a false"
+			echo "Example 4: Turn off auto update on a Dynode, you will be required to manually update if a new version comes along"
+			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -a false"
 			echo ""			
-			echo "sudo sh Example 5: Setup a miner that donates to the author's address DJnERexmBy1oURgpp2JpzVzHcE17LTFavD"
+			echo "sudo sh Example 5: Setup a miner that donates to the author's address D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
 			echo "$0"
 			echo ""			
 			echo "PLEASE REMEMBER TO USE THE \"-s\" attribute. If you don't then you will be donating and not scraping to your address."
@@ -500,19 +500,26 @@ echo " # 2. Compile the new code" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile the souce code\"" >> dynAutoUpdater.sh
 echo " cd $varGITDynamicPath" >> dynAutoUpdater.sh
 echo " echo \"Check if we can optimize mining using the avx2 instruction set\"" >> dynAutoUpdater.sh
+echo " ConfigParameters=\" --without-gui \"" >> dynAutoUpdater.sh
+echo " CPPFLAGS=-march=native" >> dynAutoUpdater.sh
 echo " varavx2=\$(grep avx2 /proc/cpuinfo)" >> dynAutoUpdater.sh
-echo " if [  \"varavx2\" = \"\" ]; then" >> dynAutoUpdater.sh
+echo " if [  \"\$varavx2\" = \"\" ]; then" >> dynAutoUpdater.sh
 echo "   echo \"avx2 not found, normal compile, no avx2 optimizations\"" >> dynAutoUpdater.sh
 echo " else" >> dynAutoUpdater.sh
-echo "   CPPFLAGS=-march=native" >> dynAutoUpdater.sh
+echo "   ConfigParameters=\"\${ConfigParameters} --enable-avx2 \"" >> dynAutoUpdater.sh
 echo " fi" >> dynAutoUpdater.sh
-echo " sudo ./autogen.sh && sudo ./configure --without-gui && sudo make" >> dynAutoUpdater.sh
+echo " varavx512f=\$(grep avx512f /proc/cpuinfo)" >> dynAutoUpdater.sh
+echo " if [  \"\$varavx512f\" = \"\" ]; then" >> dynAutoUpdater.sh
+echo "   echo \"avx512f not found, normal compile, no avx512f optimizations\"" >> dynAutoUpdater.sh
+echo " else" >> dynAutoUpdater.sh
+echo "   ConfigParameters=\"\${ConfigParameters} --enable-avx512f \"" >> dynAutoUpdater.sh
+echo " fi" >> dynAutoUpdater.sh
+echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters && sudo make" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile Finished.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 3. Scrape if there are any funds before we stop" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Scrape if there are any funds before we stop.\"" >> dynAutoUpdater.sh
 echo " sudo ${dynScrape}" >> dynAutoUpdater.sh
-echo "" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 4. Stop the running daemon" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Stop the running daemon.\"" >> dynAutoUpdater.sh
@@ -586,7 +593,7 @@ if [ "" = "$varVultrAPIKey" ]; then
     echo "No Vultr API Key, skipping Vultr specific label updater"
 else
 
-    myCommand="mySUBID=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=$(hostname -I) | jq -r '.[].SUBID')"
+    myCommand="mySUBID=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=$(hostname -I | cut -d' ' -f1) | jq -r '.[].SUBID')"
     echo $myCommand
 	eval $myCommand
 	#Try 2
@@ -615,7 +622,7 @@ else
 	
 	
 	if [ "$varDynode" = 1 ]; then
-	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode debug)"  >> dynWatchdog.sh
+	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli Dynode debug)"  >> dynWatchdog.sh
 		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | \${myMNStatus} '\""  >> dynWatchdog.sh
 	else
 		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
@@ -627,7 +634,7 @@ else
 	
 	if [ "$mySUBID" = "" ]; then
 	    echo "#We did not find the SUBID, so we are not going to execute the API command to update the Vultr hosted label." >> dynWatchdog.sh
-		echo "#You can get it by running this command: mySUBID=\$(curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=\$(hostname -I) | jq -r '.[].SUBID')" >> dynWatchdog.sh
+		echo "#You can get it by running this command: mySUBID=\$(curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/list?main_ip=\$(hostname -I | cut -d' ' -f1) | jq -r '.[].SUBID')" >> dynWatchdog.sh
 		echo "#eval \$myCommand" >> dynWatchdog.sh
 	else
 		echo "eval \$myCommand" >> dynWatchdog.sh
@@ -747,79 +754,40 @@ funcCreateDynamicConfFile ()
 
  if [ "$varDynode" = 1 ]; then
   echo "# DYNODE: " >> $varDynamicConfigFile
+  echo "# externalip is the IP address of this machine. (the remote Dynode's IP address) " >> $varDynamicConfigFile
   echo "externalip=$varDynodeExternalIP" >> $varDynamicConfigFile
-  echo "dynode=$varDynode" >> $varDynamicConfigFile
+  echo "# Dynode can be 0 or 1. 1=Dynode, 0=not a Dynode" >> $varDynamicConfigFile
+  echo "Dynode=$varDynode" >> $varDynamicConfigFile
+  echo "# Use your local or control wallet, run the command \"Dynode genkey\" to generate a unique dynodeprivkey for each remote Dynode" >> $varDynamicConfigFile
   echo "dynodeprivkey=$varDynodePrivateKey" >> $varDynamicConfigFile
   echo "" >> $varDynamicConfigFile
  fi
- 
- if [ "$Is_1_5_Phase_2" = true ]; then
-	echo "#temporary nodes for connections
-addnode=104.151.77.252:33300
-addnode=104.151.77.254:33300
-addnode=109.192.146.247:33300
-addnode=128.0.244.253:57580
-addnode=158.69.70.204:33300
-addnode=173.208.236.78:33300
-addnode=173.208.236.77:33300
-addnode=173.208.242.179:33300
-addnode=188.166.173.136:33300
-addnode=192.187.123.157:33300
-addnode=194.135.81.73:33300
-addnode=195.181.244.172:33300
-addnode=195.181.245.17:33300
-addnode=198.98.111.249:33300
-addnode=198.98.111.248:33300
-addnode=198.98.111.250:33300
-addnode=198.98.111.253:33300
-addnode=212.24.103.6:33300
-addnode=212.24.110.41:33300
-addnode=23.89.208.188:33300
-addnode=23.89.208.190:33300
-addnode=80.209.238.99:33300
-addnode=80.209.238.100:33300
-addnode=80.209.238.102:33300
-addnode=80.209.238.106:33300
-addnode=80.209.238.109:33300
-addnode=82.73.162.116:33300
-addnode=94.176.233.45:33300
-" >> $varDynamicConfigFile
- else
-	echo "#temporary nodes for connections
-addnode=104.207.148.94:32300
-addnode=104.238.128.215:32300
-addnode=108.61.165.150:32300
-addnode=108.61.204.207:32300
-addnode=198.98.111.248:32300
-addnode=134.3.76.188:32300
-addnode=142.44.244.78:32300
-addnode=158.69.120.22:39552
-addnode=158.69.121.24:32300
-addnode=158.69.122.63:52244
-addnode=176.58.207.76:26643
-addnode=173.208.242.179:49450
-addnode=207.246.67.209:32300
-addnode=207.246.81.201:32300
-addnode=216.75.121.174:51545
-addnode=35.196.201.112:32300
-addnode=35.205.91.111:32300
-addnode=45.32.224.207:32300
-addnode=45.63.78.59:32300
-addnode=45.77.73.130:32300
-addnode=45.77.106.107:32300
-addnode=45.77.166.135:32300
-addnode=54.173.15.232:44316
-addnode=66.70.187.136:32300
-addnode=83.46.213.252:32300
-addnode=82.73.162.116:32300
-addnode=92.112.166.63:52488
-addnode=93.77.160.162:51142
-addnode=95.90.216.53:35668
 
-" >> $varDynamicConfigFile
- fi
-
-
+ echo "" >> $varDynamicConfigFile
+ echo "# if you can't connect, you may need to add a node, check the peers list on an explorer and add some nodes here" >> $varDynamicConfigFile
+ echo "# addnode=<IP Address>:<PORT>" >> $varDynamicConfigFile
+ echo "addnode=212.24.107.161:33300" >> $varDynamicConfigFile
+ echo "addnode=207.246.114.52:33300" >> $varDynamicConfigFile
+ echo "addnode=198.98.111.252:33300" >> $varDynamicConfigFile
+ echo "addnode=195.181.244.12:33300" >> $varDynamicConfigFile
+ echo "addnode=195.181.245.16:33300" >> $varDynamicConfigFile
+ echo "addnode=194.135.94.82:33300" >> $varDynamicConfigFile
+ echo "addnode=194.135.84.17:33300" >> $varDynamicConfigFile
+ echo "addnode=188.166.173.136:33300" >> $varDynamicConfigFile
+ echo "addnode=173.208.236.78:33300" >> $varDynamicConfigFile
+ echo "addnode=159.203.218.28:33300" >> $varDynamicConfigFile
+ echo "addnode=108.61.216.214:33300" >> $varDynamicConfigFile
+ echo "addnode=94.176.233.45:33300" >> $varDynamicConfigFile
+ echo "addnode=80.209.238.100:33300" >> $varDynamicConfigFile
+ echo "addnode=80.209.238.99:33300" >> $varDynamicConfigFile
+ echo "addnode=80.209.238.98:33300" >> $varDynamicConfigFile
+ echo "addnode=62.151.181.228:33300" >> $varDynamicConfigFile
+ echo "addnode=46.5.187.36:33300" >> $varDynamicConfigFile
+ echo "addnode=45.63.41.217:33300" >> $varDynamicConfigFile
+ echo "addnode=45.77.69.239:33300" >> $varDynamicConfigFile
+ echo "addnode=45.76.239.38 :33300" >> $varDynamicConfigFile
+ echo "addnode=45.32.95.204:33300" >> $varDynamicConfigFile
+ echo "" >> $varDynamicConfigFile
  echo "# End of generated file" >> $varDynamicConfigFile
  echo "- Finished creating dynamic.conf"
  echo "---------------------------------"
@@ -829,7 +797,7 @@ addnode=95.90.216.53:35668
 
 ####### Security Lockdown Function #############
 #Permanent lockdown and security of the node/miner. Not implementing before we work out the bugs. (don't want to lock us out from debugging it)
-#For now we are just setting up a basic firewall. We are also using random ports for miners, but dynodes are using the default ports. 
+#For now we are just setting up a basic firewall. We are also using random ports for miners, but Dynodes are using the default ports. 
 #basically you are just putting up a firewall with three open ports, SSH dynamic port, and dynamic RPC port.
 funcLockdown ()
 {
@@ -847,7 +815,7 @@ funcLockdown ()
     # sudo service ssh restart
     # When you connect back to your VPS via an SSH client, be sure to change the port to the one you specified in your sshd_config file. While you are more secure because you changed the port and you have a really secure password, an attacker can still find your port and attempt to break your password via a brute force attack. To prevent this you will need a firewall to limit the number of attempts per second, making a brute force attack impossibly long.
  
-    # Install a Firewalledit
+    # Install a Firewall
     # The Uncomplicated Firewall (UFW) is the default firewall configuration tool for Ubuntu.
     # 
     # The following commands can be used to install and setup your UFW to help protect your system.
@@ -860,14 +828,14 @@ funcLockdown ()
 	sudo ufw allow $mysshPort/tcp
     echo "sudo ufw limit ${mysshPort}/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds"
 	sudo ufw limit $mysshPort/tcp
-    echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is 31300 by default."
+    echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is $DefaultDynode_port by default."
 	sudo ufw allow $Myport/tcp
-    echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####)"
+    echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####) BTW for Dynodes this is $DefaultDynode_rpcport by default."
 	sudo ufw allow $Myrpcport/tcp
-    #echo "sudo ufw logging on # this turns the log on, optional, but helps itentify attacks ans issues"
+    #echo "sudo ufw logging on # this turns the log on, optional, but helps identify attacks and issues"
 	#sudo ufw logging on
     echo "sudo ufw enable # This will start the firewall, you only need to do this once after you install"
-	#the yes command will automatically answer yes to everyting, but we are just going to use an echo so we dont get a broken pipe message. We only need one yes. 
+	#the yes command will automatically answer yes to everything, but we are just going to use an echo so we don't get a broken pipe message. We only need one yes. 
 	echo "y" | ufw enable
     # 
     # You can verify that your firewall is running and the rules it has by using the following command
@@ -875,7 +843,7 @@ funcLockdown ()
     echo "sudo ufw status"
 	sudo ufw status
  
- #Lessons fromthe ncident Report on DDoS attack against Dash’s Masternode P2P network: https://www.dash.org/2017/03/08/DDoSReport.html
+ #Lessons from the incident Report on DDoS attack against Dash’s Masternode P2P network: https://www.dash.org/2017/03/08/DDoSReport.html
  # Suggested IP Table rules: https://gist.github.com/chaeplin/5dabcef736f599f3bc64bdce7b62b817
  
     echo "---------------------------------"
@@ -891,7 +859,7 @@ sudo ${dynScrape}
 echo "--"
 
 
-## Quick Start Get Botstrap Data, recommended by the development team.
+## Quick Start Get Bootstrap Data, recommended by the development team.
 if [ "$varQuickBootstrap" = true ]; then
     echo "Starting Bootstrap and Blockchain download."
     echo "Step 1: If the dynamicd process is running, Stop it"
@@ -944,7 +912,7 @@ if [ "$varQuickBootstrap" = true ]; then
 	rm -fdr $varQuickStartCompressedBootstrapFileName
 
     echo "Step 5: Start Dynamic and import from bootstrap.dat. Daemon users need to use the \"--loadblock=\" argument when starting Dynamic"
-    echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compellation if you don't download the binaries"
+    echo "We will complete this step later on in the setup file, either on download of the binaries, or on completion of the compilation if you don't download the binaries"
     sleep 1
     echo "Bootstrap Prep completed!"
     echo ""
@@ -1016,7 +984,7 @@ if [ "$varQuickBlockchainDownload" = true ]; then
     echo ""
 fi
 
-## Creating the config file. This prevents the boot up, have to shut down thing in dynamicd. We do this here just in case the quickstart stuff deletes the config file.
+## Creating the config file. This prevents the boot up, have to shut down thing in dynamicd. We do this here just in case the quick start stuff deletes the config file.
 echo ""
 echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. No need to invoke dynamic-cli setgenerate true"
 funcCreateDynamicConfFile
@@ -1033,7 +1001,7 @@ fi
 
 ## Quick Start (get binaries from the web, not completely safe or reliable, but fast!)
 if [ "$varQuickStart" = true ]; then
-echo "Beginning QuickStart Executable (binaries) download and start"
+echo "Beginning Quick Start Executable (binaries) download and start"
 
 echo "If the dynamicd process is running, this will kill it."
 sudo ${dynStop}
@@ -1114,9 +1082,9 @@ fi
 echo "Boot Start and Scrape cron jobs created"
 
 
-echo "QuickStart complete"
+echo "Quick Start complete"
 fi
-#End of QuickStart
+#End of Quick Start
 echo ""
 echo ""
 
@@ -1125,7 +1093,7 @@ if [ "$varCompile" = true ]; then
 
     echo "######### Start Compile #########"
     echo ""
-#Ok If you did a QuickStart, we are going to build a new wallet. 
+#OK If you did a Quick Start, we are going to build a new wallet. 
 #This will happen while you are mining, so it will take super long, but you don't care.
 #when we complete the build we will stop the miner, replace the binary, and continue.  
 
@@ -1134,24 +1102,23 @@ if [ "$varCompile" = true ]; then
     sudo apt-get -y install software-properties-common python-software-properties 
     sudo add-apt-repository -y ppa:git-core/ppa 
     sudo apt-get -y update 
-    sudo apt-get -y install nano
-    sudo apt-get -y install git
-    sudo apt-get -y install git build-essential libtool autotools-dev autoconf pkg-config bsdmainutils libssl-dev libcrypto++-dev libevent-dev automake libminiupnpc-dev libgmp-dev libboost-all-dev
+    sudo apt-get -y install git nano build-essential libtool autotools-dev autoconf pkg-config bsdmainutils libssl-dev libcrypto++-dev libevent-dev automake libminiupnpc-dev libgmp-dev libboost-all-dev
     sudo add-apt-repository -y ppa:bitcoin/bitcoin
     sudo apt-get -y update
     sudo add-apt-repository -y ppa:silknetwork/silknetwork
     sudo apt-get -y update
     sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
+	sudo apt-get install libzmq3-dev
     sudo apt-get -y update
     sudo apt-get -y upgrade
     echo ""
 
 	
-# Clone the github repository
-    echo "Clone the github repository"
+# Clone the GitHub repository
+    echo "Clone the GitHub repository"
     cd $varGITRootPath
     sudo git clone $varRemoteRepository
-    echo "Pull changes from the github repository. If they update the code, this will bring your code up to date. "
+    echo "Pull changes from the GitHub repository. If they update the code, this will bring your code up to date. "
     cd $varGITDynamicPath
     sudo git pull $varRemoteRepository
     
@@ -1162,19 +1129,30 @@ if [ "$varCompile" = true ]; then
     echo "Compile the Daemon Client"
     cd $varGITDynamicPath
     echo "-----------------"
+	
+	echo "Just creating the CLI and Deamon Only"
+	ConfigParameters=" --without-gui "
+	
 	echo "Check if we can optimize mining using the avx2 instruction set"
 	varavx2=$(grep avx2 /proc/cpuinfo)
-	if [  "varavx2" = "" ]; then
+	if [  "$varavx2" = "" ]; then
 	  echo "avx2 not found, normal compile, no avx2 optimizations"
-	  echo "Just creating the CLI and Deamon Only"
-	  echo "sudo ./autogen.sh && sudo ./configure --without-gui && sudo make"
-      sudo ./autogen.sh && sudo ./configure --without-gui && sudo make
 	else
 	  echo "avx2 found, avx2 optimizations enabled"
-	  echo "Just creating the CLI and Deamon Only"
-	  echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure --without-gui && sudo make"
-      CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure --without-gui && sudo make
+	  ConfigParameters="${ConfigParameters} --enable-avx2 "
 	fi
+	varavx512f=$(grep avx512f /proc/cpuinfo)
+	if [  "$varavx512f" = "" ]; then
+	  echo "avx512f not found, normal compile, no avx512f optimizations"
+	else
+	  echo "avx512f found, avx512f optimizations enabled"
+	  ConfigParameters="${ConfigParameters} --enable-avx512f "
+	fi
+	
+	echo "-march=native tells the compiler to optimize to the compiling machine's CPU"
+	echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters && sudo make"
+	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters && sudo make
+	
     echo "-----------------"
     echo "Compile Finished."
     echo "-------------------------------------------"
@@ -1189,7 +1167,7 @@ if [ "$varCompile" = true ]; then
 
     sudo ${dynStop}
 
-    echo "Copy compiled binaries, if you used QuickStart your binaries are being replaced by the compiled ones"
+    echo "Copy compiled binaries, if you used Quick Start your binaries are being replaced by the compiled ones"
     mkdir -pv $varDynamicBinaries
     sudo cp -v ${varGITDynamicPath}src/dynamicd $varDynamicBinaries
     sudo cp -v ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries
@@ -1200,7 +1178,7 @@ if [ "$varCompile" = true ]; then
     if [ "$varQuickBootstrap" = true ]; then
     
         if [ "$varQuickStart" = true ]; then
-            echo "skipping the pre-launch because we already did it with the quickstart"
+            echo "skipping the pre-launch because we already did it with the quick start"
 	        echo "sudo ${varDynamicBinaries}dynamicd --daemon"
 	        sudo ${varDynamicBinaries}dynamicd --daemon
         else
@@ -1245,7 +1223,7 @@ if [ "$varCompile" = true ]; then
 
     if [ "$varAutoUpdate" = true ]; then
 
-        #we don't want eveyone updating at the same time, that would be bad for the network, so check for updates at a random time.
+        #we don't want everyone updating at the same time, that would be bad for the network, so check for updates at a random time.
         AutoUpdaterLine="$(shuf -i 0-59 -n 1) $(shuf -i 0-23 -n 1) * * * $dynAutoUpdater >> ${varScriptsDirectory}dynAutoUpdater.log 2>&1"
         #this will check once a day, just at a random time of day from other runs of this script. 
 
@@ -1283,7 +1261,7 @@ cd ${varDynamicBinaries}
 
 Alternatively, you can put the path (directory) before the command
 
-example: Getting the blockcount:
+example: Getting the block count:
 sudo ${varDynamicBinaries}dynamic-cli getblockcount"
 sudo ${varDynamicBinaries}dynamic-cli getblockcount
 echo "
@@ -1296,4 +1274,5 @@ echo "* note: hash rate may be 0 if the blockchain has not fully synced yet.
 
 Version: $varVersion
 end of startup script
+Donations are appreciated!  DYN: D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR  BTC: 1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
 "
