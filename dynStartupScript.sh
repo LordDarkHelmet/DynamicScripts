@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.0.0"
-varVersionDate="December 19, 2017"
+varVersionNumber="2.0.2"
+varVersionDate="December 23, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -52,8 +52,8 @@ echo "==========================================================================
 varDynode=0
 # This will set the external IP to your IP address (Linux only), or you can put your IP address in here
 varDynodeExternalIP=$(hostname -I | cut -d' ' -f1)
-# This is your Dynode private key. To get it run dynamic-cli Dynode genkey
-varDynodePrivateKey=ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey
+# This is your Dynode private key. To get it run dynamic-cli dynode genkey, 
+varDynodePrivateKey=""
 # This is the label you want to give your Dynode
 varDynodeLabel=""
 
@@ -173,9 +173,6 @@ do
         d) 
             varDynodePrivateKey=${OPTARG}
             varDynode=1
-			if [ "$( echo "$varDynodePrivateKey" | tr '[A-Z]' '[a-z]' )" = "unknown" ]; then
-			    varDynodePrivateKey=""
-			fi
             echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a Dynode)"
             ;;
 		y) 
@@ -274,7 +271,6 @@ do
 			echo "This script, $0 , can use the following attributes:"
             echo " -s Scrape address requires an attribute Ex.  -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
             echo " -d Dynode Private key. if you populate this it will setup a Dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
-			echo "    You can also pre-enable a dynode by using the following: -d unknown"
 			echo " -y Dynode Label, a human readable label for your Dynode. Useful with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
             echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
@@ -394,6 +390,7 @@ mkdir -pv $varDynamicBinaries
 mkdir -pv $varScriptsDirectory
 mkdir -pv $varBackupDirectory
 
+
 ## Create Scripts ##
 echo "-------------------------------------------"
 echo "Create the scripts we are going to use: "
@@ -501,7 +498,7 @@ echo " echo \"GitCheck \$(date +%F_%T) : Downloading the source code\"" >> dynAu
 echo " sudo git clone $varRemoteRepository" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 2. Compile the new code" >> dynAutoUpdater.sh
-echo " echo \"GitCheck \$(date +%F_%T) : Compile the souce code\"" >> dynAutoUpdater.sh
+echo " echo \"GitCheck \$(date +%F_%T) : Compile the source code\"" >> dynAutoUpdater.sh
 echo " cd $varGITDynamicPath" >> dynAutoUpdater.sh
 echo " echo \"Check if we can optimize mining using the avx2 instruction set\"" >> dynAutoUpdater.sh
 echo " ConfigParameters=\" --without-gui \"" >> dynAutoUpdater.sh
@@ -614,6 +611,12 @@ else
 		echo "Third attempt to get the SUBID"
 		eval $myCommand
 	fi
+	
+	## if a dynode label has not been set, set it here
+    if [ "$varDynodeLabel" = "" ]; then
+       varDynodeLabel="$mySUBID"
+    fi
+
 		
 	echo "Vultr SUBID=${mySUBID}" 
     echo "mySUBIDStr=\"'SUBID=${mySUBID}'\""  >> dynWatchdog.sh
@@ -626,8 +629,8 @@ else
 	
 	
 	if [ "$varDynode" = 1 ]; then
-	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli Dynode debug)"  >> dynWatchdog.sh
-		echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | \$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | \${myMNStatus} '\""  >> dynWatchdog.sh
+	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode debug)"  >> dynWatchdog.sh
+		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | DYNODE ${varDynodeLabel}=\${myMNStatus} '\""  >> dynWatchdog.sh
 	else
 		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
 	fi
@@ -757,40 +760,23 @@ funcCreateDynamicConfFile ()
  echo "" >> $varDynamicConfigFile
 
  if [ "$varDynode" = 1 ]; then
-  echo "# DYNODE: " >> $varDynamicConfigFile
-  echo "# externalip is the IP address of this machine. (the remote Dynode's IP address) " >> $varDynamicConfigFile
-  echo "externalip=$varDynodeExternalIP" >> $varDynamicConfigFile
-  echo "# Dynode can be 0 or 1. 1=Dynode, 0=not a Dynode" >> $varDynamicConfigFile
-  echo "Dynode=$varDynode" >> $varDynamicConfigFile
-  echo "# Use your local or control wallet, run the command \"Dynode genkey\" to generate a unique dynodeprivkey for each remote Dynode" >> $varDynamicConfigFile
-  echo "dynodeprivkey=$varDynodePrivateKey" >> $varDynamicConfigFile
-  echo "" >> $varDynamicConfigFile
+  if [ "$varDynodePrivateKey" = "" ]; then
+    echo "This instance will be a dynode, but a dynode key has not been assigned. We will auto assign a dynode key later."
+  else
+    echo "# DYNODE: " >> $varDynamicConfigFile
+    echo "# externalip is the IP address of this machine. (the remote Dynode's IP address) " >> $varDynamicConfigFile
+    echo "externalip=$varDynodeExternalIP" >> $varDynamicConfigFile
+    echo "# Dynode can be 0 or 1. 1=Dynode, 0=not a Dynode" >> $varDynamicConfigFile
+    echo "Dynode=$varDynode" >> $varDynamicConfigFile
+    echo "# Use your local or control wallet, run the command \"Dynode genkey\" to generate a unique dynodeprivkey for each remote Dynode" >> $varDynamicConfigFile
+    echo "dynodeprivkey=$varDynodePrivateKey" >> $varDynamicConfigFile
+    echo "" >> $varDynamicConfigFile
+  fi
  fi
 
  echo "" >> $varDynamicConfigFile
  echo "# if you can't connect, you may need to add a node, check the peers list on an explorer and add some nodes here" >> $varDynamicConfigFile
  echo "# addnode=<IP Address>:<PORT>" >> $varDynamicConfigFile
- echo "addnode=212.24.107.161:33300" >> $varDynamicConfigFile
- echo "addnode=207.246.114.52:33300" >> $varDynamicConfigFile
- echo "addnode=198.98.111.252:33300" >> $varDynamicConfigFile
- echo "addnode=195.181.244.12:33300" >> $varDynamicConfigFile
- echo "addnode=195.181.245.16:33300" >> $varDynamicConfigFile
- echo "addnode=194.135.94.82:33300" >> $varDynamicConfigFile
- echo "addnode=194.135.84.17:33300" >> $varDynamicConfigFile
- echo "addnode=188.166.173.136:33300" >> $varDynamicConfigFile
- echo "addnode=173.208.236.78:33300" >> $varDynamicConfigFile
- echo "addnode=159.203.218.28:33300" >> $varDynamicConfigFile
- echo "addnode=108.61.216.214:33300" >> $varDynamicConfigFile
- echo "addnode=94.176.233.45:33300" >> $varDynamicConfigFile
- echo "addnode=80.209.238.100:33300" >> $varDynamicConfigFile
- echo "addnode=80.209.238.99:33300" >> $varDynamicConfigFile
- echo "addnode=80.209.238.98:33300" >> $varDynamicConfigFile
- echo "addnode=62.151.181.228:33300" >> $varDynamicConfigFile
- echo "addnode=46.5.187.36:33300" >> $varDynamicConfigFile
- echo "addnode=45.63.41.217:33300" >> $varDynamicConfigFile
- echo "addnode=45.77.69.239:33300" >> $varDynamicConfigFile
- echo "addnode=45.76.239.38 :33300" >> $varDynamicConfigFile
- echo "addnode=45.32.95.204:33300" >> $varDynamicConfigFile
  echo "" >> $varDynamicConfigFile
  echo "# End of generated file" >> $varDynamicConfigFile
  echo "- Finished creating dynamic.conf"
@@ -1037,6 +1023,34 @@ fi
 
 echo "The Daemon has started."
 
+#OK the daemon has started. Lets do some logistical items
+
+echo "Sleeping for 30 seconds then we are going to add some nodes"
+sleep 30
+
+sudo ${varDynamicBinaries}dynamic-cli addnode "212.24.107.161:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.114.52:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "198.98.111.252:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.244.12:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.245.16:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.94.82:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.84.17:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "188.166.173.136:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "173.208.236.78:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "159.203.218.28:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "108.61.216.214:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "94.176.233.45:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.100:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.99:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.98:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "62.151.181.228:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "46.5.187.36:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.41.217:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.69.239:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.76.239.38:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.95.204:33300" "onetry"
+
+
 if [ $varQuickBlockchainDownload = true ] ; then
 	# Downloading the blockchain is significantly faster. you will most likely be mining within 5 min. 
     echo "We have downloaded the blockchain and the binaries, let's give some time for the blockchain to load"
@@ -1062,6 +1076,57 @@ sudo ${varDynamicBinaries}dynamic-cli getblockcount
 echo "A full sync can take many hours. Mining will automatically start once synced."
 sleep 1
 
+
+if [ "$varDynode" = 1 ]; then
+  if [ "$varDynodePrivateKey" = "" ]; then
+     
+	 echo "This was assigned as a Dynode, but a private key was not assigned. We are going to assign a key now, then we are going to restart."
+	 varDynodePrivateKey=$(sudo ${varDynamicBinaries}dynamic-cli dynode genkey)
+	 echo "The assigned Dynode Private key is $varDynodePrivateKey "
+	 sudo ${dynStop}
+	 echo "sleep for 30 seconds"
+	 sleep 30
+	 echo "Creating new config file"
+	 funcCreateDynamicConfFile
+	 echo "File created."
+	 sleep 5
+	 echo "Starting Dynamic"
+	 sudo ${varDynamicBinaries}dynamicd --daemon
+	 echo "sleep for 30 seconds"
+	 sleep 30
+	 
+	 if [ "" = "$varVultrAPIKey" ]; then
+	   echo "No Vultr API key, future placeholder for communicating the dynode key"
+	 else
+	   myCommand="myTagResult=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/tag_set --data 'SUBID=${mySUBID}' --data 'tag=${varDynodePrivateKey}' )"
+       echo $myCommand
+	   eval $myCommand
+	   
+	   if [ "$myTagResult" != "" ]; then
+	 	  #if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
+	 	  sleep $(shuf -i 1-60 -n 1)
+	 	  echo "Second attempt to get the tag with the dynode key"
+	 	  eval $myCommand
+	   fi
+	   if [ "$myTagResult" != "" ]; then
+	 	  #if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
+	 	  sleep $(shuf -i 1-60 -n 1)
+	 	  echo "Third attempt to get the tag with the dynode key"
+	 	  eval $myCommand
+	   fi
+	   if [ "$myTagResult" != "" ]; then
+	 	  #if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
+	 	  sleep $(shuf -i 1-60 -n 1)
+	 	  echo "Fourth attempt to get the tag with the dynode key"
+	 	  eval $myCommand
+	   fi
+	   
+	   
+	 fi
+  fi
+fi
+  
+  
 echo ""
 echo "In case Compiling later on fails, we want to put all of our cron jobs in"
 echo ""
