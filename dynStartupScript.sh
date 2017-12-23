@@ -173,6 +173,9 @@ do
         d) 
             varDynodePrivateKey=${OPTARG}
             varDynode=1
+			if [ "$( echo "$varDynodePrivateKey" | tr '[A-Z]' '[a-z]' )" = "unknown" ]; then
+			    varDynodePrivateKey=""
+			fi
             echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a Dynode)"
             ;;
 		y) 
@@ -271,6 +274,7 @@ do
 			echo "This script, $0 , can use the following attributes:"
             echo " -s Scrape address requires an attribute Ex.  -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
             echo " -d Dynode Private key. if you populate this it will setup a Dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+			echo "    You can also pre-enable a dynode by using the following: -d unknown"
 			echo " -y Dynode Label, a human readable label for your Dynode. Useful with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
             echo " -r Auto Repair. Turn auto repair on (default) or off, ex -r true"
