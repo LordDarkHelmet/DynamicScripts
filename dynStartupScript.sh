@@ -20,7 +20,7 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.0.4"
+varVersionNumber="2.0.5"
 varVersionDate="December 26, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -586,9 +586,9 @@ echo "        echo \"\$(date +%F_%T) Error the file ${varDynamicBinaries}dynamic
 echo "        myVultrStatusInfo=\"Error: dynamic-cli does not exist!\""  >> dynWatchdog.sh
 echo "    fi"  >> dynWatchdog.sh
 echo "else"  >> dynWatchdog.sh
-echo "    myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
+echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
 echo "    if [ \"\$?\" = \"0\" ]; then" >> dynWatchdog.sh
-echo "        myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
+echo "        myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
 echo "        myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
 #echo "        myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
 echo "        myNetworkHPS=\$(sudo ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
