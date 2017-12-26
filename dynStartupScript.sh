@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.0.3"
-varVersionDate="December 23, 2017"
+varVersionNumber="2.0.4"
+varVersionDate="December 26, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -586,12 +586,24 @@ echo "        echo \"\$(date +%F_%T) Error the file ${varDynamicBinaries}dynamic
 echo "        myVultrStatusInfo=\"Error: dynamic-cli does not exist!\""  >> dynWatchdog.sh
 echo "    fi"  >> dynWatchdog.sh
 echo "else"  >> dynWatchdog.sh
-echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
-echo "    myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
-#echo "    myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
-echo "    myNetworkHPS=\$(sudo ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
-echo "    myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
-echo "    echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS \""  >> dynWatchdog.sh
+echo "    myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
+echo "    if [ \"\$?\" = \"0\" ]; then" >> dynWatchdog.sh
+echo "        myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
+echo "        myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
+#echo "        myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
+echo "        myNetworkHPS=\$(sudo ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
+echo "        myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
+if [ "$varDynode" = 1 ]; then
+echo "        myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode status | jq -r '.status')"  >> dynWatchdog.sh
+echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS  Dynode: \$myMNStatus \""  >> dynWatchdog.sh
+else
+echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS \""  >> dynWatchdog.sh
+fi
+echo "    else" >> dynWatchdog.sh
+echo "        echo \"\$(date +%F_%T) Unresponsive: Stop the daemon, it will restart next time\"" >> dynWatchdog.sh
+echo "        myVultrStatusInfo=\"Unresponsive Stopping ...\"" >> dynWatchdog.sh
+echo "        sudo ${dynStop}" >> dynWatchdog.sh
+echo "    fi" >> dynWatchdog.sh
 echo "fi" >> dynWatchdog.sh
 
 if [ "" = "$varVultrAPIKey" ]; then
@@ -621,26 +633,21 @@ else
        varDynodeLabel="$mySUBID"
     fi
 
-		
 	echo "Vultr SUBID=${mySUBID}" 
     echo "mySUBIDStr=\"'SUBID=${mySUBID}'\""  >> dynWatchdog.sh
 
 	if [ "$varVultrLabelmHz" = true ]; then
 		echo "myMHz=\"| \$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-) MHz \""  >> dynWatchdog.sh
     fi
-	
-	echo "myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
-	
-	
+
 	if [ "$varDynode" = 1 ]; then
-	    echo "myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode debug)"  >> dynWatchdog.sh
 		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | DYNODE ${varDynodeLabel}=\${myMNStatus} '\""  >> dynWatchdog.sh
 	else
 		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
 	fi
 	
-    echo "#due to API rate limiting lets go at a random time in the next 3 min."  >> dynWatchdog.sh
-    echo "sleep \$(shuf -i 1-180 -n 1)"  >> dynWatchdog.sh
+    echo "#due to API rate limiting lets go at a random time in the next 4.5 min."  >> dynWatchdog.sh
+    echo "sleep \$(shuf -i 1-270 -n 1)"  >> dynWatchdog.sh
     echo "myCommand=\"curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\""  >> dynWatchdog.sh
 	
 	if [ "$mySUBID" = "" ]; then
@@ -652,7 +659,6 @@ else
 	fi
 	
 fi
-
 
 
 
@@ -770,8 +776,8 @@ funcCreateDynamicConfFile ()
     echo "# DYNODE: " >> $varDynamicConfigFile
     echo "# externalip is the IP address of this machine. (the remote Dynode's IP address) " >> $varDynamicConfigFile
     echo "externalip=$varDynodeExternalIP" >> $varDynamicConfigFile
-    echo "# Dynode can be 0 or 1. 1=Dynode, 0=not a Dynode" >> $varDynamicConfigFile
-    echo "Dynode=$varDynode" >> $varDynamicConfigFile
+    echo "# dynode can be 0 or 1. 1=dynode, 0=not a dynode" >> $varDynamicConfigFile
+    echo "dynode=$varDynode" >> $varDynamicConfigFile
     echo "# Use your local or control wallet, run the command \"Dynode genkey\" to generate a unique dynodeprivkey for each remote Dynode" >> $varDynamicConfigFile
     echo "dynodeprivkey=$varDynodePrivateKey" >> $varDynamicConfigFile
     echo "" >> $varDynamicConfigFile
@@ -1032,6 +1038,7 @@ echo "The Daemon has started."
 echo "Sleeping for 30 seconds then we are going to add some nodes"
 sleep 30
 
+sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.125.100:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "212.24.107.161:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.114.52:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "198.98.111.252:33300" "onetry"
