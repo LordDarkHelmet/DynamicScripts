@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.0.5"
-varVersionDate="December 26, 2017"
+varVersionNumber="2.0.6"
+varVersionDate="December 29, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -593,6 +593,12 @@ echo "        myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashesp
 #echo "        myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
 echo "        myNetworkHPS=\$(sudo ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
 echo "        myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
+echo "        if [ \"0 hps\" = \"\${myVultrStatusInfo}\"; ] then"  >> dynWatchdog.sh
+echo "             myGenerate=$(cat ${varDynamicConfigFile} | grep gen=1 )"  >> dynWatchdog.sh
+echo "             if [ \"gen=1\" = \"\${myGenerate}\"; ] then"  >> dynWatchdog.sh
+echo "                  sudo ${varDynamicBinaries}dynamic-cli setgenerate true"  >> dynWatchdog.sh
+echo "             fi "  >> dynWatchdog.sh  
+echo "        fi "  >> dynWatchdog.sh  
 if [ "$varDynode" = 1 ]; then
 echo "        myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode status | jq -r '.status')"  >> dynWatchdog.sh
 echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS  Dynode: \$myMNStatus \""  >> dynWatchdog.sh
