@@ -20,7 +20,7 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.0.7"
+varVersionNumber="2.0.8"
 varVersionDate="December 29, 2017"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -596,6 +596,7 @@ echo "        myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
 echo "        if [ \"0 hps\" = \"\${myVultrStatusInfo}\" ]; then"  >> dynWatchdog.sh
 echo "             myGenerate=\$(cat ${varDynamicConfigFile} | grep gen=1 )"  >> dynWatchdog.sh
 echo "             if [ \"gen=1\" = \"\${myGenerate}\" ]; then"  >> dynWatchdog.sh
+echo "                  echo \"We should be mining, but we have 0 hps, try setgenerate true\""  >> dynWatchdog.sh
 echo "                  sudo ${varDynamicBinaries}dynamic-cli setgenerate true"  >> dynWatchdog.sh
 echo "             fi"  >> dynWatchdog.sh  
 echo "        fi"  >> dynWatchdog.sh  
