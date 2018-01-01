@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.0.8"
-varVersionDate="December 29, 2017"
+varVersionNumber="2.1.0"
+varVersionDate="January 1, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -52,8 +52,8 @@ echo "==========================================================================
 varDynode=0
 # This will set the external IP to your IP address (Linux only), or you can put your IP address in here
 varDynodeExternalIP=$(hostname -I | cut -d' ' -f1)
-# This is your Dynode private key. To get it run dynamic-cli dynode genkey, 
-varDynodePrivateKey=""
+# This is your Dynode pairing key. To get it run dynamic-cli dynode genkey, 
+varDynodePairingKey=""
 # This is the label you want to give your Dynode
 varDynodeLabel=""
 
@@ -80,13 +80,13 @@ varQuickStartCompressedFilePathForCLI=dynamic-2.0.0/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=false
-varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapLocation=_INVALID_http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
 # Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
 varQuickBlockchainDownload=false
-varQuickStartCompressedBlockChainLocation=http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
+varQuickStartCompressedBlockChainLocation=_INVALID_http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileName=Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileIsZip=true
 
@@ -171,12 +171,12 @@ do
             echo "-s has set myScrapeAddress=${myScrapeAddress}"
             ;;
         d) 
-            varDynodePrivateKey=${OPTARG}
+            varDynodePairingKey=${OPTARG}
             varDynode=1
-			if [ "$( echo "$varDynodePrivateKey" | tr '[A-Z]' '[a-z]' )" = "unknown" ]; then
-			    varDynodePrivateKey=""
+			if [ "$( echo "$varDynodePairingKey" | tr '[A-Z]' '[a-z]' )" = "unknown" ]; then
+			    varDynodePairingKey=""
 			fi
-            echo "-d has set varDynode=1, and has set varDynodePrivateKey=${varDynodePrivateKey} (the script will set up a Dynode)"
+            echo "-d has set varDynode=1, and has set varDynodePairingKey=${varDynodePairingKey} (the script will set up a Dynode)"
             ;;
 		y) 
             varDynodeLabel=${OPTARG}
@@ -273,7 +273,7 @@ do
 			echo "Help:"
 			echo "This script, $0 , can use the following attributes:"
             echo " -s Scrape address requires an attribute Ex.  -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
-            echo " -d Dynode Private key. if you populate this it will setup a Dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+            echo " -d Dynode Pairing key. if you populate this it will setup a Dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
 			echo "    You can also pre-enable a dynode by using the following: -d unknown"
 			echo " -y Dynode Label, a human readable label for your Dynode. Useful with the -v option."
             echo " -a Auto Updates. Turns auto updates (on by default) on or off, ex -a true"
@@ -777,7 +777,7 @@ funcCreateDynamicConfFile ()
  echo "" >> $varDynamicConfigFile
 
  if [ "$varDynode" = 1 ]; then
-  if [ "$varDynodePrivateKey" = "" ]; then
+  if [ "$varDynodePairingKey" = "" ]; then
     echo "This instance will be a dynode, but a dynode key has not been assigned. We will auto assign a dynode key later."
   else
     echo "# DYNODE: " >> $varDynamicConfigFile
@@ -785,8 +785,8 @@ funcCreateDynamicConfFile ()
     echo "externalip=$varDynodeExternalIP" >> $varDynamicConfigFile
     echo "# dynode can be 0 or 1. 1=dynode, 0=not a dynode" >> $varDynamicConfigFile
     echo "dynode=$varDynode" >> $varDynamicConfigFile
-    echo "# Use your local or control wallet, run the command \"Dynode genkey\" to generate a unique dynodeprivkey for each remote Dynode" >> $varDynamicConfigFile
-    echo "dynodeprivkey=$varDynodePrivateKey" >> $varDynamicConfigFile
+    echo "# Use your local or control wallet, run the command \"Dynode genkey\" to generate a unique dynodepairingkey for each remote Dynode" >> $varDynamicConfigFile
+    echo "dynodepairingkey=$varDynodePairingKey" >> $varDynamicConfigFile
     echo "" >> $varDynamicConfigFile
   fi
  fi
@@ -1096,11 +1096,11 @@ sleep 1
 
 
 if [ "$varDynode" = 1 ]; then
-  if [ "$varDynodePrivateKey" = "" ]; then
+  if [ "$varDynodePairingKey" = "" ]; then
      
-	 echo "This was assigned as a Dynode, but a private key was not assigned. We are going to assign a key now, then we are going to restart."
-	 varDynodePrivateKey=$(sudo ${varDynamicBinaries}dynamic-cli dynode genkey)
-	 echo "The assigned Dynode Private key is $varDynodePrivateKey "
+	 echo "This was assigned as a Dynode, but a pairing key was not assigned. We are going to assign a key now, then we are going to restart."
+	 varDynodePairingKey=$(sudo ${varDynamicBinaries}dynamic-cli dynode genkey)
+	 echo "The assigned Dynode Pairing key is $varDynodePairingKey "
 	 sudo ${dynStop}
 	 echo "sleep for 30 seconds"
 	 sleep 30
@@ -1116,7 +1116,7 @@ if [ "$varDynode" = 1 ]; then
 	 if [ "" = "$varVultrAPIKey" ]; then
 	   echo "No Vultr API key, future placeholder for communicating the dynode key"
 	 else
-	   myCommand="myTagResult=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/tag_set --data 'SUBID=${mySUBID}' --data 'tag=${varDynodePrivateKey}' )"
+	   myCommand="myTagResult=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/tag_set --data 'SUBID=${mySUBID}' --data 'tag=${varDynodePairingKey}' )"
        echo $myCommand
 	   eval $myCommand
 	   
