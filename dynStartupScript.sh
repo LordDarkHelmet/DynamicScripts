@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.1.0"
-varVersionDate="January 1, 2018"
+varVersionNumber="2.2.0"
+varVersionDate="January 5, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -73,14 +73,14 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.0.0.0/Dynamic-2.0.0.0-Linux64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.0.0.0-Linux64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.0.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.0.0/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.2.0.0/Dynamic-2.2.0.0-Linux64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.2.0.0-Linux64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.2.0/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.2.0/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
-varQuickBootstrap=false
-varQuickStartCompressedBootstrapLocation=_INVALID_http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
+varQuickBootstrap=true
+varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
@@ -504,9 +504,15 @@ echo "" >> dynAutoUpdater.sh
 echo " # 2. Compile the new code" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile the source code\"" >> dynAutoUpdater.sh
 echo " cd $varGITDynamicPath" >> dynAutoUpdater.sh
-echo " echo \"Check if we can optimize mining using the avx2 instruction set\"" >> dynAutoUpdater.sh
+echo " echo \"Check if we can optimize mining using the ssse3, avx2, and avx512f instruction sets\"" >> dynAutoUpdater.sh
 echo " ConfigParameters=\" --without-gui \"" >> dynAutoUpdater.sh
 echo " CPPFLAGS=-march=native" >> dynAutoUpdater.sh
+echo " varssse3=\$(grep ssse3 /proc/cpuinfo)" >> dynAutoUpdater.sh
+echo " if [  \"\$varssse3\" = \"\" ]; then" >> dynAutoUpdater.sh
+echo "   echo \"ssse3 not found, normal compile, no ssse3 optimizations\"" >> dynAutoUpdater.sh
+echo " else" >> dynAutoUpdater.sh
+echo "   ConfigParameters=\"\${ConfigParameters} --enable-ssse3 \"" >> dynAutoUpdater.sh
+echo " fi" >> dynAutoUpdater.sh
 echo " varavx2=\$(grep avx2 /proc/cpuinfo)" >> dynAutoUpdater.sh
 echo " if [  \"\$varavx2\" = \"\" ]; then" >> dynAutoUpdater.sh
 echo "   echo \"avx2 not found, normal compile, no avx2 optimizations\"" >> dynAutoUpdater.sh
@@ -1045,8 +1051,17 @@ echo "The Daemon has started."
 echo "Sleeping for 30 seconds then we are going to add some nodes"
 sleep 30
 
-sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.125.100:33300" "onetry"
+#dynodes collected Jan 1 2018
+sudo ${varDynamicBinaries}dynamic-cli addnode "54.37.76.229:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "149.202.62.75:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "217.182.77.214:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "91.134.133.208:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "104.238.182.96:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.93.232:33300" "onetry"
+
+#earlier list
 sudo ${varDynamicBinaries}dynamic-cli addnode "212.24.107.161:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.125.100:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.114.52:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "198.98.111.252:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.244.12:33300" "onetry"
@@ -1219,7 +1234,15 @@ if [ "$varCompile" = true ]; then
 	
 	echo "Just creating the CLI and Deamon Only"
 	ConfigParameters=" --without-gui "
-	
+
+	echo "Check if we can optimize mining using the ssse3 instruction set"
+	varssse3=$(grep ssse3 /proc/cpuinfo)
+	if [  "$varssse3" = "" ]; then
+	  echo "ssse3 not found, normal compile, no ssse3 optimizations"
+	else
+	  echo "ssse3 found, ssse3 optimizations enabled"
+	  ConfigParameters="${ConfigParameters} --enable-ssse3 "
+	fi	
 	echo "Check if we can optimize mining using the avx2 instruction set"
 	varavx2=$(grep avx2 /proc/cpuinfo)
 	if [  "$varavx2" = "" ]; then
