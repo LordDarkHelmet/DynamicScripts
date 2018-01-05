@@ -12,14 +12,15 @@
 #  * Startup on reboot
 #  * Can create miners
 #  * Can create remote dynodes
+#  * Auto optimizes for your CPU: SSSE3, AVX2, AVX512F, and more
 #  and more... See https://github.com/LordDarkHelmet/DynamicScripts for the latest.
 #
 # You can run this as one command on the command line
-# wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s DJnERexmBy1oURgpp2JpzVzHcE17LTFavD
+# wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #
 echo "===========================================================================" | tee -a dynSimpleSetup.log
-echo "Version 1.0.5 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
-echo " Released May 4, 2017 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
+echo "Version 2.2.0 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
+echo " Released January 4, 2018 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "Local Filename: $0" | tee -a dynSimpleSetup.log
 echo "Local Time: $(date +%F_%T)" | tee -a dynSimpleSetup.log
@@ -52,7 +53,7 @@ if [ "$varIsScrapeAddressSet" = false ]; then
 	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
 	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
 	echo "SCRAPE ADDRESS HAS NOT BEEN SET!!! You will be donating your HASH power." | tee -a dynSimpleSetup.log
-	echo "If you did not intend to do this then please use the -a attribute and set your scrape address!" | tee -a dynSimpleSetup.log
+	echo "If you did not intend to do this then please use the -s attribute and set your scrape address!" | tee -a dynSimpleSetup.log
 	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
 	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
 fi
