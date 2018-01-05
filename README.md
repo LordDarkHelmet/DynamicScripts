@@ -3,7 +3,7 @@
 
 You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
 
-<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s DPkq3HeNYgHkwDMwfHxeTKu25VL4tK323z</code>
+<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR</code>
 
 The above line will download the latest startup script which can: 
  * Create miners
@@ -15,7 +15,7 @@ The above line will download the latest startup script which can:
  * Download and run the executables
  * Download the Bootstrap
  * Download the Blockchain
- * Auto optimizes for your CPU: AVX2, AVX512F, and more
+ * Auto optimizes for your CPU: SSSE3, AVX2, AVX512F, and more
  * and more...
  
  You can also setup Dynodes with one line. Use the -h command to see the full list of capabilietes and options, Examples are provided.  
