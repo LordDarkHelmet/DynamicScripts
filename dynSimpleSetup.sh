@@ -13,7 +13,7 @@
 #  * Can create miners
 #  * Can create remote dynodes
 #  * Auto optimizes for your CPU: SSSE3, AVX2, AVX512F, and more
-#  and more... See https://github.com/LordDarkHelmet/DynamicScripts for the latest.
+#  and more... See https://github.com/LordDarkHelmet/DynamicScripts for the latest
 #
 # You can run this as one command on the command line
 # wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
