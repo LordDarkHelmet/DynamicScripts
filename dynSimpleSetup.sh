@@ -19,8 +19,8 @@
 # wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #
 echo "===========================================================================" | tee -a dynSimpleSetup.log
-echo "Version 2.2.0 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
-echo " Released January 4, 2018 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
+echo "Version 2.2.1 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
+echo " Released January 8, 2018 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "Local Filename: $0" | tee -a dynSimpleSetup.log
 echo "Local Time: $(date +%F_%T)" | tee -a dynSimpleSetup.log
@@ -70,6 +70,8 @@ sudo git clone https://github.com/LordDarkHelmet/DynamicScripts | tee -a dynSimp
 echo "- Navigate to the script" | tee -a dynSimpleSetup.log
 cd DynamicScripts
 echo "- Just in case we previously ran this script, pull the latest from GitHub" | tee -a ../dynSimpleSetup.log
+sudo git fetch --all
+sudo git reset --hard origin/master
 sudo git pull https://github.com/LordDarkHelmet/DynamicScripts | tee -a ../dynSimpleSetup.log
 echo "" | tee -a dynSimpleSetup.log
 echo "Step 2: Set permissions so that dynStartupScript.sh can run" | tee -a ../dynSimpleSetup.log
