@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.0"
-varVersionDate="January 5, 2018"
+varVersionNumber="2.2.1"
+varVersionDate="January 8, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -108,8 +108,10 @@ varExpandSwapFile=true
 #Mining Variables
 #varMining0ForNo1ForYes controls if we mine or not. set it to 0 if you don't want to mine, set to 1 if you want to mine
 varMining0ForNo1ForYes=1
-#varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them)
+#varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them). 
 varMiningProcessorLimit=-1
+#varMiningProcessorAutoDetect if true, the script will automatically detect and explicitly add the number of CPUs (sockets * cores * threads per core)
+ varMiningProcessorAutoDetect=true
 #varMiningScrapeTime is the amount of time in minutes between scrapes use 5 recommended
 varMiningScrapeTime=5
 
@@ -320,6 +322,12 @@ cat /etc/*release | grep -v URL
 echo "If you found this script useful please contribute. Feedback is appreciated"
 echo "==============================================================="
 
+# Detect the number of CPU Threads that this machine has
+if [ "$varMiningProcessorAutoDetect" = true ]; then
+	echo "Explicitly using the number of CPUs in the system rather than relying on -1"
+	varMiningProcessorLimit=$(lscpu --json | jq -r '.lscpu[] | select(.field == "CPU(s):") | .data')
+	echo "We will use $varMiningProcessorLimit processors"
+fi
 
 ### Prep your VPS (Increase Swap Space and update) ###
 
@@ -442,12 +450,20 @@ echo "Creating Mining Start script: dynMineStart.sh"
 echo '#!/bin/sh' > dynMineStart.sh
 echo "" >> dynMineStart.sh
 echo "# This file, dynMineStart.sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynMineStart.sh
+echo "" >> dynMineStart.sh
+
+if [ "$varMiningProcessorAutoDetect" = true ]; then
+  echo "echo \"\$(date +%F_%T) We are set to auto detect the CPU count, so we will detect the number of CPU Threads that this machine has and modify the config file\"" >> dynMineStart.sh
+  echo "echo \"   CPUs detected: \$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')\"" >> dynMineStart.sh
+  echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
+  echo "" >> dynMineStart.sh
+fi
+
 echo "echo \"\$(date +%F_%T) Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
 echo "sudo ${varDynamicBinaries}dynamicd --daemon" >> dynMineStart.sh
 echo "echo \"\$(date +%F_%T) Waiting 15 seconds \"" >> dynMineStart.sh
 echo "sleep 15" >> dynMineStart.sh
 echo "# End of generated Script" >> dynMineStart.sh
-#./dynamic-cli settxfee 0.0
 
 echo "Changing the file attributes so we can run the script"
 chmod +x dynMineStart.sh
