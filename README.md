@@ -1,13 +1,17 @@
 # DynamicScripts
 <b>Scripts for the Dynamic (DYN) Cryptocurrency</b>
 
-You can now setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
+Setup a Dynode with one line! You can generate a pairing key from any wallet using the <code>dynode genkey</code> command. We recomend Ubuntu 16.04 as the OS, but any version is compatible. 
+
+<code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -d ReplaceMeWithOutputFrom_dynode_genkey</code>
+
+You can also setup a dynamic miner with one line! Example: (<i>be sure to replace the address with your scrape address</i>)
 
 <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR</code>
 
-The above line will download the latest startup script which can: 
- * Create miners
+The scipt can: 
  * Create remote dynodes
+ * Create miners
  * Auto Scrapes
  * Auto Updates
  * Watchdog to keep the mining going just in case of a crash
@@ -16,9 +20,10 @@ The above line will download the latest startup script which can:
  * Download the Bootstrap
  * Download the Blockchain
  * Auto optimizes for your CPU: SSSE3, AVX2, AVX512F, and more
+ * If you are using [Vultr](http://www.vultr.com/?ref=6923885) as your VPS provider, the script can update the server name to give you up to date status info
  * and more...
  
- You can also setup Dynodes with one line. Use the -h command to see the full list of capabilietes and options, Examples are provided.  
+ Use the -h command to see the full list of capabilietes and options, Examples are provided.    
  
  <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -h</code>
  
