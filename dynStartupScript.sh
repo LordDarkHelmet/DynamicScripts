@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.1"
-varVersionDate="January 8, 2018"
+varVersionNumber="2.2.2"
+varVersionDate="January 9, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -111,7 +111,7 @@ varMining0ForNo1ForYes=1
 #varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them). 
 varMiningProcessorLimit=-1
 #varMiningProcessorAutoDetect if true, the script will automatically detect and explicitly add the number of CPUs (sockets * cores * threads per core)
- varMiningProcessorAutoDetect=true
+varMiningProcessorAutoDetect=true
 #varMiningScrapeTime is the amount of time in minutes between scrapes use 5 recommended
 varMiningScrapeTime=5
 
@@ -326,7 +326,16 @@ echo "==============================================================="
 if [ "$varMiningProcessorAutoDetect" = true ]; then
 	echo "Explicitly using the number of CPUs in the system rather than relying on -1"
 	varMiningProcessorLimit=$(lscpu --json | jq -r '.lscpu[] | select(.field == "CPU(s):") | .data')
-	echo "We will use $varMiningProcessorLimit processors"
+	
+	if [ "$varMiningProcessorLimit" = "" ]; then
+		echo "no auto CPU detection, using -1"
+		varMiningProcessorLimit=-1
+		varMiningProcessorAutoDetect=false
+		echo "We will use $varMiningProcessorLimit processors, -1 = wallet will maximize"
+	else
+		echo "We will use $varMiningProcessorLimit processors"
+	fi
+
 fi
 
 ### Prep your VPS (Increase Swap Space and update) ###
@@ -458,6 +467,7 @@ if [ "$varMiningProcessorAutoDetect" = true ]; then
   echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
   echo "" >> dynMineStart.sh
 fi
+
 
 echo "echo \"\$(date +%F_%T) Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
 echo "sudo ${varDynamicBinaries}dynamicd --daemon" >> dynMineStart.sh
