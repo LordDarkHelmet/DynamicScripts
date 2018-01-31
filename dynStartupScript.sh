@@ -20,7 +20,7 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.4"
+varVersionNumber="2.2.5"
 varVersionDate="January 30, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -336,7 +336,7 @@ echo "==============================================================="
 if [ "$varMiningProcessorAutoDetect" = true ]; then
 	echo "Explicitly using the number of CPUs in the system rather than relying on -1"
 	#varMiningProcessorLimit=$(lscpu --json | jq -r '.lscpu[] | select(.field == "CPU(s):") | .data') # Linux 17.10 and above only. No json in 16.04
-	varMiningProcessorLimit=$(lscpu | grep -m 1 "CPU(s):" | cut -d' ' -f 17-)
+	varMiningProcessorLimit=$(echo $(lscpu | grep -m 1 "CPU(s):" | cut -d' ' -f 8-))
 	
 	if [ "$varMiningProcessorLimit" = "" ]; then
 		echo "no auto CPU detection, using -1"
@@ -476,7 +476,7 @@ if [ "$varMiningProcessorAutoDetect" = true ]; then
   echo "echo \"\$(date +%F_%T) We are set to auto detect the CPU count, so we will detect the number of CPU Threads that this machine has and modify the config file\"" >> dynMineStart.sh
   #Linux 17.10 or above only #echo "echo \"   CPUs detected: \$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')\"" >> dynMineStart.sh
   #Linux 17.10 or above only #echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
-  echo "echo \"   CPUs detected: \$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 17-)\"" >> dynMineStart.sh
+  echo "echo \"   CPUs detected: \$(echo \$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8-))\"" >> dynMineStart.sh
   echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 17-)/ $varDynamicConfigFile" >> dynMineStart.sh
   echo "" >> dynMineStart.sh
 fi
