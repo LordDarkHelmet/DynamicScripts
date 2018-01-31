@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.2"
-varVersionDate="January 9, 2018"
+varVersionNumber="2.2.3"
+varVersionDate="January 30, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -259,6 +259,15 @@ do
                 echo "-b ${myTemp} is not a valid option"
             fi
             ;;
+		m)
+            if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = false ]; then
+                varMining0ForNo1ForYes=0
+                echo "-m Mining has been set to false. We will disable mining."
+            else
+                varMining0ForNo1ForYes=1
+                echo "-m Mining has been set to true. We will be mining."
+            fi	
+			;;
         t)
 		    myTemp=${OPTARG}
 			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = testnet ]; then
@@ -285,6 +294,7 @@ do
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
 			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using Vultr as an API service, this will change the label to update the last watchdog status"
 			echo " -b bootstrap or blockchain. Download an external bootstrap, blockchain or none, ex\"-b bootstrap\""
+			echo " -m Mining. enables or disables mining. true for on, false for off. On by default. ex\"-m true\" to enable mining"
 			echo " -t Various test attributes (in development)"
             echo " -h Display Help then exit."
 			echo ""
@@ -325,7 +335,8 @@ echo "==============================================================="
 # Detect the number of CPU Threads that this machine has
 if [ "$varMiningProcessorAutoDetect" = true ]; then
 	echo "Explicitly using the number of CPUs in the system rather than relying on -1"
-	varMiningProcessorLimit=$(lscpu --json | jq -r '.lscpu[] | select(.field == "CPU(s):") | .data')
+	#varMiningProcessorLimit=$(lscpu --json | jq -r '.lscpu[] | select(.field == "CPU(s):") | .data') # Linux 17.10 and above only. No json in 16.04
+	varMiningProcessorLimit=$(lscpu | grep -m 1 "CPU(s):" | cut -d' ' -f 17-)
 	
 	if [ "$varMiningProcessorLimit" = "" ]; then
 		echo "no auto CPU detection, using -1"
@@ -463,8 +474,10 @@ echo "" >> dynMineStart.sh
 
 if [ "$varMiningProcessorAutoDetect" = true ]; then
   echo "echo \"\$(date +%F_%T) We are set to auto detect the CPU count, so we will detect the number of CPU Threads that this machine has and modify the config file\"" >> dynMineStart.sh
-  echo "echo \"   CPUs detected: \$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')\"" >> dynMineStart.sh
-  echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
+  #Linux 17.10 or above only #echo "echo \"   CPUs detected: \$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')\"" >> dynMineStart.sh
+  #Linux 17.10 or above only #echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
+  echo "echo \"   CPUs detected: \$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 17-)\"" >> dynMineStart.sh
+  echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 17-)/ $varDynamicConfigFile" >> dynMineStart.sh
   echo "" >> dynMineStart.sh
 fi
 
