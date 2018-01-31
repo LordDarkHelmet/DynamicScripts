@@ -20,7 +20,7 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.3"
+varVersionNumber="2.2.4"
 varVersionDate="January 30, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -164,7 +164,7 @@ echo "To see all options pass in the -h attribute"
 echo ""
 echo "Options passed in: $@"
 echo ""
-while getopts :s:d:y:a:r:l:w:c:v:b:t:h option
+while getopts :s:d:y:a:r:l:w:c:v:b:m:t:h option
 do
     case "${option}"
     in
