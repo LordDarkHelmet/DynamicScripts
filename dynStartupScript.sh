@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.5"
-varVersionDate="January 30, 2018"
+varVersionNumber="2.2.6"
+varVersionDate="January 31, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -477,7 +477,7 @@ if [ "$varMiningProcessorAutoDetect" = true ]; then
   #Linux 17.10 or above only #echo "echo \"   CPUs detected: \$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')\"" >> dynMineStart.sh
   #Linux 17.10 or above only #echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
   echo "echo \"   CPUs detected: \$(echo \$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8-))\"" >> dynMineStart.sh
-  echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 17-)/ $varDynamicConfigFile" >> dynMineStart.sh
+  echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8-)/ $varDynamicConfigFile" >> dynMineStart.sh
   echo "" >> dynMineStart.sh
 fi
 
