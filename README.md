@@ -9,7 +9,7 @@ You can also setup a dynamic miner with one line! Example: (<i>be sure to replac
 
 <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR</code>
 
-The scipt can: 
+The script can: 
  * Create remote dynodes
  * Create miners
  * Auto Scrapes
