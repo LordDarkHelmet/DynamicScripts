@@ -20,11 +20,11 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.6"
-varVersionDate="January 31, 2018"
+varVersionNumber="2.2.7"
+varVersionDate="April 18, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
-# The script was tested using on Vultr. Ubuntu 14.04, 16.04, & 17.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
+# The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
 # We recommend running Ubuntu 16.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 18.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
@@ -73,13 +73,13 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.2.0.0/Dynamic-2.2.0.0-Linux64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.2.0.0-Linux64.tar.gz
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.2.0.0-Crash-Fix/Dynamic-2.2.0.0-Crash-Fix-Linux64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.2.0.0-Crash-Fix-Linux64.tar.gz
 varQuickStartCompressedFilePathForDaemon=dynamic-2.2.0/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-2.2.0/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
-varQuickBootstrap=true
+varQuickBootstrap=false
 varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
@@ -152,6 +152,9 @@ varVultrLabelmHz=false
 
 #Other and Test
 Is_TestNet=false
+
+#Developer's donation address 
+donationAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 
 #End of Variables
 
@@ -283,7 +286,7 @@ do
             echo ""
 			echo "Help:"
 			echo "This script, $0 , can use the following attributes:"
-            echo " -s Scrape address requires an attribute Ex.  -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
+            echo " -s Scrape address requires an attribute Ex.  -s $donationAddress"
             echo " -d Dynode Pairing key. if you populate this it will setup a Dynode.  ex -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
 			echo "    You can also pre-enable a dynode by using the following: -d unknown"
 			echo " -y Dynode Label, a human readable label for your Dynode. Useful with the -v option."
@@ -299,20 +302,20 @@ do
             echo " -h Display Help then exit."
 			echo ""
 			echo "Example 1: Just set up a simple miner"
-			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
+			echo "sudo sh $0 -s $donationAddress"
 			echo ""
 			echo "Example 2: Setup a remote Dynode"
-			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
+			echo "sudo sh $0 -s $donationAddress -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey"
 			echo ""
-			echo "Example 3: Run a miner, but don't compile (auto update will be turned off by default), useful for low RAM VPS's that don't allow for SWAP files"
-			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR -c false"			
+			echo "Example 3: Setup a remote Dynode that does not mine. Great for VPS's that will ban high CPU usage"
+			echo "sudo sh $0 -s $donationAddress -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -m false"
+			echo ""		
+			echo "Example 4: Run a miner, but don't compile (auto update will be turned off by default), useful for low RAM VPS's that don't allow for SWAP files"
+			echo "sudo sh $0 -s $donationAddress -c false"			
 			echo ""
-			echo "Example 4: Turn off auto update on a Dynode, you will be required to manually update if a new version comes along"
-			echo "sudo sh $0 -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -a false"
-			echo ""			
-			echo "sudo sh Example 5: Setup a miner that donates to the author's address D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR"
-			echo "$0"
-			echo ""			
+			echo "Example 5: Turn off auto update on a Dynode, you will be required to manually update if a new version comes along"
+			echo "sudo sh $0 -s $donationAddress -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -a false"
+			echo ""				
 			echo "PLEASE REMEMBER TO USE THE \"-s\" attribute. If you don't then you will be donating and not scraping to your address."
 			echo ""
 			echo ""
@@ -480,6 +483,32 @@ if [ "$varMiningProcessorAutoDetect" = true ]; then
   echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8-)/ $varDynamicConfigFile" >> dynMineStart.sh
   echo "" >> dynMineStart.sh
 fi
+
+echo "echo \"Some VPS servers kill your swap file by removing it from fstab. Let's Check.\"" >> dynMineStart.sh
+echo "varSwapFileLine=\$(cat /etc/fstab | grep \"/swapfile \")" >> dynMineStart.sh
+echo "if [  \"\$varSwapFileLine\" = \"\" ]; then" >> dynMineStart.sh
+echo "    echo \"Somehow, the swap file was removed. Let's fix that\"" >> dynMineStart.sh
+echo "    echo \"Expanding the swap file for optimization with low RAM VPS...\"" >> dynMineStart.sh
+echo "    echo \"sudo fallocate -l 4G /swapfile\"" >> dynMineStart.sh
+echo "    sudo fallocate -l 4G /swapfile" >> dynMineStart.sh
+echo "    echo \"sudo chmod 600 /swapfile\"" >> dynMineStart.sh
+echo "    sudo chmod 600 /swapfile" >> dynMineStart.sh
+echo "    echo \"sudo mkswap /swapfile\"" >> dynMineStart.sh
+echo "    sudo mkswap /swapfile" >> dynMineStart.sh
+echo "    echo \"sudo swapon /swapfile\"" >> dynMineStart.sh
+echo "    sudo swapon /swapfile" >> dynMineStart.sh
+echo "    echo \"Adding swap file line to /etc/fstab\"" >> dynMineStart.sh
+echo "    echo \"/swapfile none swap sw 0 0\" >> /etc/fstab" >> dynMineStart.sh
+echo "else" >> dynMineStart.sh
+echo "    echo \"Looks good\"" >> dynMineStart.sh
+echo "fi" >> dynMineStart.sh
+echo "echo \"Current Swap File Status:\"" >> dynMineStart.sh
+echo "echo \"sudo swapon -s\"" >> dynMineStart.sh
+echo "sudo swapon -s" >> dynMineStart.sh
+echo "echo \"Let's check the memory\"" >> dynMineStart.sh
+echo "echo \"free -m\"" >> dynMineStart.sh
+echo "free -m" >> dynMineStart.sh
+
 
 
 echo "echo \"\$(date +%F_%T) Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
@@ -1090,37 +1119,48 @@ echo "The Daemon has started."
 echo "Sleeping for 30 seconds then we are going to add some nodes"
 sleep 30
 
-#dynodes collected Jan 1 2018
-sudo ${varDynamicBinaries}dynamic-cli addnode "54.37.76.229:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "149.202.62.75:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "217.182.77.214:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "91.134.133.208:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "104.238.182.96:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.93.232:33300" "onetry"
+#dynodes collected April 18 2018
+sudo ${varDynamicBinaries}dynamic-cli addnode "64.64.106.145:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.213.159:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "196.52.58.183:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "145.239.28.129:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "54.37.77.31:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "108.61.99.138:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "144.217.244.198:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "54.36.112.157:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "142.44.244.247:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.76.242.106:33300" "onetry"
 
-#earlier list
-sudo ${varDynamicBinaries}dynamic-cli addnode "212.24.107.161:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.125.100:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.114.52:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "198.98.111.252:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.244.12:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.245.16:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.94.82:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.84.17:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "188.166.173.136:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "173.208.236.78:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "159.203.218.28:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "108.61.216.214:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "94.176.233.45:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.100:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.99:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.98:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "62.151.181.228:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "46.5.187.36:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.41.217:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.69.239:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.76.239.38:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.95.204:33300" "onetry"
+
+sleep 10
+
+myBlockCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
+if [ "$myBlockCount" = "0" ]; then
+	#earlier list
+	sudo ${varDynamicBinaries}dynamic-cli addnode "212.24.107.161:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.114.52:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "198.98.111.252:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.244.12:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.245.16:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.94.82:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.84.17:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "188.166.173.136:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "173.208.236.78:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "159.203.218.28:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "108.61.216.214:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "94.176.233.45:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.100:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.99:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.98:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "62.151.181.228:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "46.5.187.36:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.41.217:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.69.239:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.76.239.38:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.95.204:33300" "onetry"
+fi
+
+
 
 
 if [ $varQuickBlockchainDownload = true ] ; then
@@ -1423,5 +1463,5 @@ echo "* note: hash rate may be 0 if the blockchain has not fully synced yet.
 
 Version: $varVersion
 end of startup script
-Donations are appreciated!  DYN: D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR  BTC: 1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
+Donations are appreciated!  DYN: $donationAddress  BTC: 1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
 "
