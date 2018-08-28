@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.2.7"
-varVersionDate="April 18, 2018"
+varVersionNumber="2.3.0"
+varVersionDate="August 27, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -73,14 +73,14 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.2.0.0-Crash-Fix/Dynamic-2.2.0.0-Crash-Fix-Linux64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.2.0.0-Crash-Fix-Linux64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.2.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.2.0/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.3.0.0/Dynamic-2.3.0.0-Linux-x64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.3.0.0-Linux-x64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.3.0/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.3.0/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
 varQuickBootstrap=false
-varQuickStartCompressedBootstrapLocation=http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapLocation=_INVALID_http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
@@ -400,9 +400,11 @@ echo "Updating OS and packages..."
 echo "sleeping for 60 seconds, this is because some VPS's are not fully up if you use this as a startup script"
 sleep 60
 echo "sudo apt-get -y update"
+# the -c opens up a new child shell process that will inherit DEBIAN_FRONTEND=noninteractive. 
 sudo apt-get -y update
-echo "sudo apt-get -y upgrade"
-sudo apt-get -y upgrade
+# fix for "A new version (/tmp/grub.BBz9nuWKdP) of configuration file /etc/default/grub is available, but the version installed currently has been locally modified."
+echo "DEBIAN_FRONTEND=noninteractive apt-get upgrade -q -y -u  -o Dpkg::Options::=\"--force-confdef\""
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -q -y -u  -o Dpkg::Options::="--force-confdef"
 echo "OS and packages updated."
 echo ""
 
@@ -502,15 +504,23 @@ echo "    echo \"/swapfile none swap sw 0 0\" >> /etc/fstab" >> dynMineStart.sh
 echo "else" >> dynMineStart.sh
 echo "    echo \"Looks good\"" >> dynMineStart.sh
 echo "fi" >> dynMineStart.sh
-echo "echo \"Current Swap File Status:\"" >> dynMineStart.sh
-echo "echo \"sudo swapon -s\"" >> dynMineStart.sh
-echo "sudo swapon -s" >> dynMineStart.sh
-echo "echo \"Let's check the memory\"" >> dynMineStart.sh
-echo "echo \"free -m\"" >> dynMineStart.sh
-echo "free -m" >> dynMineStart.sh
-
-
-
+echo "" >> dynMineStart.sh
+echo "mySwapSizeMB=\$(swapon -s | grep -v Size | awk '{print $3/1024}')" >> dynMineStart.sh
+echo "if [  \"\${mySwapSizeMB}\" = \"\" ]; then" >> dynMineStart.sh
+echo "    echo \"Swap File does not seem to be on\"" >> dynMineStart.sh
+echo "    echo \"Enable all swaps from /etc/fstab\"" >> dynMineStart.sh
+echo "    echo \"sudo swapon -a\"" >> dynMineStart.sh
+echo "    sudo swapon -a" >> dynMineStart.sh
+echo "    echo \"Current Swap File Status:\"" >> dynMineStart.sh
+echo "    echo \"sudo swapon -s\"" >> dynMineStart.sh
+echo "    sudo swapon -s" >> dynMineStart.sh
+echo "    echo \"Let's check the memory\"" >> dynMineStart.sh
+echo "    echo \"free -m\"" >> dynMineStart.sh
+echo "    free -m" >> dynMineStart.sh
+echo "else" >> dynMineStart.sh
+echo "    echo \"Swap file is running \${mySwapSizeMB} MB\"" >> dynMineStart.sh
+echo "fi" >> dynMineStart.sh
+echo "" >> dynMineStart.sh
 echo "echo \"\$(date +%F_%T) Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
 echo "sudo ${varDynamicBinaries}dynamicd --daemon" >> dynMineStart.sh
 echo "echo \"\$(date +%F_%T) Waiting 15 seconds \"" >> dynMineStart.sh
