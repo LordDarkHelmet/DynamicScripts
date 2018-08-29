@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.0"
-varVersionDate="August 27, 2018"
+varVersionNumber="2.3.1"
+varVersionDate="August 28, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -400,7 +400,6 @@ echo "Updating OS and packages..."
 echo "sleeping for 60 seconds, this is because some VPS's are not fully up if you use this as a startup script"
 sleep 60
 echo "sudo apt-get -y update"
-# the -c opens up a new child shell process that will inherit DEBIAN_FRONTEND=noninteractive. 
 sudo apt-get -y update
 # fix for "A new version (/tmp/grub.BBz9nuWKdP) of configuration file /etc/default/grub is available, but the version installed currently has been locally modified."
 echo "DEBIAN_FRONTEND=noninteractive apt-get upgrade -q -y -u  -o Dpkg::Options::=\"--force-confdef\""
@@ -481,8 +480,8 @@ if [ "$varMiningProcessorAutoDetect" = true ]; then
   echo "echo \"\$(date +%F_%T) We are set to auto detect the CPU count, so we will detect the number of CPU Threads that this machine has and modify the config file\"" >> dynMineStart.sh
   #Linux 17.10 or above only #echo "echo \"   CPUs detected: \$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')\"" >> dynMineStart.sh
   #Linux 17.10 or above only #echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu --json | jq -r '.lscpu[] | select(.field == \"CPU(s):\") | .data')/ $varDynamicConfigFile" >> dynMineStart.sh
-  echo "echo \"   CPUs detected: \$(echo \$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8-))\"" >> dynMineStart.sh
-  echo "sed -i s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8-)/ $varDynamicConfigFile" >> dynMineStart.sh
+  echo "echo \"   CPUs detected: \$(echo \$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8- | tr -d ' '))\"" >> dynMineStart.sh
+  echo "sed -i \"s/genproclimit=.*/genproclimit=\$(lscpu | grep -m 1 \"CPU(s):\" | cut -d' ' -f 8- | tr -d ' ')/\" $varDynamicConfigFile" >> dynMineStart.sh
   echo "" >> dynMineStart.sh
 fi
 
@@ -502,10 +501,10 @@ echo "    sudo swapon /swapfile" >> dynMineStart.sh
 echo "    echo \"Adding swap file line to /etc/fstab\"" >> dynMineStart.sh
 echo "    echo \"/swapfile none swap sw 0 0\" >> /etc/fstab" >> dynMineStart.sh
 echo "else" >> dynMineStart.sh
-echo "    echo \"Looks good\"" >> dynMineStart.sh
+echo "    echo \"The swap file is in /etc/fstab\"" >> dynMineStart.sh
 echo "fi" >> dynMineStart.sh
 echo "" >> dynMineStart.sh
-echo "mySwapSizeMB=\$(swapon -s | grep -v Size | awk '{print $3/1024}')" >> dynMineStart.sh
+echo "mySwapSizeMB=\$(swapon -s | grep -v Size | awk '{print \$3/1024}')" >> dynMineStart.sh
 echo "if [  \"\${mySwapSizeMB}\" = \"\" ]; then" >> dynMineStart.sh
 echo "    echo \"Swap File does not seem to be on\"" >> dynMineStart.sh
 echo "    echo \"Enable all swaps from /etc/fstab\"" >> dynMineStart.sh
@@ -670,8 +669,9 @@ echo "        echo \"\$(date +%F_%T) Error the file ${varDynamicBinaries}dynamic
 echo "        myVultrStatusInfo=\"Error: dynamic-cli does not exist!\""  >> dynWatchdog.sh
 echo "    fi"  >> dynWatchdog.sh
 echo "else"  >> dynWatchdog.sh
-echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount)"  >> dynWatchdog.sh
-echo "    if [ \"\$?\" = \"0\" ]; then" >> dynWatchdog.sh
+echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount 2>&1)"  >> dynWatchdog.sh
+echo "    myCLIErrorCode=\$?"  >> dynWatchdog.sh
+echo "    if [ \"\${myCLIErrorCode}\" = \"0\" ]; then" >> dynWatchdog.sh
 echo "        myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
 echo "        myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
 #echo "        myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
@@ -690,6 +690,9 @@ echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash R
 else
 echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS \""  >> dynWatchdog.sh
 fi
+echo "    elif [ \"\${myCLIErrorCode}\" = \"28\" ]; then" >> dynWatchdog.sh
+echo "        echo \"Loading block index...\"" >> dynWatchdog.sh
+echo "        myVultrStatusInfo=\"Loading block index...\"" >> dynWatchdog.sh
 echo "    else" >> dynWatchdog.sh
 echo "        echo \"\$(date +%F_%T) Unresponsive: Stop the daemon, it will restart next time\"" >> dynWatchdog.sh
 echo "        myVultrStatusInfo=\"Unresponsive Stopping ...\"" >> dynWatchdog.sh
