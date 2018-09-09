@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.1"
-varVersionDate="August 28, 2018"
+varVersionNumber="2.3.2"
+varVersionDate="September 9, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -371,7 +371,7 @@ if [ "$varExpandSwapFile" = true ]; then
 	varSwapFileLine=$(cat /etc/fstab | grep "/swapfile none swap sw 0 0")
 	if [  "varSwapFileLine" = "" ]; then
 	    echo "Adding swap file line to /etc/fstab"
-        echo "/swapfile none swap sw 0 0" >> /etc/fstab
+        sudo echo "/swapfile none swap sw 0 0" >> /etc/fstab
 	else
 	    echo "Swap file line is already in /etc/fstab"
 	fi
@@ -499,7 +499,7 @@ echo "    sudo mkswap /swapfile" >> dynMineStart.sh
 echo "    echo \"sudo swapon /swapfile\"" >> dynMineStart.sh
 echo "    sudo swapon /swapfile" >> dynMineStart.sh
 echo "    echo \"Adding swap file line to /etc/fstab\"" >> dynMineStart.sh
-echo "    echo \"/swapfile none swap sw 0 0\" >> /etc/fstab" >> dynMineStart.sh
+echo "    sudo echo \"/swapfile none swap sw 0 0\" >> /etc/fstab" >> dynMineStart.sh
 echo "else" >> dynMineStart.sh
 echo "    echo \"The swap file is in /etc/fstab\"" >> dynMineStart.sh
 echo "fi" >> dynMineStart.sh
