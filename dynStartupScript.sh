@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.2"
-varVersionDate="September 9, 2018"
+varVersionNumber="2.3.3"
+varVersionDate="September 13, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -78,10 +78,10 @@ varQuickStartCompressedFileName=Dynamic-2.3.0.0-Linux-x64.tar.gz
 varQuickStartCompressedFilePathForDaemon=dynamic-2.3.0/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-2.3.0/bin/dynamic-cli
 
-# Quick Start Bootstrap (The developer recommends that you set this to true. This will clean up the blockchain on the network.)
+# Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=false
-varQuickStartCompressedBootstrapLocation=_INVALID_http://dyn.coin-info.net/bootstrap/bootstrap-latest.tar.gz
-varQuickStartCompressedBootstrapFileName=bootstrap-latest.tar.gz
+varQuickStartCompressedBootstrapLocation=https://bootstrap.0x03.services/dynamic/DYN-bootstrap.tar.gz
+varQuickStartCompressedBootstrapFileName=DYN-bootstrap.tar.gz
 varQuickStartCompressedBootstrapFileIsZip=false
 
 # Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
