@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.3"
-varVersionDate="September 13, 2018"
+varVersionNumber="2.3.4"
+varVersionDate="September 21, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -73,10 +73,10 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.3.0.0/Dynamic-2.3.0.0-Linux-x64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.3.0.0-Linux-x64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.3.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.3.0/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.3.5.0/Dynamic-2.3.5.0-Linux-x64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.3.5.0-Linux-x64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.3.5/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.3.5/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=false
