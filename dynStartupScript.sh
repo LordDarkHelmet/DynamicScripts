@@ -20,12 +20,12 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.4"
+varVersionNumber="2.3.5"
 varVersionDate="September 21, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
-# The script was tested using on Vultr. Ubuntu 16.04, & 17.10 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
-# We recommend running Ubuntu 16.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 18.04
+# The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
+# We recommend running Ubuntu 18.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 20.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 # 
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
@@ -79,10 +79,10 @@ varQuickStartCompressedFilePathForDaemon=dynamic-2.3.5/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-2.3.5/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
-varQuickBootstrap=false
-varQuickStartCompressedBootstrapLocation=https://bootstrap.0x03.services/dynamic/DYN-bootstrap.tar.gz
-varQuickStartCompressedBootstrapFileName=DYN-bootstrap.tar.gz
-varQuickStartCompressedBootstrapFileIsZip=false
+varQuickBootstrap=true
+varQuickStartCompressedBootstrapLocation=- http://dyn.coin-info.net/bootstrap/bootstrap.zip
+varQuickStartCompressedBootstrapFileName=bootstrap.zip
+varQuickStartCompressedBootstrapFileIsZip=true
 
 # Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
 varQuickBlockchainDownload=false
@@ -1120,6 +1120,8 @@ echo "Launching daemon for the first time."
 if [ "$varQuickBootstrap" = true ]; then
   echo "sudo ${varDynamicBinaries}dynamicd --daemon --loadblock=${varDynamicConfigDirectory}bootstrap.dat"
   sudo ${varDynamicBinaries}dynamicd --daemon --loadblock=${varDynamicConfigDirectory}bootstrap.dat 
+  echo "Sleeping for 2 min to allow for sync to occur"
+  sleep 120
 else
   echo "sudo ${varDynamicBinaries}dynamicd --daemon"
   sudo ${varDynamicBinaries}dynamicd --daemon
@@ -1132,48 +1134,37 @@ echo "The Daemon has started."
 echo "Sleeping for 30 seconds then we are going to add some nodes"
 sleep 30
 
-#dynodes collected April 18 2018
-sudo ${varDynamicBinaries}dynamic-cli addnode "64.64.106.145:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.213.159:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "196.52.58.183:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "145.239.28.129:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "54.37.77.31:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "108.61.99.138:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "144.217.244.198:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "54.36.112.157:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "142.44.244.247:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.76.242.106:33300" "onetry"
+#Collected September 21 2018
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.89.45:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.128.102:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.2.148:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "91.134.133.208:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "206.189.193.181:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "167.99.145.192:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "165.227.25.11:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.51.85:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "207.148.30.183:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.160.96:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "144.202.96.59:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "79.143.180.217:33300" "onetry"
 
-
+echo "Sleeping for 10 seconds to allow for connection to occur"
 sleep 10
 
-myBlockCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
-if [ "$myBlockCount" = "0" ]; then
+myConnectionCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
+if [ "$myConnectionCount" = "0" ]; then
 	#earlier list
-	sudo ${varDynamicBinaries}dynamic-cli addnode "212.24.107.161:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.114.52:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "198.98.111.252:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.244.12:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "195.181.245.16:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.94.82:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "194.135.84.17:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "188.166.173.136:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "173.208.236.78:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "159.203.218.28:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "108.61.216.214:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "94.176.233.45:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.100:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.99:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "80.209.238.98:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "62.151.181.228:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "46.5.187.36:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.41.217:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.69.239:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.76.239.38:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.95.204:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "207.148.30.183:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.160.96:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "144.202.96.59:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "79.143.180.217:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "164.132.55.237:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.111.193:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.207.241:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "51.15.64.81:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "104.238.136.140:33300" "onetry"
+
 fi
-
-
 
 
 if [ $varQuickBlockchainDownload = true ] ; then
