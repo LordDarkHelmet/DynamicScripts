@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.5"
-varVersionDate="September 21, 2018"
+varVersionNumber="2.3.6"
+varVersionDate="November 9, 2018"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -80,8 +80,8 @@ varQuickStartCompressedFilePathForCLI=dynamic-2.3.5/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=true
-varQuickStartCompressedBootstrapLocation=- http://dyn.coin-info.net/bootstrap/bootstrap.zip
-varQuickStartCompressedBootstrapFileName=bootstrap.zip
+varQuickStartCompressedBootstrapLocation=- http://dyn.coin-info.net/bootstrap/bootstrap-latest.zip
+varQuickStartCompressedBootstrapFileName=bootstrap-latest.zip
 varQuickStartCompressedBootstrapFileIsZip=true
 
 # Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
@@ -1283,20 +1283,27 @@ if [ "$varCompile" = true ]; then
 #when we complete the build we will stop the miner, replace the binary, and continue.  
 
 # Install Dependencies and other tools
-    echo "Install Dependencies and other tools"
-    sudo apt-get -y install software-properties-common python-software-properties 
-    sudo add-apt-repository -y ppa:git-core/ppa 
-    sudo apt-get -y update 
-    sudo apt-get -y install git nano build-essential libtool autotools-dev autoconf pkg-config bsdmainutils libssl-dev libcrypto++-dev libevent-dev automake libminiupnpc-dev libgmp-dev libboost-all-dev
-    sudo add-apt-repository -y ppa:bitcoin/bitcoin
+	echo "Install Dependencies and other tools"
+	sudo apt-get -y update
+	sudo apt-get -y upgrade
+	sudo apt-get -y install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
+    sudo apt-get -y install nano libboost-all-dev							
+	sudo add-apt-repository -y ppa:bitcoin/bitcoin
     sudo apt-get -y update
-    sudo add-apt-repository -y ppa:silknetwork/silknetwork
+	sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
+	sudo apt-get -y install libminiupnpc-dev
+	sudo apt-get -y install libzmq3-dev
     sudo apt-get -y update
-    sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
-	sudo apt-get install libzmq3-dev
+	sudo apt-get -y upgrade
+	echo ""
+	echo "QT5 Dependencies"
+	#For QT5
+	sudo apt-get -y install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libcrypto++-dev
+	sudo apt-get -y install libqrencode-dev
     sudo apt-get -y update
     sudo apt-get -y upgrade
-    echo ""
+    echo "Dependencies Complete"
+	echo ""
 
 	
 # Clone the GitHub repository
