@@ -71,8 +71,6 @@ Use these attributes to customize your deployment:
  <code>-h Display Help then exit.</code>
 
 
-<b>Options:</b>
-
 <b>Examples:</b>
 
 Example 1: Just set up a simple miner (use the -m attribute to turn on mining)
