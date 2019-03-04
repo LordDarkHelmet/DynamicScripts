@@ -20,8 +20,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.6"
-varVersionDate="November 9, 2018"
+varVersionNumber="2.3.7"
+varVersionDate="March 3, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -97,6 +97,7 @@ varCompile=true
 #Default Dynode Ports
 DefaultDynode_rpcport=33350
 DefaultDynode_port=33300
+DefaultDynode_DHT_uTP=33311
 
 # P2P
 DefaultP2P_Port=33300
@@ -107,7 +108,7 @@ varExpandSwapFile=true
 
 #Mining Variables
 #varMining0ForNo1ForYes controls if we mine or not. set it to 0 if you don't want to mine, set to 1 if you want to mine
-varMining0ForNo1ForYes=1
+varMining0ForNo1ForYes=0
 #varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them). 
 varMiningProcessorLimit=-1
 #varMiningProcessorAutoDetect if true, the script will automatically detect and explicitly add the number of CPUs (sockets * cores * threads per core)
@@ -926,6 +927,9 @@ funcLockdown ()
 	sudo ufw allow $Myport/tcp
     echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####) BTW for Dynodes this is $DefaultDynode_rpcport by default."
 	sudo ufw allow $Myrpcport/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP}/tcp # replace AAAAAA with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP/tcp
+	
     #echo "sudo ufw logging on # this turns the log on, optional, but helps identify attacks and issues"
 	#sudo ufw logging on
     echo "sudo ufw enable # This will start the firewall, you only need to do this once after you install"
