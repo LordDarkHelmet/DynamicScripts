@@ -1295,7 +1295,7 @@ if [ "$varCompile" = true ]; then
 	sudo add-apt-repository -y ppa:bitcoin/bitcoin
     sudo apt-get -y update
 	sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
-	sudo apt-get install libdb++-dev
+	sudo apt-get -y install libdb++-dev
 	sudo apt-get -y install libminiupnpc-dev
 	sudo apt-get -y install libzmq3-dev
     sudo apt-get -y update
