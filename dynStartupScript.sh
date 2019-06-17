@@ -16,12 +16,13 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 # Contributors:         DYN Donation Address                      BTC Address
 #   LordDarkHelmet      D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
 #   Broyhill            
-#   Coinkiller          
+#   Coinkiller         
+#   razerrazer
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.7"
-varVersionDate="March 3, 2019"
+varVersionNumber="2.3.8"
+varVersionDate="June 17, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
