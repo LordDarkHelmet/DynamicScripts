@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.8"
-varVersionDate="June 17, 2019"
+varVersionNumber="2.3.9"
+varVersionDate="June 28, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -95,10 +95,28 @@ varQuickStartCompressedBlockChainFileIsZip=true
 # -varCompile will compile the code
 varCompile=true
 
-#Default Dynode Ports
+# Default Dynode Ports
 DefaultDynode_rpcport=33350
 DefaultDynode_port=33300
-DefaultDynode_DHT_uTP=33311
+DefaultDynode_DHT_uTP_a=33311
+DefaultDynode_DHT_uTP_b=33312
+DefaultDynode_DHT_uTP_c=33313
+DefaultDynode_DHT_uTP_d=33314
+DefaultDynode_DHT_uTP_e=33315
+DefaultDynode_DHT_uTP_f=33316
+DefaultDynode_DHT_uTP_g=33317
+DefaultDynode_DHT_uTP_h=33318
+
+
+# TestNet Ports
+TestNetDynode_DHT_uTP_a=33611
+TestNetDynode_DHT_uTP_b=33612
+TestNetDynode_DHT_uTP_c=33613
+TestNetDynode_DHT_uTP_d=33614
+TestNetDynode_DHT_uTP_e=33615
+TestNetDynode_DHT_uTP_f=33616
+TestNetDynode_DHT_uTP_g=33617
+TestNetDynode_DHT_uTP_h=33618
 
 # P2P
 DefaultP2P_Port=33300
@@ -928,8 +946,24 @@ funcLockdown ()
 	sudo ufw allow $Myport/tcp
     echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####) BTW for Dynodes this is $DefaultDynode_rpcport by default."
 	sudo ufw allow $Myrpcport/tcp
-	echo "sudo ufw allow ${DefaultDynode_DHT_uTP}/tcp # replace AAAAAA with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_a}/tcp # replace AAAAAA with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_a by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_a/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_b}/tcp # replace BBBBBB with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_b by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_b/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_c}/tcp # replace CCCCCC with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_c by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_c/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_d}/tcp # replace DDDDDD with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_d by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_d/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_e}/tcp # replace EEEEEE with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_e by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_e/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_f}/tcp # replace FFFFFF with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_f by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_f/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_g}/tcp # replace GGGGGG with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_g by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_g/tcp
+	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_h}/tcp # replace HHHHHH with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_h by default."
+	sudo ufw allow $DefaultDynode_DHT_uTP_h/tcp
+
+
 	
     #echo "sudo ufw logging on # this turns the log on, optional, but helps identify attacks and issues"
 	#sudo ufw logging on
