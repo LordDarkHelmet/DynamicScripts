@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Summary:
-# This script is a one stop installing and maintenance script for Dynamic. 
+# This script is a one stop installing and maintenance script for Dynamic.
 # It is used to startup a new VPS. It will download, compile, and maintain the wallet.
 
 # myScrapeAddress: This is the address that the wallet will scrape mining coins to:
@@ -12,23 +12,23 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 # "CHANGE THE ADDRESS ABOVE TO BE THE ONE FOR YOUR WALLET"
 
 # Credit:
-# Written by those who are dedicated to teaching other about ion (ionomy.com) and other cryptocurrencies. 
+# Written by those who are dedicated to teaching other about ion (ionomy.com) and other cryptocurrencies.
 # Contributors:         DYN Donation Address                      BTC Address
 #   LordDarkHelmet      D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR        1NZya3HizUdeJ1CNbmeJEW3tHkXUG6PoNn
-#   Broyhill            
-#   Coinkiller         
+#   Broyhill
+#   Coinkiller
 #   razerrazer
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.3.9"
-varVersionDate="June 28, 2019"
+varVersionNumber="2.4.0"
+varVersionDate="August 31, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
 # We recommend running Ubuntu 18.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 20.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
-# 
+#
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
 # The script will take some time to run. You can view progress when you first log in by typing in the command:
 # tail -f /tmp/firstboot.log
@@ -49,11 +49,11 @@ echo "==========================================================================
 #
 
 # Are you setting up a Dynode? if so you want to set these variables
-# Set varDynode to 1 if you want to run a node, otherwise set it to zero. 
+# Set varDynode to 1 if you want to run a node, otherwise set it to zero.
 varDynode=0
 # This will set the external IP to your IP address (Linux only), or you can put your IP address in here
 varDynodeExternalIP=$(hostname -I | cut -d' ' -f1)
-# This is your Dynode pairing key. To get it run dynamic-cli dynode genkey, 
+# This is your Dynode pairing key. To get it run dynamic-cli dynode genkey,
 varDynodePairingKey=""
 # This is the label you want to give your Dynode
 varDynodeLabel=""
@@ -74,14 +74,14 @@ varBackupDirectory="${varUserDirectory}DYN/Backups/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.3.5.0/Dynamic-2.3.5.0-Linux-x64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.3.5.0-Linux-x64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.3.5/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.3.5/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.0.0/Dynamic-2.4.0.0-Linux-x64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.4.0.0-Linux-x64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.4.0/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.4.0/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=true
-varQuickStartCompressedBootstrapLocation=- http://dyn.coin-info.net/bootstrap/bootstrap-latest.zip
+varQuickStartCompressedBootstrapLocation=https://duality.solutions/duality/bootstraps/dyn/bootstrap-latest.zip
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.zip
 varQuickStartCompressedBootstrapFileIsZip=true
 
@@ -128,7 +128,7 @@ varExpandSwapFile=true
 #Mining Variables
 #varMining0ForNo1ForYes controls if we mine or not. set it to 0 if you don't want to mine, set to 1 if you want to mine
 varMining0ForNo1ForYes=0
-#varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them). 
+#varMiningProcessorLimit set the number of processors you want to use -1 for unbounded (all of them).
 varMiningProcessorLimit=-1
 #varMiningProcessorAutoDetect if true, the script will automatically detect and explicitly add the number of CPUs (sockets * cores * threads per core)
 varMiningProcessorAutoDetect=true
@@ -139,8 +139,8 @@ varMiningScrapeTime=5
 varRemoteRepository=https://github.com/duality-solutions/Dynamic
 
 #Script Repository
-#This can be used to auto heal and update the script system. 
-#If a future deployment breaks something, an update by the repository owner can run a script on your machine. 
+#This can be used to auto heal and update the script system.
+#If a future deployment breaks something, an update by the repository owner can run a script on your machine.
 #This is dangerous and not implemented
 varRemoteScriptRepository=https://github.com/LordDarkHelmet/DynamicScripts
 
@@ -149,14 +149,14 @@ varRemoteScriptRepository=https://github.com/LordDarkHelmet/DynamicScripts
 varAutoUpdate=true
 
 #AutoRepair
-#Future Repair System. 
+#Future Repair System.
 varAutoRepair=true
 #Watchdog timer. Check every X min to see if we are still running. (5 min recommended)
 varWatchdogTime=5
-#Turn on or off the watchdog. default is true. 
+#Turn on or off the watchdog. default is true.
 varWatchdogEnabled=true
 
-#System Lockdown, Firewall, security rules, etc. 
+#System Lockdown, Firewall, security rules, etc.
 varSystemLockdown=true
 
 #Filenames of Generated Scripts
@@ -173,7 +173,7 @@ varVultrLabelmHz=false
 #Other and Test
 Is_TestNet=false
 
-#Developer's donation address 
+#Developer's donation address
 donationAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 
 #End of Variables
@@ -1362,8 +1362,8 @@ if [ "$varCompile" = true ]; then
     cd $varGITDynamicPath
     echo "-----------------"
 	
-	echo "Just creating the CLI and Deamon Only"
-	ConfigParameters=" --without-gui "
+	echo "Just creating the CLI and Deamon Only, no GPU"
+	ConfigParameters=" --without-gui --disable-gpu "
 
 	echo "Check if we can optimize mining using the ssse3 instruction set"
 	varssse3=$(grep ssse3 /proc/cpuinfo)
