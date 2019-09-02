@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.0"
-varVersionDate="August 31, 2019"
+varVersionNumber="2.4.0.a"
+varVersionDate="September 2, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -145,7 +145,7 @@ varRemoteRepository=https://github.com/duality-solutions/Dynamic
 varRemoteScriptRepository=https://github.com/LordDarkHelmet/DynamicScripts
 
 #AutoUpdater
-#This runs the auto update script. If you do not want to automatically update the script, then set this to false. If a new update 
+#This runs the auto update script. If you do not want to automatically update the script, then set this to false. If a new update
 varAutoUpdate=true
 
 #AutoRepair
@@ -172,6 +172,11 @@ varVultrLabelmHz=false
 
 #Other and Test
 Is_TestNet=false
+
+#Berkeley DB Build
+DYNAMIC_ROOT=$(pwd)
+# Pick some path to install BDB to, here we create a directory within the dynamic directory
+BDB_PREFIX="${DYNAMIC_ROOT}/db4"
 
 #Developer's donation address
 donationAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
@@ -593,7 +598,7 @@ echo "" >> dynAutoUpdater.sh
 echo " # 1. Download the new source code from the repository if it has been updated" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Remove old repository, we need to do a clean clone for the next version comparison to work. Do not git pull.\"" >> dynAutoUpdater.sh
 echo " rm -fdr $varGITDynamicPath" >> dynAutoUpdater.sh
-echo " mkdir -p $varGITDynamicPath" >> dynAutoUpdater.sh
+echo " mkdir -pv $varGITDynamicPath" >> dynAutoUpdater.sh
 echo " cd $varUserDirectory" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Downloading the source code\"" >> dynAutoUpdater.sh
 echo " sudo git clone $varRemoteRepository" >> dynAutoUpdater.sh
@@ -602,7 +607,7 @@ echo " # 2. Compile the new code" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile the source code\"" >> dynAutoUpdater.sh
 echo " cd $varGITDynamicPath" >> dynAutoUpdater.sh
 echo " echo \"Check if we can optimize mining using the ssse3, avx2, and avx512f instruction sets\"" >> dynAutoUpdater.sh
-echo " ConfigParameters=\" --without-gui \"" >> dynAutoUpdater.sh
+echo " ConfigParameters=\" --without-gui --disable-gpu \"" >> dynAutoUpdater.sh
 echo " CPPFLAGS=-march=native" >> dynAutoUpdater.sh
 echo " varssse3=\$(grep ssse3 /proc/cpuinfo)" >> dynAutoUpdater.sh
 echo " if [  \"\$varssse3\" = \"\" ]; then" >> dynAutoUpdater.sh
@@ -622,7 +627,7 @@ echo "   echo \"avx512f not found, normal compile, no avx512f optimizations\"" >
 echo " else" >> dynAutoUpdater.sh
 echo "   ConfigParameters=\"\${ConfigParameters} --enable-avx512f \"" >> dynAutoUpdater.sh
 echo " fi" >> dynAutoUpdater.sh
-echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters && sudo make" >> dynAutoUpdater.sh
+echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}/lib/\" CPPFLAGS=\"-I${BDB_PREFIX}/include/  -march=native\" && sudo make" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile Finished.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 3. Scrape if there are any funds before we stop" >> dynAutoUpdater.sh
@@ -1173,19 +1178,19 @@ echo "The Daemon has started."
 echo "Sleeping for 30 seconds then we are going to add some nodes"
 sleep 30
 
-#Collected September 21 2018
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.89.45:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.128.102:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.2.148:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "91.134.133.208:33300" "onetry"
+#Collected September 2 2019
+sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.26.75:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "64.52.87.70:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.232.29:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.234.133:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "159.69.13.221:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "95.217.63.135:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "51.68.212.61:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.26.62:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "195.201.27.156:33300" "onetry"
 sudo ${varDynamicBinaries}dynamic-cli addnode "206.189.193.181:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "167.99.145.192:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "165.227.25.11:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.51.85:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "207.148.30.183:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.160.96:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "144.202.96.59:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "79.143.180.217:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.103.101:33300" "onetry"
+sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.50.212:33300" "onetry"
 
 echo "Sleeping for 10 seconds to allow for connection to occur"
 sleep 10
@@ -1193,15 +1198,15 @@ sleep 10
 myConnectionCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
 if [ "$myConnectionCount" = "0" ]; then
 	#earlier list
-	sudo ${varDynamicBinaries}dynamic-cli addnode "207.148.30.183:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.160.96:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "144.202.96.59:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "79.143.180.217:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "164.132.55.237:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.111.193:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.32.207.241:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "51.15.64.81:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "104.238.136.140:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "51.158.170.187:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.51.228:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "51.15.197.180:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.21:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.33:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.9:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.148.69:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.52:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "138.197.146.197:33300" "onetry"
 
 fi
 
@@ -1317,16 +1322,16 @@ if [ "$varCompile" = true ]; then
 
     echo "######### Start Compile #########"
     echo ""
-#OK If you did a Quick Start, we are going to build a new wallet. 
+#OK If you did a Quick Start, we are going to build a new wallet.
 #This will happen while you are mining, so it will take super long, but you don't care.
-#when we complete the build we will stop the miner, replace the binary, and continue.  
+#when we complete the build we will stop the miner, replace the binary, and continue. 
 
 # Install Dependencies and other tools
 	echo "Install Dependencies and other tools"
 	sudo apt-get -y update
 	sudo apt-get -y upgrade
 	sudo apt-get -y install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
-    sudo apt-get -y install nano libboost-all-dev							
+    sudo apt-get -y install nano libboost-all-dev
 	sudo add-apt-repository -y ppa:bitcoin/bitcoin
     sudo apt-get -y update
 	sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
@@ -1344,6 +1349,26 @@ if [ "$varCompile" = true ]; then
     sudo apt-get -y upgrade
     echo "Dependencies Complete"
 	echo ""
+	
+#Berkeley DB time, Ubuntu 18.04 and above have a different version installed. We are going to compile the version duality uses 4.8.30.
+    mkdir -pv $BDB_PREFIX
+
+    # Fetch the source and verify that it is not tampered with
+    wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+    echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
+    # -> db-4.8.30.NC.tar.gz: OK
+    tar -xzvf db-4.8.30.NC.tar.gz
+
+    # Build the library and install to our prefix
+    cd db-4.8.30.NC/build_unix/
+    #  Note: Do a static build so that it can be embedded into the executable, instead of having to find a .so at runtime
+    ../dist/configure --prefix=/usr/local --enable-cxx
+    make
+    sudo make install
+
+    # Configure Dynamic to use our own-built instance of BDB
+    cd $DYNAMIC_ROOT
+
 
 	
 # Clone the GitHub repository
@@ -1391,7 +1416,7 @@ if [ "$varCompile" = true ]; then
 	
 	echo "-march=native tells the compiler to optimize to the compiling machine's CPU"
 	echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters && sudo make"
-	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters && sudo make
+	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/  -march=native " && sudo make
 	
     echo "-----------------"
     echo "Compile Finished."
