@@ -1,7 +1,7 @@
 # DynamicScripts
 <b>Scripts for the Dynamic (DYN) Cryptocurrency</b>
 
-Setup a Dynode with one line! You can generate a pairing key from any wallet using the <code>dynode genkey</code> command. We recommend Ubuntu 18.04 as the OS, but any version is compatible. 
+Setup a Dynode with one line! You can generate a pairing key from any wallet using the <code>dynode genkey</code> command. We recommend the latest Ubuntu LTS 18.04 version as the OS, but any version is compatible. 
 
 <code>wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sudo sh dynSimpleSetup.sh -d ReplaceMeWithOutputFrom_dynode_genkey</code>
 
