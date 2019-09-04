@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.0.a"
-varVersionDate="September 2, 2019"
+varVersionNumber="2.4.0.b"
+varVersionDate="September 3, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -68,6 +68,9 @@ varDynamicConfigFile="${varUserDirectory}.dynamic/dynamic.conf"
 varGITRootPath="${varUserDirectory}"
 varGITDynamicPath="${varGITRootPath}Dynamic/"
 varBackupDirectory="${varUserDirectory}DYN/Backups/"
+#Berkeley DB Build
+# Pick some path to install BDB to, here we create a directory within the dynamic directory
+BDB_PREFIX="${varUserDirectory}db-4.8.30.NC/build_unix/"
 
 # Quick Non-Source Start (get binaries and blockchain from the web, not completely safe or reliable, but fast!)
 
@@ -172,11 +175,6 @@ varVultrLabelmHz=false
 
 #Other and Test
 Is_TestNet=false
-
-#Berkeley DB Build
-DYNAMIC_ROOT=$(pwd)
-# Pick some path to install BDB to, here we create a directory within the dynamic directory
-BDB_PREFIX="${DYNAMIC_ROOT}/db4"
 
 #Developer's donation address
 donationAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
@@ -1350,26 +1348,56 @@ if [ "$varCompile" = true ]; then
     echo "Dependencies Complete"
 	echo ""
 	
+	
+	
 #Berkeley DB time, Ubuntu 18.04 and above have a different version installed. We are going to compile the version duality uses 4.8.30.
+    echo ""
+	echo "--------------------------------------"
+	echo "Berkeley DB 4.8.30.NC Compile "
+	echo "--------------------------------------"
+
+	#make the directory to install the Berkeley DB. 
     mkdir -pv $BDB_PREFIX
 
+	#navigate to the directory where we want to download the file. 
+	cd  $varUserDirectory
+
     # Fetch the source and verify that it is not tampered with
-    wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+    wget  -o /dev/null 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+	echo "Verify Hash"
     echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
     # -> db-4.8.30.NC.tar.gz: OK
-    tar -xzvf db-4.8.30.NC.tar.gz
+	
+	echo "Extract"
+    tar -xzf db-4.8.30.NC.tar.gz
 
     # Build the library and install to our prefix
     cd db-4.8.30.NC/build_unix/
+	
+	#This resolves an issue with Ubuntu 19.04 and above. (https://www.fsanmartin.co/compiling-berkeley-db-4-8-30-in-ubuntu-19/)
+	echo ""
+	echo "There is a compile error with Ubuntu 19 and above. "
+	echo "To resolve we are going to modify the source code to resolve the ambiguity issue with __atomic_compare_exchange"
+	echo "  \"../dist/../dbinc/atomic.h:179:19: error: definition of 'int __atomic_compare_exchange(db_atomic_t*, atomic_value_t, atomic_value_t)' ambiguates built-in declaration 'bool __atomic_compare_exchange(long unsigned int, volatile void*, void*, void*, int, int)\""
+	echo "we are going to replace the name __atomic_compare_exchange with __atomic_compare_exchange_db in the atomic.h file"
+	echo "sed -i 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' ${varUserDirectory}db-4.8.30.NC/dbinc/atomic.h"
+	sed -i 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' ${varUserDirectory}db-4.8.30.NC/dbinc/atomic.h
+	echo "At this point the source code has been modified and the issue should be resolved."
+	echo ""
+	
     #  Note: Do a static build so that it can be embedded into the executable, instead of having to find a .so at runtime
-    ../dist/configure --prefix=/usr/local --enable-cxx
+    ../dist/configure --enable-cxx --disable-shared --with-pic
     make
     sudo make install
 
+    echo "--------------------------------------"
+	echo " End of Berkeley DB 4.8.30.NC Compile "
+	echo "--------------------------------------"
+	echo ""
+
+
     # Configure Dynamic to use our own-built instance of BDB
     cd $DYNAMIC_ROOT
-
-
 	
 # Clone the GitHub repository
     echo "Clone the GitHub repository"
@@ -1416,7 +1444,7 @@ if [ "$varCompile" = true ]; then
 	
 	echo "-march=native tells the compiler to optimize to the compiling machine's CPU"
 	echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters && sudo make"
-	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/  -march=native " && sudo make
+	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}" CPPFLAGS="-I${BDB_PREFIX} -march=native " && sudo make
 	
     echo "-----------------"
     echo "Compile Finished."
