@@ -64,7 +64,7 @@ Use these attributes to customize your deployment:
  
  <code>-b bootstrap or blockchain. Download an external bootstrap, blockchain or none, ex"-b bootstrap"</code>
  
- <code>-m Mining. enables or disables mining. true for on, false for off. On by default. ex"-m true" to enable mining</code>
+ <code>-m Mining. enables or disables mining. true for on, false for off. Off by default. ex"-m true" to enable mining</code>
  
  <code>-t Various test attributes (in development)</code>
  
