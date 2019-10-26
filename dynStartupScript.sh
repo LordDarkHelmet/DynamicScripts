@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.0.b"
-varVersionDate="September 3, 2019"
+varVersionNumber="2.4.1.a"
+varVersionDate="October 26, 2019"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -77,10 +77,10 @@ BDB_PREFIX="${varUserDirectory}db-4.8.30.NC/build_unix/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.0.0/Dynamic-2.4.0.0-Linux-x64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.4.0.0-Linux-x64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.4.0/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.4.0/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.1.0/Dynamic-2.4.1.0-Linux-x64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.4.1.0-Linux-x64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.4.1/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.4.1/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=true
@@ -88,7 +88,7 @@ varQuickStartCompressedBootstrapLocation=https://duality.solutions/duality/boots
 varQuickStartCompressedBootstrapFileName=bootstrap-latest.zip
 varQuickStartCompressedBootstrapFileIsZip=true
 
-# Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.)
+# Quick Start Blockchain (Downloading the blockchain will save time. It is up to you if you want to take the risk.) No longer available.
 varQuickBlockchainDownload=false
 varQuickStartCompressedBlockChainLocation=_INVALID_http://108.61.216.160/cryptochainer.chains/chains/Dynamic_blockchain.zip
 varQuickStartCompressedBlockChainFileName=Dynamic_blockchain.zip
@@ -320,7 +320,7 @@ do
             echo " -c Compile. Compile the code, default is true. If you set it to false it will also turn off AutoUpdate"
 			echo " -v Vultr API. see http://www.vultr.com/?ref=6923885 If you are using Vultr as an API service, this will change the label to update the last watchdog status"
 			echo " -b bootstrap or blockchain. Download an external bootstrap, blockchain or none, ex\"-b bootstrap\""
-			echo " -m Mining. enables or disables mining. true for on, false for off. On by default. ex\"-m true\" to enable mining"
+			echo " -m Mining. enables or disables mining. true for on, false for off. Off by default. ex\"-m true\" to enable mining"
 			echo " -t Various test attributes (in development)"
             echo " -h Display Help then exit."
 			echo ""
@@ -332,13 +332,13 @@ do
 			echo ""
 			echo "Example 3: Setup a remote Dynode that does not mine. Great for VPS's that will ban high CPU usage"
 			echo "sudo sh $0 -s $donationAddress -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -m false"
-			echo ""		
+			echo ""
 			echo "Example 4: Run a miner, but don't compile (auto update will be turned off by default), useful for low RAM VPS's that don't allow for SWAP files"
-			echo "sudo sh $0 -s $donationAddress -c false"			
+			echo "sudo sh $0 -s $donationAddress -c false"
 			echo ""
 			echo "Example 5: Turn off auto update on a Dynode, you will be required to manually update if a new version comes along"
 			echo "sudo sh $0 -s $donationAddress -d ReplaceMeWithOutputFrom_dynamic-cli_dynode_genkey -a false"
-			echo ""				
+			echo ""
 			echo "PLEASE REMEMBER TO USE THE \"-s\" attribute. If you don't then you will be donating and not scraping to your address."
 			echo ""
 			echo ""
@@ -363,7 +363,7 @@ if [ "$varMiningProcessorAutoDetect" = true ]; then
 	echo "Explicitly using the number of CPUs in the system rather than relying on -1"
 	#varMiningProcessorLimit=$(lscpu --json | jq -r '.lscpu[] | select(.field == "CPU(s):") | .data') # Linux 17.10 and above only. No json in 16.04
 	varMiningProcessorLimit=$(echo $(lscpu | grep -m 1 "CPU(s):" | cut -d' ' -f 8-))
-	
+
 	if [ "$varMiningProcessorLimit" = "" ]; then
 		echo "no auto CPU detection, using -1"
 		varMiningProcessorLimit=-1
@@ -588,7 +588,7 @@ echo "" >> dynAutoUpdater.sh
 echo "# This file, dynAutoUpdater,sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo "cd $varGITDynamicPath" >> dynAutoUpdater.sh
-echo "if [ \"\`git log --pretty=%H ...refs/heads/master^ | head -n 1\`\" = \"\`git ls-remote $varRemoteRepository -h refs/heads/master |cut -f1\`\" ] ; then " >> dynAutoUpdater.sh
+echo "if [ \"\`git log --pretty=%H ...refs/heads/master^ | head -n 1\`\" = \"\`git ls-remote $varRemoteRepository -h refs/heads/master |cut -f1\`\" ] ; then" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : We are up to date.\"" >> dynAutoUpdater.sh
 echo "else" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Changes to the repository, Preparing to update.\"" >> dynAutoUpdater.sh
@@ -625,7 +625,7 @@ echo "   echo \"avx512f not found, normal compile, no avx512f optimizations\"" >
 echo " else" >> dynAutoUpdater.sh
 echo "   ConfigParameters=\"\${ConfigParameters} --enable-avx512f \"" >> dynAutoUpdater.sh
 echo " fi" >> dynAutoUpdater.sh
-echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}/lib/\" CPPFLAGS=\"-I${BDB_PREFIX}/include/  -march=native\" && sudo make" >> dynAutoUpdater.sh
+echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}\" CPPFLAGS=\"-I${BDB_PREFIX} -march=native \" && sudo make" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile Finished.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 3. Scrape if there are any funds before we stop" >> dynAutoUpdater.sh
@@ -921,7 +921,7 @@ funcLockdown ()
     echo "---------------------------------"
 	echo "-Basic lockdown and security of the node and or miner."
     #echo "-Permanent lockdown and security of the node and or miner."
- 
+
     #echo "-Remove SSH Access, Usually on Port 22. This will lock you out as well."
 	mysshPort=22
 	#edit /etc/ssh/sshd_config to remove the line or change the line that says Port 22
@@ -931,12 +931,12 @@ funcLockdown ()
     # At this point the sshd_config file has been changed, but the SSH service needs to be restarted in order for those changes to take effect.
     # sudo service ssh restart
     # When you connect back to your VPS via an SSH client, be sure to change the port to the one you specified in your sshd_config file. While you are more secure because you changed the port and you have a really secure password, an attacker can still find your port and attempt to break your password via a brute force attack. To prevent this you will need a firewall to limit the number of attempts per second, making a brute force attack impossibly long.
- 
+
     # Install a Firewall
     # The Uncomplicated Firewall (UFW) is the default firewall configuration tool for Ubuntu.
-    # 
+    #
     # The following commands can be used to install and setup your UFW to help protect your system.
-    # 
+    #
     echo "sudo apt-get -y install ufw # this installs UFW"
 	sudo apt-get -y install ufw
     echo "sudo ufw default deny # By default UFW will deny all connections. "
@@ -966,24 +966,21 @@ funcLockdown ()
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_h}/tcp # replace HHHHHH with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_h by default."
 	sudo ufw allow $DefaultDynode_DHT_uTP_h/tcp
 
-
-	
     #echo "sudo ufw logging on # this turns the log on, optional, but helps identify attacks and issues"
 	#sudo ufw logging on
     echo "sudo ufw enable # This will start the firewall, you only need to do this once after you install"
 	#the yes command will automatically answer yes to everything, but we are just going to use an echo so we don't get a broken pipe message. We only need one yes. 
 	echo "y" | ufw enable
-    # 
+    #
     # You can verify that your firewall is running and the rules it has by using the following command
-    # 
+    #
     echo "sudo ufw status"
 	sudo ufw status
- 
+
  #Lessons from the incident Report on DDoS attack against Dash’s Masternode P2P network: https://www.dash.org/2017/03/08/DDoSReport.html
  # Suggested IP Table rules: https://gist.github.com/chaeplin/5dabcef736f599f3bc64bdce7b62b817
- 
+
     echo "---------------------------------"
- 
 
 }
 ####### Security Lockdown Function #############
@@ -1043,7 +1040,7 @@ if [ "$varQuickBootstrap" = true ]; then
 	    echo "because the bootstrap failed, we are going to resort to downloading the blockchain"
 	    varQuickBlockchainDownload=true
     fi
-	
+
 	echo "Lets free up some space, now that we have extracted the bootstrap, we should delete the compressed file."
 	rm -fdr $varQuickStartCompressedBootstrapFileName
 
@@ -1059,10 +1056,10 @@ fi
 
 ## Quick Start (get blockchain from the web, not completely safe or reliable, but fast!)
 ## If you are bootstraping, you can still download the blockchain. While the developers recommend you only bootstrap, this will save time while syncing.
-## 
+##
 if [ "$varQuickBlockchainDownload" = true ]; then
     echo "Blockchain Download"
-    
+
 	echo "Step 1: If the dynamicd process is running, Stop it"
     sudo ${dynStop}
 
@@ -1091,7 +1088,7 @@ if [ "$varQuickBlockchainDownload" = true ]; then
     rm -fdr $varQuickStartCompressedBlockChainFileName
 	echo "wget -o /dev/null $varQuickStartCompressedBlockChainLocation"
     wget -o /dev/null $varQuickStartCompressedBlockChainLocation
-	
+
 	if [ $? -eq 0 ]; then
 	    echo "Download succeeded, extract ..."
         mkdir -pv $varDynamicConfigDirectory
@@ -1099,11 +1096,11 @@ if [ "$varQuickBlockchainDownload" = true ]; then
 			echo "Using unrar to decompress compressed blockchain"
 			echo "unrar x -y $varQuickStartCompressedBlockChainFileName $varDynamicConfigDirectory"
 			unrar x -y $varQuickStartCompressedBlockChainFileName $varDynamicConfigDirectory
-			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"		
+			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
 			echo "There was a historical issue with the blockchain provider using a file that was unzip vs unrar compatible. We are going to unzip even if unrar was successful. We may overwrite files, but that is OK."
 			echo "Using unzip to decompress compressed blockchain"
 			unzip -o $varQuickStartCompressedBlockChainFileName -d $varDynamicConfigDirectory
-			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"			
+			echo "Extracted Zip file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
         else
             tar -xvf $varQuickStartCompressedBlockChainFileName -C $varDynamicConfigDirectory
             echo "Extracted TAR file ( $varQuickStartCompressedBlockChainFileName ) to the config directory ( $varDynamicConfigDirectory )"
@@ -1210,7 +1207,7 @@ fi
 
 
 if [ $varQuickBlockchainDownload = true ] ; then
-	# Downloading the blockchain is significantly faster. you will most likely be mining within 5 min. 
+	# Downloading the blockchain is significantly faster. you will most likely be mining within 5 min.
     echo "We have downloaded the blockchain and the binaries, let's give some time for the blockchain to load"
 	echo "Out of all of the options, this is the fastest and actually has a chance of completing before compiling starts"
     echo "Sleeping for 15 min"
@@ -1237,7 +1234,7 @@ sleep 1
 
 if [ "$varDynode" = 1 ]; then
   if [ "$varDynodePairingKey" = "" ]; then
-     
+
 	 echo "This was assigned as a Dynode, but a pairing key was not assigned. We are going to assign a key now, then we are going to restart."
 	 varDynodePairingKey=$(sudo ${varDynamicBinaries}dynamic-cli dynode genkey)
 	 echo "The assigned Dynode Pairing key is $varDynodePairingKey "
@@ -1252,14 +1249,14 @@ if [ "$varDynode" = 1 ]; then
 	 sudo ${varDynamicBinaries}dynamicd --daemon
 	 echo "sleep for 30 seconds"
 	 sleep 30
-	 
+
 	 if [ "" = "$varVultrAPIKey" ]; then
 	   echo "No Vultr API key, future placeholder for communicating the dynode key"
 	 else
 	   myCommand="myTagResult=\$(curl -s -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/tag_set --data 'SUBID=${mySUBID}' --data 'tag=${varDynodePairingKey}' )"
        echo $myCommand
 	   eval $myCommand
-	   
+
 	   if [ "$myTagResult" != "" ]; then
 	 	  #if you are starting a lot of servers at once, you could have flooded the API, set a random delay and try again once.
 	 	  sleep $(shuf -i 1-60 -n 1)
@@ -1278,13 +1275,11 @@ if [ "$varDynode" = 1 ]; then
 	 	  echo "Fourth attempt to get the tag with the dynode key"
 	 	  eval $myCommand
 	   fi
-	   
-	   
 	 fi
   fi
 fi
-  
-  
+
+
 echo ""
 echo "In case Compiling later on fails, we want to put all of our cron jobs in"
 echo ""
@@ -1347,9 +1342,8 @@ if [ "$varCompile" = true ]; then
     sudo apt-get -y upgrade
     echo "Dependencies Complete"
 	echo ""
-	
-	
-	
+
+
 #Berkeley DB time, Ubuntu 18.04 and above have a different version installed. We are going to compile the version duality uses 4.8.30.
     echo ""
 	echo "--------------------------------------"
@@ -1367,13 +1361,15 @@ if [ "$varCompile" = true ]; then
 	echo "Verify Hash"
     echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
     # -> db-4.8.30.NC.tar.gz: OK
-	
+
 	echo "Extract"
     tar -xzf db-4.8.30.NC.tar.gz
+	echo "remove unneeded compressed file db-4.8.30.NC.tar.gz"
+	rm -fdr db-4.8.30.NC.tar.gz
 
     # Build the library and install to our prefix
     cd db-4.8.30.NC/build_unix/
-	
+
 	#This resolves an issue with Ubuntu 19.04 and above. (https://www.fsanmartin.co/compiling-berkeley-db-4-8-30-in-ubuntu-19/)
 	echo ""
 	echo "There is a compile error with Ubuntu 19 and above. "
@@ -1384,7 +1380,7 @@ if [ "$varCompile" = true ]; then
 	sed -i 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' ${varUserDirectory}db-4.8.30.NC/dbinc/atomic.h
 	echo "At this point the source code has been modified and the issue should be resolved."
 	echo ""
-	
+
     #  Note: Do a static build so that it can be embedded into the executable, instead of having to find a .so at runtime
     ../dist/configure --enable-cxx --disable-shared --with-pic
     make
@@ -1414,7 +1410,7 @@ if [ "$varCompile" = true ]; then
     echo "Compile the Daemon Client"
     cd $varGITDynamicPath
     echo "-----------------"
-	
+
 	echo "Just creating the CLI and Deamon Only, no GPU"
 	ConfigParameters=" --without-gui --disable-gpu "
 
@@ -1425,7 +1421,7 @@ if [ "$varCompile" = true ]; then
 	else
 	  echo "ssse3 found, ssse3 optimizations enabled"
 	  ConfigParameters="${ConfigParameters} --enable-ssse3 "
-	fi	
+	fi
 	echo "Check if we can optimize mining using the avx2 instruction set"
 	varavx2=$(grep avx2 /proc/cpuinfo)
 	if [  "$varavx2" = "" ]; then
@@ -1441,16 +1437,16 @@ if [ "$varCompile" = true ]; then
 	  echo "avx512f found, avx512f optimizations enabled"
 	  ConfigParameters="${ConfigParameters} --enable-avx512f "
 	fi
-	
+
 	echo "-march=native tells the compiler to optimize to the compiling machine's CPU"
-	echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters && sudo make"
+	echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}\" CPPFLAGS=\"-I${BDB_PREFIX} -march=native \" && sudo make"
 	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}" CPPFLAGS="-I${BDB_PREFIX} -march=native " && sudo make
-	
+
     echo "-----------------"
     echo "Compile Finished."
     echo "-------------------------------------------"
 
-    
+
     echo "If the dynamicd process is running, this will kill it."
 
     echo "Lets Scrape, if this is an upgrade, you may have mined coins."
@@ -1466,10 +1462,9 @@ if [ "$varCompile" = true ]; then
     sudo cp -v ${varGITDynamicPath}src/dynamic-cli $varDynamicBinaries
 	sudo cp -v ${varGITDynamicPath}src/dynamicd /usr/local/bin
     sudo cp -v ${varGITDynamicPath}src/dynamic-cli /usr/local/bin
-	
-    
+
     if [ "$varQuickBootstrap" = true ]; then
-    
+
         if [ "$varQuickStart" = true ]; then
             echo "skipping the pre-launch because we already did it with the quick start"
 	        echo "sudo ${varDynamicBinaries}dynamicd --daemon"
@@ -1494,8 +1489,8 @@ if [ "$varCompile" = true ]; then
     sleep 1
 
     echo "Dynamic Wallet created and blockchain should be syncing."
-    
-    
+
+
 ## CREATE CRON JOBS ###
     echo "-------------------------------------------"
     echo "Creating Boot Start and Scrape Cron jobs..."
@@ -1507,7 +1502,7 @@ if [ "$varCompile" = true ]; then
     echo " cron job $dynStart is setup: $startLine"
     (crontab -u root -l 2>/dev/null | grep -v -F "$dynScrape"; echo "$scrapeLine") | crontab -u root -
     echo " cron job $dynScrape is setup: $scrapeLine"
-    
+
     if [ "$varWatchdogEnabled" = true ]; then
         watchdogLine="*/$varWatchdogTime * * * * $dynWatchdog >> ${varScriptsDirectory}dynWatchdog.log 2>&1"
         (crontab -u root -l 2>/dev/null | grep -v -F "$dynWatchdog"; echo "$watchdogLine") | crontab -u root -
@@ -1518,7 +1513,7 @@ if [ "$varCompile" = true ]; then
 
         #we don't want everyone updating at the same time, that would be bad for the network, so check for updates at a random time.
         AutoUpdaterLine="$(shuf -i 0-59 -n 1) $(shuf -i 0-23 -n 1) * * * $dynAutoUpdater >> ${varScriptsDirectory}dynAutoUpdater.log 2>&1"
-        #this will check once a day, just at a random time of day from other runs of this script. 
+        #this will check once a day, just at a random time of day from other runs of this script.
 
         (crontab -u root -l 2>/dev/null | grep -v -F "$dynAutoUpdater"; echo "$AutoUpdaterLine") | crontab -u root -
         echo " cron job $dynAutoUpdater is setup: $AutoUpdaterLine"
@@ -1533,22 +1528,22 @@ if [ "$varCompile" = true ]; then
     echo "Created cron jobs."
     echo "-------------------------------------------"
 fi
-	
+
 echo "
 
 ===========================================================
-All set! 
-Helpful commands: 
+All set!
+Helpful commands:
 \"dynamic-cli getmininginfo\" to check mining and # of blocks synced.
 \"dynamicd --daemon\" starts the daemon.
-\"dynamic-cli stop\" stops the daemon. 
+\"dynamic-cli stop\" stops the daemon.
 \"dynamic-cli setgenerate true -1\" to start mining.
 \"dynamic-cli listaddressgroupings\" to see mined balances.
 \"dynamic-cli getblockcount\" gets the current blockcount
 \"dynamic-cli gethashespersec\" gets your current hash rate.
 \"dynamic-cli help\" for a full list of commands.
 
-You may need to navigate to ${varDynamicBinaries} before you can run the commands. 
+You may need to navigate to ${varDynamicBinaries} before you can run the commands.
 This command will navigate to ${varDynamicBinaries} the directory
 cd ${varDynamicBinaries}
 
