@@ -11,7 +11,7 @@
 #  * Watchdog to keep the mining going just in case of a crash
 #  * Startup on reboot
 #  * Can create miners
-#  * Can create remote dynodes
+#  * Can create remote Dynodes
 #  * Auto optimizes for your CPU: SSSE3, AVX2, AVX512F, and more
 #  and more... See https://github.com/LordDarkHelmet/DynamicScripts for the latest
 #
@@ -19,8 +19,8 @@
 # wget -N https://github.com/LordDarkHelmet/DynamicScripts/releases/download/v1.0.0/dynSimpleSetup.sh && sh dynSimpleSetup.sh -s D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #
 echo "===========================================================================" | tee -a dynSimpleSetup.log
-echo "Version 2.2.1 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
-echo " Released January 8, 2018 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
+echo "Version 2.4.1 of dynSimpleSetup.sh" | tee -a dynSimpleSetup.log
+echo " Released October 26, 2019 Released by LordDarkHelmet" | tee -a dynSimpleSetup.log
 echo "Original Version found at: https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "Local Filename: $0" | tee -a dynSimpleSetup.log
 echo "Local Time: $(date +%F_%T)" | tee -a dynSimpleSetup.log
@@ -31,6 +31,8 @@ echo "If you found this script useful please contribute. Feedback is appreciated
 echo "===========================================================================" | tee -a dynSimpleSetup.log
 varIsScrapeAddressSet=false
 varShowHelp=false
+#By Default we are not mining. Do not warn about scrape addresses if we are not mining. 
+varAmIMining=false
 while getopts :s:h option
 do
 	case "${option}" in
@@ -46,21 +48,34 @@ do
 			echo "-s has set myScrapeAddress=${myScrapeAddress}" | tee -a dynSimpleSetup.log
 			varIsScrapeAddressSet=true
 			;;
+		m)
+            if [ "$( echo "${OPTARG}" | tr '[A-Z]' '[a-z]' )" = false ]; then
+                varAmIMining=false
+                echo "-m Mining has been set to false. We will disable mining."
+            else
+                varAmIMining=true
+                echo "-m Mining has been set to true. We will be mining."
+            fi	
+			;;
 	esac
 done
 
-if [ "$varIsScrapeAddressSet" = false ]; then
-	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
-	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
-	echo "SCRAPE ADDRESS HAS NOT BEEN SET!!! You will be donating your HASH power." | tee -a dynSimpleSetup.log
-	echo "If you did not intend to do this then please use the -s attribute and set your scrape address!" | tee -a dynSimpleSetup.log
-	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
-	echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
+if [ "${varIsScrapeAddressSet}" = false ]; then
+	if [ "${varAmIMining}" = true ]; then
+		echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
+		echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
+		echo "SCRAPE ADDRESS HAS NOT BEEN SET!!! You will be donating your HASH power." | tee -a dynSimpleSetup.log
+		echo "If you did not intend to do this then please use the -s attribute and set your scrape address!" | tee -a dynSimpleSetup.log
+		echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
+		echo "=!!!!!= WARNING WARNING WARNING WARNING WARNING WARNING =!!!!!=" | tee -a dynSimpleSetup.log
+	fi
 fi
 
 echo "" | tee -a dynSimpleSetup.log
 echo "" | tee -a dynSimpleSetup.log
-echo "Step 1: Download the latest dynStartupScript.sh from GitHub, https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
+echo "Step 1: Update the system to ensue it knows where to find GIT" | tee -a dynSimpleSetup.log
+sudo apt-get -y update | tee -a dynSimpleSetup.log
+echo "Step 2: Download the latest dynStartupScript.sh from GitHub, https://github.com/LordDarkHelmet/DynamicScripts" | tee -a dynSimpleSetup.log
 echo "- To download from GitHub we need to install GIT" | tee -a dynSimpleSetup.log
 sudo apt-get -y install git | tee -a dynSimpleSetup.log
 echo "- we also use the \"at\" command we should install that too. " | tee -a dynSimpleSetup.log
@@ -74,11 +89,11 @@ sudo git fetch --all
 sudo git reset --hard origin/master
 sudo git pull https://github.com/LordDarkHelmet/DynamicScripts | tee -a ../dynSimpleSetup.log
 echo "" | tee -a dynSimpleSetup.log
-echo "Step 2: Set permissions so that dynStartupScript.sh can run" | tee -a ../dynSimpleSetup.log
+echo "Step 3: Set permissions so that dynStartupScript.sh can run" | tee -a ../dynSimpleSetup.log
 echo "- Change the permissions" | tee -a ../dynSimpleSetup.log
 chmod +x dynStartupScript.sh | tee -a ../dynSimpleSetup.log
 echo "" | tee -a ../dynSimpleSetup.log
-echo "Step 3: Run the script." | tee -a ../dynSimpleSetup.log
+echo "Step 4: Run the script." | tee -a ../dynSimpleSetup.log
 
 if [ "$varShowHelp" = true ]; then
 	echo "./dynStartupScript.sh -h" | tee -a ../dynSimpleSetup.log
@@ -86,14 +101,11 @@ if [ "$varShowHelp" = true ]; then
 else
 	varLogFilename="dynStartupScript$(date +%Y%m%d_%H%M%S).log"
 	#Due to the fact that some VPN servers have not enabled RemainAfterExit=yes", which if neglected, causes systemd to terminate all spawned processes from the imageboot unit, we need to schedule the script to run.
-	#echo "sudo setsid ./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &"
-	#sudo setsid ./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &
-	#PID=`ps -eaf | grep dynStartupScript.sh | grep -v grep | awk '{print \$2}'`
-	#echo "The script is now running in the background. PID=${PID}" | tee -a ../dynSimpleSetup.log
 	#Because of that flaw, we are going to use the at command to schedule the process
 	echo "" | tee -a ../dynSimpleSetup.log
 	echo "$(date +%F_%T) Scheduling the script to run 2 min from now. We do this instead of nohup or setsid because some VPSs terminate " | tee -a ../dynSimpleSetup.log
 	echo "We will execute the following command in 2 min:  ./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &" | tee -a ../dynSimpleSetup.log
+	#at command used on this line to launch. 
 	echo "./dynStartupScript.sh $@ 1> $varLogFilename 2>&1 < /dev/null &" | at now + 2 minutes  | tee -a ../dynSimpleSetup.log
 	echo "" | tee -a ../dynSimpleSetup.log
 	echo "If you want to follow its progress (once it starts in 2 min) then use the following command:" | tee -a ../dynSimpleSetup.log
