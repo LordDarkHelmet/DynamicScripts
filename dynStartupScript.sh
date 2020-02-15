@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.3.a"
-varVersionDate="November 3, 2019"
+varVersionNumber="2.4.4.a"
+varVersionDate="February 14, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -64,7 +64,7 @@ varUserDirectory=/root/
 varDynamicBinaries="${varUserDirectory}DYN/bin/"
 varScriptsDirectory="${varUserDirectory}DYN/UserScripts/"
 varDynamicConfigDirectory="${varUserDirectory}.dynamic/"
-varDynamicConfigFile="${varUserDirectory}.dynamic/dynamic.conf"
+varDynamicConfigFile="${varDynamicConfigDirectory}dynamic.conf"
 varGITRootPath="${varUserDirectory}"
 varGITDynamicPath="${varGITRootPath}Dynamic/"
 varBackupDirectory="${varUserDirectory}DYN/Backups/"
@@ -77,10 +77,10 @@ BDB_PREFIX="${varUserDirectory}db-4.8.30.NC/build_unix/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.3.0/Dynamic-2.4.3.0-Linux-x64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.4.3.0-Linux-x64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.4.3/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.4.3/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.4.0/Dynamic-2.4.4.0-Linux-x64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.4.4.0-Linux-x64.tar.gz
+varQuickStartCompressedFilePathForDaemon=dynamic-2.4.4/bin/dynamicd
+varQuickStartCompressedFilePathForCLI=dynamic-2.4.4/bin/dynamic-cli
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=true
@@ -543,6 +543,9 @@ echo "else" >> dynMineStart.sh
 echo "    echo \"Swap file is running \${mySwapSizeMB} MB\"" >> dynMineStart.sh
 echo "fi" >> dynMineStart.sh
 echo "" >> dynMineStart.sh
+echo "echo \"Remove ${varDynamicConfigDirectory}dncache.dat file. (This is to prevent potentially corrupted information.)\"" >> dynMineStart.sh
+echo "sudo rm ${varDynamicConfigDirectory}dncache.dat" >> dynMineStart.sh
+echo "" >> dynMineStart.sh
 echo "echo \"\$(date +%F_%T) Starting Dynamic miner: \$(date)\"" >> dynMineStart.sh
 echo "sudo ${varDynamicBinaries}dynamicd --daemon" >> dynMineStart.sh
 echo "echo \"\$(date +%F_%T) Waiting 15 seconds \"" >> dynMineStart.sh
@@ -671,10 +674,10 @@ cd $varScriptsDirectory
 echo "Creating The Stop dynamicd Script: dynWatchdog.sh"
 echo '#!/bin/sh' > dynWatchdog.sh
 echo "# This file, dynWatchdog.sh, was generated. $(date +%F_%T) Version: $varVersion" >> dynWatchdog.sh
-echo "# This script checks to see if dynamicd is running. If it is not, then it will be restarted. " >> dynWatchdog.sh
+echo "# This script checks to see if dynamicd is running. If it is not, then it will be restarted." >> dynWatchdog.sh
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
 echo "if [ \"\" =  \"\$PID\" ]; then" >> dynWatchdog.sh
-echo "    if [ -e ${varDynamicBinaries}dynamic-cli ]; then"  >> dynWatchdog.sh
+echo "    if [ -e timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli ]; then"  >> dynWatchdog.sh
 echo "        echo \"\$(date +%F_%T) STOPPED: Wait 2 minutes. We could be in an auto-update or other momentary restart.\""  >> dynWatchdog.sh
 echo "        sleep 120" >> dynWatchdog.sh
 echo "        PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
@@ -692,23 +695,23 @@ echo "        echo \"\$(date +%F_%T) Error the file ${varDynamicBinaries}dynamic
 echo "        myVultrStatusInfo=\"Error: dynamic-cli does not exist!\""  >> dynWatchdog.sh
 echo "    fi"  >> dynWatchdog.sh
 echo "else"  >> dynWatchdog.sh
-echo "    myBlockCount=\$(sudo ${varDynamicBinaries}dynamic-cli getblockcount 2>&1)"  >> dynWatchdog.sh
+echo "    myBlockCount=\$(sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli getblockcount 2>&1)"  >> dynWatchdog.sh
 echo "    myCLIErrorCode=\$?"  >> dynWatchdog.sh
 echo "    if [ \"\${myCLIErrorCode}\" = \"0\" ]; then" >> dynWatchdog.sh
-echo "        myDynamicVersion=\"\$(sudo ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
-echo "        myHashesPerSec=\$(sudo ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
-#echo "        myNetworkDifficulty=\$(sudo ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
-echo "        myNetworkHPS=\$(sudo ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
+echo "        myDynamicVersion=\"\$(sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli getinfo | jq -r '.version')\""  >> dynWatchdog.sh
+echo "        myHashesPerSec=\$(sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli gethashespersec)"  >> dynWatchdog.sh
+#echo "        myNetworkDifficulty=\$(sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli getdifficulty)"  >> dynWatchdog.sh
+echo "        myNetworkHPS=\$(sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli getnetworkhashps)"  >> dynWatchdog.sh
 echo "        myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
 echo "        if [ \"0 hps\" = \"\${myVultrStatusInfo}\" ]; then"  >> dynWatchdog.sh
 echo "             myGenerate=\$(cat ${varDynamicConfigFile} | grep gen=1 )"  >> dynWatchdog.sh
 echo "             if [ \"gen=1\" = \"\${myGenerate}\" ]; then"  >> dynWatchdog.sh
 echo "                  echo \"We should be mining, but we have 0 hps, try setgenerate true\""  >> dynWatchdog.sh
-echo "                  sudo ${varDynamicBinaries}dynamic-cli setgenerate true"  >> dynWatchdog.sh
+echo "                  sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli setgenerate true"  >> dynWatchdog.sh
 echo "             fi"  >> dynWatchdog.sh  
 echo "        fi"  >> dynWatchdog.sh  
 if [ "$varDynode" = 1 ]; then
-echo "        myMNStatus=\$(sudo ${varDynamicBinaries}dynamic-cli dynode status | jq -r '.status')"  >> dynWatchdog.sh
+echo "        myMNStatus=\$(sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli dynode status | jq -r '.status')"  >> dynWatchdog.sh
 echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS  Dynode: \$myMNStatus \""  >> dynWatchdog.sh
 else
 echo "        echo \"\$(date +%F_%T) Running: Block Count: \$myBlockCount Hash Rate: \$myHashesPerSec Network HPS \$myNetworkHPS \""  >> dynWatchdog.sh
