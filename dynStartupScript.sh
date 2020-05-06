@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.a"
-varVersionDate="February 14, 2020"
+varVersionNumber="2.4.4.1.a"
+varVersionDate="May 6, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -77,8 +77,8 @@ BDB_PREFIX="${varUserDirectory}db-4.8.30.NC/build_unix/"
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.4.0/Dynamic-2.4.4.0-Linux-x64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.4.4.0-Linux-x64.tar.gz
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.4.1/Dynamic-2.4.4.1-Linux-x64.tar.gz
+varQuickStartCompressedFileName=Dynamic-2.4.4.1-Linux-x64.tar.gz
 varQuickStartCompressedFilePathForDaemon=dynamic-2.4.4/bin/dynamicd
 varQuickStartCompressedFilePathForCLI=dynamic-2.4.4/bin/dynamic-cli
 
