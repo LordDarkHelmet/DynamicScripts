@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.1.a"
-varVersionDate="May 6, 2020"
+varVersionNumber="2.4.4.1.b"
+varVersionDate="September 22, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -677,7 +677,7 @@ echo "# This file, dynWatchdog.sh, was generated. $(date +%F_%T) Version: $varVe
 echo "# This script checks to see if dynamicd is running. If it is not, then it will be restarted." >> dynWatchdog.sh
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
 echo "if [ \"\" =  \"\$PID\" ]; then" >> dynWatchdog.sh
-echo "    if [ -e timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli ]; then"  >> dynWatchdog.sh
+echo "    if [ -e ${varDynamicBinaries}dynamic-cli ]; then"  >> dynWatchdog.sh
 echo "        echo \"\$(date +%F_%T) STOPPED: Wait 2 minutes. We could be in an auto-update or other momentary restart.\""  >> dynWatchdog.sh
 echo "        sleep 120" >> dynWatchdog.sh
 echo "        PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynWatchdog.sh
