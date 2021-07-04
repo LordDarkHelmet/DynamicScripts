@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.1.b"
-varVersionDate="September 22, 2020"
+varVersionNumber="2.4.4.1.c"
+varVersionDate="July 4, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -109,9 +109,13 @@ DefaultDynode_DHT_uTP_e=33315
 DefaultDynode_DHT_uTP_f=33316
 DefaultDynode_DHT_uTP_g=33317
 DefaultDynode_DHT_uTP_h=33318
+# P2P
+DefaultP2P_Port=33300
 
 
 # TestNet Ports
+TestNetDynode_rpcport=33450
+TestNetDynode_port=33400
 TestNetDynode_DHT_uTP_a=33611
 TestNetDynode_DHT_uTP_b=33612
 TestNetDynode_DHT_uTP_c=33613
@@ -120,9 +124,8 @@ TestNetDynode_DHT_uTP_e=33615
 TestNetDynode_DHT_uTP_f=33616
 TestNetDynode_DHT_uTP_g=33617
 TestNetDynode_DHT_uTP_h=33618
-
 # P2P
-DefaultP2P_Port=33300
+TestNetP2P_Port=33400
 
 #
 #Expand Swap File
@@ -297,8 +300,19 @@ do
         t)
 		    myTemp=${OPTARG}
 			if [ "$( echo "${myTemp}" | tr '[A-Z]' '[a-z]' )" = testnet ]; then
-				DefaultDynode_rpcport=33450
-				DefaultDynode_port=33400
+				# TestNet Ports
+				DefaultDynode_rpcport=${TestNetDynode_rpcport}
+				DefaultDynode_port=${TestNetDynode_port}
+				DefaultDynode_DHT_uTP_a=${TestNetDynode_DHT_uTP_a}
+				DefaultDynode_DHT_uTP_b=${TestNetDynode_DHT_uTP_b}
+				DefaultDynode_DHT_uTP_c=${TestNetDynode_DHT_uTP_c}
+				DefaultDynode_DHT_uTP_d=${TestNetDynode_DHT_uTP_d}
+				DefaultDynode_DHT_uTP_e=${TestNetDynode_DHT_uTP_e}
+				DefaultDynode_DHT_uTP_f=${TestNetDynode_DHT_uTP_f}
+				DefaultDynode_DHT_uTP_g=${TestNetDynode_DHT_uTP_g}
+				DefaultDynode_DHT_uTP_h=${TestNetDynode_DHT_uTP_h}
+				# P2P
+				DefaultP2P_Port=${TestNetP2P_Port}
 				Is_TestNet=true
                 echo "-t Changing variables to TestNet"
             else
@@ -466,7 +480,7 @@ echo "echo \"\$(date +%F_%T) Stopping the dynamicd if it already running \"" >> 
 echo "PID=\`ps -eaf | grep dynamicd | grep -v grep | awk '{print \$2}'\`" >> dynStopDynamicd.sh
 echo "if [ \"\" !=  \"\$PID\" ]; then" >> dynStopDynamicd.sh
 echo "    if [ -e ${varDynamicBinaries}dynamic-cli ]; then"  >> dynStopDynamicd.sh
-echo "        sudo ${varDynamicBinaries}dynamic-cli stop" >> dynStopDynamicd.sh
+echo "        sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli stop" >> dynStopDynamicd.sh
 echo "        echo \"\$(date +%F_%T) Stop sent, waiting 30 seconds\""  >> dynStopDynamicd.sh
 echo "        sleep 30" >> dynStopDynamicd.sh
 echo "    fi"  >> dynStopDynamicd.sh
@@ -651,7 +665,7 @@ echo " # 6. Start the daemon" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Start the daemon. Mining will automatically start once synced.\"" >> dynAutoUpdater.sh
 echo " sudo ${varDynamicBinaries}dynamicd --daemon" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
-echo " echo "waiting 10 seconds"" >> dynAutoUpdater.sh
+echo " echo \"waiting 10 seconds\"" >> dynAutoUpdater.sh
 echo " sleep 10" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Now running the latest GIT version.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
@@ -760,10 +774,15 @@ else
 		echo "myMHz=\"| \$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-) MHz \""  >> dynWatchdog.sh
     fi
 
+    testnetLabel=""
+    if [ ${Is_TestNet} = true ]; then
+        testnetLabel="---TESTNET---"
+    fi
+
 	if [ "$varDynode" = 1 ]; then
-		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | DYNODE ${varDynodeLabel}=\${myMNStatus} '\""  >> dynWatchdog.sh
+		echo "myLabel=\"'label=${testnetLabel}\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} | DYNODE ${varDynodeLabel}=\${myMNStatus} '\""  >> dynWatchdog.sh
 	else
-		echo "myLabel=\"'label=\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
+		echo "myLabel=\"'label=${testnetLabel}\$(date \"+%F %T\") | v${varVersionNumber}, \${myDynamicVersion} \${myMHz}| \${myVultrStatusInfo} '\""  >> dynWatchdog.sh
 	fi
 	
     echo "#due to API rate limiting lets go at a random time in the next 4.5 min."  >> dynWatchdog.sh
@@ -814,11 +833,16 @@ else
 			echo "myMHz=\$(cat /proc/cpuinfo |grep -m 1 \"cpu MHz\"|cut -d' ' -f 3-)" >> vultr.sh
 			echo "myMHz=\"| \${myMHz} MHz \"" >> vultr.sh
 		fi
+		
+		testnetLabel=""
+        if [ ${Is_TestNet} = true ]; then
+            testnetLabel="---TESTNET---"
+        fi
 
 		if [ "$varDynode" = 1 ]; then
-			echo "myLabel=\"'label=DYNODE ${varDynodeLabel} | v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
+			echo "myLabel=\"'label=${testnetLabel}DYNODE ${varDynodeLabel} | v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
 		else
-			echo "myLabel=\"'label=v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
+			echo "myLabel=\"'label=${testnetLabel}v${varVersionNumber} | Setting Up... \${myMHz}'\"" >> vultr.sh
 		fi
 
 		echo "myCommand=\"curl -H 'API-Key: ${varVultrAPIKey}' https://api.vultr.com/v1/server/label_set --data \${mySUBIDStr} --data \${myLabel}\"" >> vultr.sh
@@ -868,6 +892,14 @@ funcCreateDynamicConfFile ()
  Myport=$(shuf -i 50000-65000 -n 1)
  Myrpcport=$(shuf -i 1-500 -n 1)
  Myrpcport=$((Myrpcport+Myport))
+ 
+ if [ ${Is_TestNet} = true ]; then
+    echo "" >> $varDynamicConfigFile
+    echo "# Test Net: If this is on the testnet, then testnet=1" >> $varDynamicConfigFile
+	echo "testnet=1" >> $varDynamicConfigFile
+	echo "" >> $varDynamicConfigFile
+ fi
+ 
  
  if [ "$varDynode" = 1 ]; then
     Myrpcport=$DefaultDynode_rpcport
@@ -945,29 +977,29 @@ funcLockdown ()
     echo "sudo ufw default deny # By default UFW will deny all connections. "
 	sudo ufw default deny
     echo "sudo ufw allow ${mysshPort}/tcp # replace XXXXX with your SSH port chosen earlier"
-	sudo ufw allow $mysshPort/tcp
+	sudo ufw allow $mysshPort/tcp comment "ssh port"
     echo "sudo ufw limit ${mysshPort}/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds"
-	sudo ufw limit $mysshPort/tcp
+	sudo ufw limit $mysshPort/tcp comment "ssh port limited"
     echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is $DefaultDynode_port by default."
-	sudo ufw allow $Myport/tcp
+	sudo ufw allow $Myport/tcp comment "Dynamic Dynode"
     echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####) BTW for Dynodes this is $DefaultDynode_rpcport by default."
-	sudo ufw allow $Myrpcport/tcp
+	sudo ufw allow $Myrpcport/tcp comment "Dynamic Dynode RPC"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_a}/tcp # replace AAAAAA with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_a by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_a/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_a/tcp comment "Dynamic Dynode - DHT_uTP_a"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_b}/tcp # replace BBBBBB with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_b by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_b/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_b/tcp comment "Dynamic Dynode - DHT_uTP_b"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_c}/tcp # replace CCCCCC with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_c by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_c/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_c/tcp comment "Dynamic Dynode - DHT_uTP_c"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_d}/tcp # replace DDDDDD with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_d by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_d/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_d/tcp comment "Dynamic Dynode - DHT_uTP_d"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_e}/tcp # replace EEEEEE with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_e by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_e/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_e/tcp comment "Dynamic Dynode - DHT_uTP_e"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_f}/tcp # replace FFFFFF with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_f by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_f/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_f/tcp comment "Dynamic Dynode - DHT_uTP_f"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_g}/tcp # replace GGGGGG with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_g by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_g/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_g/tcp comment "Dynamic Dynode - DHT_uTP_g"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_h}/tcp # replace HHHHHH with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_h by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_h/tcp
+	sudo ufw allow $DefaultDynode_DHT_uTP_h/tcp comment "Dynamic Dynode - DHT_uTP_h"
 
     #echo "sudo ufw logging on # this turns the log on, optional, but helps identify attacks and issues"
 	#sudo ufw logging on
@@ -1176,38 +1208,45 @@ echo "The Daemon has started."
 echo "Sleeping for 30 seconds then we are going to add some nodes"
 sleep 30
 
-#Collected September 2 2019
-sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.26.75:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "64.52.87.70:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.232.29:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "95.216.234.133:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "159.69.13.221:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "95.217.63.135:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "51.68.212.61:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.26.62:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "195.201.27.156:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "206.189.193.181:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.103.101:33300" "onetry"
-sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.50.212:33300" "onetry"
+if [ ${Is_TestNet} = true ]; then
+	#testnet nodes
+	#Nodes added July 4 2021 - This is unlikely to be valid on future dates as there is not permanent test net. 
+	sudo ${varDynamicBinaries}dynamic-cli addnode "147.182.139.88:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "138.68.51.41:33400" "onetry"
+else 
+	#mainnet nodes
+	#run by LordDarkHelmet
+	sudo ${varDynamicBinaries}dynamic-cli addnode "66.42.82.77:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "149.28.222.124:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "216.128.135.41:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.78.215:33300" "onetry"
+	#Collected July 4 2021
+	sudo ${varDynamicBinaries}dynamic-cli addnode "51.15.228.20:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "51.222.155.191:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "216.128.151.188:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "135.181.150.19:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "161.97.145.37:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "116.203.139.51:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "51.161.134.220:33300" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "163.172.147.78:33300" "onetry"
 
-echo "Sleeping for 10 seconds to allow for connection to occur"
-sleep 10
+	echo "Sleeping for 10 seconds to allow for connection to occur"
+	sleep 10
 
-myConnectionCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
-if [ "$myConnectionCount" = "0" ]; then
-	#earlier list
-	sudo ${varDynamicBinaries}dynamic-cli addnode "51.158.170.187:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "139.99.51.228:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "51.15.197.180:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.21:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.33:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.9:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.148.69:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "178.21.79.52:33300" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "138.197.146.197:33300" "onetry"
-
+	myConnectionCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
+	if [ "$myConnectionCount" = "0" ]; then
+		#earlier list
+		#Collected July 4 2021
+		sudo ${varDynamicBinaries}dynamic-cli addnode "51.79.242.241:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "155.138.157.38:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "188.40.184.65:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "209.126.86.208:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "209.126.86.210:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.141.137:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "168.119.83.1:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "209.141.46.225:33300" "onetry"
+	fi
 fi
-
 
 if [ $varQuickBlockchainDownload = true ] ; then
 	# Downloading the blockchain is significantly faster. you will most likely be mining within 5 min.
@@ -1408,7 +1447,7 @@ if [ "$varCompile" = true ]; then
     
 # Compile the Daemon Client
 
-
+	echo ""
     echo "-------------------------------------------"
     echo "Compile the Daemon Client"
     cd $varGITDynamicPath
@@ -1441,9 +1480,16 @@ if [ "$varCompile" = true ]; then
 	  ConfigParameters="${ConfigParameters} --enable-avx512f "
 	fi
 
-	echo "-march=native tells the compiler to optimize to the compiling machine's CPU"
-	echo "CPPFLAGS=-march=native && echo \$CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}\" CPPFLAGS=\"-I${BDB_PREFIX} -march=native \" && sudo make"
-	CPPFLAGS=-march=native && echo $CPPFLAGS && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}" CPPFLAGS="-I${BDB_PREFIX} -march=native " && sudo make
+    echo "-march=native tells the compiler to optimize to the compiling machine's CPU"
+	echo ""
+	echo "-----------------"
+	echo "Compile String:"
+	echo "CPPFLAGS=-march=native && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}\" CPPFLAGS=\"-I${BDB_PREFIX} -march=native \" && sudo make"
+	echo "-----------------"
+	echo ""
+	echo "Starting Compile"
+	echo "-----------------"
+	CPPFLAGS=-march=native && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}" CPPFLAGS="-I${BDB_PREFIX} -march=native " && sudo make && strip src/dynamicd && strip src/dynamic-cli
 
     echo "-----------------"
     echo "Compile Finished."
