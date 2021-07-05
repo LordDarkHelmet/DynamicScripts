@@ -21,8 +21,8 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.1.d"
-varVersionDate="July 4, 2020"
+varVersionNumber="2.4.4.1.e"
+varVersionDate="July 5, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
 # The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
@@ -1214,6 +1214,17 @@ if [ ${Is_TestNet} = true ]; then
 	#Nodes added July 4 2021 - This is unlikely to be valid on future dates as there is not permanent test net. 
 	sudo ${varDynamicBinaries}dynamic-cli addnode "147.182.139.88:33400" "onetry"
 	sudo ${varDynamicBinaries}dynamic-cli addnode "138.68.51.41:33400" "onetry"
+	#Testnet dynodes run by LordDarkHelmet - This is temporary.
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.202.41:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.216.102:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.157.187:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "144.202.14.93:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "104.207.134.136:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "104.238.128.110:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.205.6:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "149.28.32.128:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.201.163:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.86.206:33400" "onetry"
 else 
 	#mainnet nodes
 	#run by LordDarkHelmet
