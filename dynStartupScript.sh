@@ -21,7 +21,7 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.1.c"
+varVersionNumber="2.4.4.1.d"
 varVersionDate="July 4, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -893,13 +893,7 @@ funcCreateDynamicConfFile ()
  Myrpcport=$(shuf -i 1-500 -n 1)
  Myrpcport=$((Myrpcport+Myport))
  
- if [ ${Is_TestNet} = true ]; then
-    echo "" >> $varDynamicConfigFile
-    echo "# Test Net: If this is on the testnet, then testnet=1" >> $varDynamicConfigFile
-	echo "testnet=1" >> $varDynamicConfigFile
-	echo "" >> $varDynamicConfigFile
- fi
- 
+
  
  if [ "$varDynode" = 1 ]; then
     Myrpcport=$DefaultDynode_rpcport
@@ -914,6 +908,13 @@ funcCreateDynamicConfFile ()
  echo "rpcport=$Myrpcport" >> $varDynamicConfigFile
  echo "port=$Myport" >> $varDynamicConfigFile
  echo "" >> $varDynamicConfigFile
+ 
+ if [ ${Is_TestNet} = true ]; then
+    echo "# Test Net: If this is on the testnet, then testnet=1" >> $varDynamicConfigFile
+	echo "testnet=1" >> $varDynamicConfigFile
+	echo "" >> $varDynamicConfigFile
+ fi
+
  echo "# MINING:  These are your mining variables" >> $varDynamicConfigFile
  echo "# Gen can be 0 or 1. 1=mining, 0=No mining" >> $varDynamicConfigFile
  echo "gen=$varMining0ForNo1ForYes" >> $varDynamicConfigFile
