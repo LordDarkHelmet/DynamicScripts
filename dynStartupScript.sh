@@ -21,7 +21,7 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.1.e"
+varVersionNumber="2.4.4.1.f"
 varVersionDate="July 5, 2020"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
@@ -720,8 +720,8 @@ echo "        myVultrStatusInfo=\"\${myHashesPerSec} hps\""  >> dynWatchdog.sh
 echo "        if [ \"0 hps\" = \"\${myVultrStatusInfo}\" ]; then"  >> dynWatchdog.sh
 echo "             myGenerate=\$(cat ${varDynamicConfigFile} | grep gen=1 )"  >> dynWatchdog.sh
 echo "             if [ \"gen=1\" = \"\${myGenerate}\" ]; then"  >> dynWatchdog.sh
-echo "                  echo \"We should be mining, but we have 0 hps, try setgenerate true\""  >> dynWatchdog.sh
-echo "                  sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli setgenerate true"  >> dynWatchdog.sh
+echo "                  echo \"We should be mining, but we have 0 hps, try setgenerate true -1\""  >> dynWatchdog.sh
+echo "                  sudo timeout --preserve-status -k 45s 40s ${varDynamicBinaries}dynamic-cli setgenerate true -1"  >> dynWatchdog.sh
 echo "             fi"  >> dynWatchdog.sh  
 echo "        fi"  >> dynWatchdog.sh  
 if [ "$varDynode" = 1 ]; then
@@ -1155,7 +1155,7 @@ fi
 
 ## Creating the config file. This prevents the boot up, have to shut down thing in dynamicd. We do this here just in case the quick start stuff deletes the config file.
 echo ""
-echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. No need to invoke dynamic-cli setgenerate true"
+echo "Ok, now we are going to modify the dynamic.conf file so that when you boot up dynamicd, you will be mining. No need to invoke dynamic-cli setgenerate true -1"
 funcCreateDynamicConfFile
 echo "Now that we have crated the dynamic.conf file, there is no need to do the boot up shut down thing with dyanmicd"
 echo ""
