@@ -21,12 +21,12 @@ myScrapeAddress=D9T2NVLGZEFSw3yc6ye4BenfK7n356wudR
 #   Your name here, help add value by contributing. Contact LordDarkHelmet on Github!
 
 # Version:
-varVersionNumber="2.4.4.1.f"
-varVersionDate="July 5, 2020"
+varVersionNumber="2.5.0.0.a"
+varVersionDate="August 12, 2021"
 varVersion="${varVersionNumber} dynStartupScript.sh ${varVersionDate} Released by LordDarkHelmet"
 
-# The script was tested using on Vultr. Ubuntu 18.04 x64, 1 CPU, 512 MB ram, 20 GB SSD, 500 GB bandwidth
-# We recommend running Ubuntu 18.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 20.04
+# The script was tested using on Vultr. Ubuntu 20.04 x64, 1 CPU, 1024 MB ram, 25 GB SSD, 1000 GB bandwidth
+# We recommend running Ubuntu 20.04. This is the LTS or Long Term Support version. This OS version is supported in the long run. The next LTS version will be 22.04
 # LordDarkHelmet's affiliate link: http://www.vultr.com/?ref=6923885
 #
 # If you are using Vultr as a VPN service and you run this in as your startup script, then you should see the results in /tmp/firstboot.log
@@ -68,19 +68,18 @@ varDynamicConfigFile="${varDynamicConfigDirectory}dynamic.conf"
 varGITRootPath="${varUserDirectory}"
 varGITDynamicPath="${varGITRootPath}Dynamic/"
 varBackupDirectory="${varUserDirectory}DYN/Backups/"
-#Berkeley DB Build
-# Pick some path to install BDB to, here we create a directory within the dynamic directory
-BDB_PREFIX="${varUserDirectory}db-4.8.30.NC/build_unix/"
 
 # Quick Non-Source Start (get binaries and blockchain from the web, not completely safe or reliable, but fast!)
 
 # Quick Start Binaries
 varQuickStart=true
 # Quick Start compressed file location and name
-varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.4.4.1/Dynamic-2.4.4.1-Linux-x64.tar.gz
-varQuickStartCompressedFileName=Dynamic-2.4.4.1-Linux-x64.tar.gz
-varQuickStartCompressedFilePathForDaemon=dynamic-2.4.4/bin/dynamicd
-varQuickStartCompressedFilePathForCLI=dynamic-2.4.4/bin/dynamic-cli
+varQuickStartCompressedFileLocation=https://github.com/duality-solutions/Dynamic/releases/download/v2.5.0.0/Dynamic-2.5.0.0-Linux-x64.tar.gz
+varQuickStartCompressedFileName="Dynamic-2.5.0.0-Linux-x64.tar.gz"
+#varQuickStartCompressedFileDirectory="dynamic-2.5.0/bin/"
+varQuickStartCompressedFileDirectory="bin/"
+varQuickStartCompressedFilePathForDaemon="${varQuickStartCompressedFileDirectory}dynamicd"
+varQuickStartCompressedFilePathForCLI="${varQuickStartCompressedFileDirectory}dynamic-cli"
 
 # Quick Start Bootstrap (The developer recommends that you sync from the blockchain)
 varQuickBootstrap=true
@@ -642,7 +641,7 @@ echo "   echo \"avx512f not found, normal compile, no avx512f optimizations\"" >
 echo " else" >> dynAutoUpdater.sh
 echo "   ConfigParameters=\"\${ConfigParameters} --enable-avx512f \"" >> dynAutoUpdater.sh
 echo " fi" >> dynAutoUpdater.sh
-echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}\" CPPFLAGS=\"-I${BDB_PREFIX} -march=native \" && sudo make" >> dynAutoUpdater.sh
+echo " sudo ./autogen.sh && sudo ./configure \$ConfigParameters  CPPFLAGS=\" -march=native \" && sudo make" >> dynAutoUpdater.sh
 echo " echo \"GitCheck \$(date +%F_%T) : Compile Finished.\"" >> dynAutoUpdater.sh
 echo "" >> dynAutoUpdater.sh
 echo " # 3. Scrape if there are any funds before we stop" >> dynAutoUpdater.sh
@@ -981,26 +980,33 @@ funcLockdown ()
 	sudo ufw allow $mysshPort/tcp comment "ssh port"
     echo "sudo ufw limit ${mysshPort}/tcp # limits SSH connection attempts from an IP to 6 times in 30 seconds"
 	sudo ufw limit $mysshPort/tcp comment "ssh port limited"
-    echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is $DefaultDynode_port by default."
-	sudo ufw allow $Myport/tcp comment "Dynamic Dynode"
+
+	
+	testnetLabel=""
+    if [ ${Is_TestNet} = true ]; then
+        testnetLabel="---TESTNET--- "
+    fi
+	
+	echo "sudo ufw allow ${Myport}/tcp # replace YYYYY with your dynamic port (dynamic.conf file under port=#####) BTW for Dynodes this is $DefaultDynode_port by default."
+	sudo ufw allow $Myport/tcp comment "${testnetLabel}Dynamic Dynode"
     echo "sudo ufw allow ${Myrpcport}/tcp # replace ZZZZZ with your rpc port (dynamic.conf file under rpcport=#####) BTW for Dynodes this is $DefaultDynode_rpcport by default."
-	sudo ufw allow $Myrpcport/tcp comment "Dynamic Dynode RPC"
+	sudo ufw allow $Myrpcport/tcp comment "${testnetLabel}Dynamic Dynode RPC"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_a}/tcp # replace AAAAAA with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_a by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_a/tcp comment "Dynamic Dynode - DHT_uTP_a"
+	sudo ufw allow $DefaultDynode_DHT_uTP_a/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_a"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_b}/tcp # replace BBBBBB with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_b by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_b/tcp comment "Dynamic Dynode - DHT_uTP_b"
+	sudo ufw allow $DefaultDynode_DHT_uTP_b/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_b"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_c}/tcp # replace CCCCCC with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_c by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_c/tcp comment "Dynamic Dynode - DHT_uTP_c"
+	sudo ufw allow $DefaultDynode_DHT_uTP_c/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_c"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_d}/tcp # replace DDDDDD with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_d by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_d/tcp comment "Dynamic Dynode - DHT_uTP_d"
+	sudo ufw allow $DefaultDynode_DHT_uTP_d/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_d"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_e}/tcp # replace EEEEEE with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_e by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_e/tcp comment "Dynamic Dynode - DHT_uTP_e"
+	sudo ufw allow $DefaultDynode_DHT_uTP_e/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_e"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_f}/tcp # replace FFFFFF with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_f by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_f/tcp comment "Dynamic Dynode - DHT_uTP_f"
+	sudo ufw allow $DefaultDynode_DHT_uTP_f/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_f"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_g}/tcp # replace GGGGGG with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_g by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_g/tcp comment "Dynamic Dynode - DHT_uTP_g"
+	sudo ufw allow $DefaultDynode_DHT_uTP_g/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_g"
 	echo "sudo ufw allow ${DefaultDynode_DHT_uTP_h}/tcp # replace HHHHHH with your DHT µTP (Micro Transport Protocol) port. BTW for Dynodes this is $DefaultDynode_DHT_uTP_h by default."
-	sudo ufw allow $DefaultDynode_DHT_uTP_h/tcp comment "Dynamic Dynode - DHT_uTP_h"
+	sudo ufw allow $DefaultDynode_DHT_uTP_h/tcp comment "${testnetLabel}Dynamic Dynode - DHT_uTP_h"
 
     #echo "sudo ufw logging on # this turns the log on, optional, but helps identify attacks and issues"
 	#sudo ufw logging on
@@ -1217,14 +1223,8 @@ if [ ${Is_TestNet} = true ]; then
 	#Testnet dynodes run by LordDarkHelmet - This is temporary.
 	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.202.41:33400" "onetry"
 	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.216.102:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.157.187:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "144.202.14.93:33400" "onetry"
 	sudo ${varDynamicBinaries}dynamic-cli addnode "104.207.134.136:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "104.238.128.110:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.205.6:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "149.28.32.128:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.201.163:33400" "onetry"
-	sudo ${varDynamicBinaries}dynamic-cli addnode "207.246.86.206:33400" "onetry"
+	sudo ${varDynamicBinaries}dynamic-cli addnode "45.63.22.234:33400" "onetry"
 else 
 	#mainnet nodes
 	#run by LordDarkHelmet
@@ -1248,15 +1248,12 @@ else
 	myConnectionCount=$(sudo ${varDynamicBinaries}dynamic-cli getconnectioncount)
 	if [ "$myConnectionCount" = "0" ]; then
 		#earlier list
-		#Collected July 4 2021
-		sudo ${varDynamicBinaries}dynamic-cli addnode "51.79.242.241:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "155.138.157.38:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "188.40.184.65:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "209.126.86.208:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "209.126.86.210:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "45.77.141.137:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "168.119.83.1:33300" "onetry"
-		sudo ${varDynamicBinaries}dynamic-cli addnode "209.141.46.225:33300" "onetry"
+		#Collected August 12 2021
+		sudo ${varDynamicBinaries}dynamic-cli addnode "215.115.106.97:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "154.209.178.57:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "221.120.106.13:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "223.186.188.15:33300" "onetry"
+		sudo ${varDynamicBinaries}dynamic-cli addnode "222.154.48.64:33300" "onetry"
 	fi
 fi
 
@@ -1379,10 +1376,9 @@ if [ "$varCompile" = true ]; then
 	sudo apt-get -y upgrade
 	sudo apt-get -y install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git automake
     sudo apt-get -y install nano libboost-all-dev
-	sudo add-apt-repository -y ppa:bitcoin/bitcoin
+	sudo add-apt-repository -y ppa:pivx/pivx
     sudo apt-get -y update
 	sudo apt-get -y install libdb4.8-dev libdb4.8++-dev
-	sudo apt-get -y install libdb++-dev
 	sudo apt-get -y install libminiupnpc-dev
 	sudo apt-get -y install libzmq3-dev
     sudo apt-get -y update
@@ -1395,54 +1391,6 @@ if [ "$varCompile" = true ]; then
     sudo apt-get -y update
     sudo apt-get -y upgrade
     echo "Dependencies Complete"
-	echo ""
-
-
-#Berkeley DB time, Ubuntu 18.04 and above have a different version installed. We are going to compile the version duality uses 4.8.30.
-    echo ""
-	echo "--------------------------------------"
-	echo "Berkeley DB 4.8.30.NC Compile "
-	echo "--------------------------------------"
-
-	#make the directory to install the Berkeley DB. 
-    mkdir -pv $BDB_PREFIX
-
-	#navigate to the directory where we want to download the file. 
-	cd  $varUserDirectory
-
-    # Fetch the source and verify that it is not tampered with
-    wget  -o /dev/null 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
-	echo "Verify Hash"
-    echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef  db-4.8.30.NC.tar.gz' | sha256sum -c
-    # -> db-4.8.30.NC.tar.gz: OK
-
-	echo "Extract"
-    tar -xzf db-4.8.30.NC.tar.gz
-	echo "remove unneeded compressed file db-4.8.30.NC.tar.gz"
-	rm -fdr db-4.8.30.NC.tar.gz
-
-    # Build the library and install to our prefix
-    cd db-4.8.30.NC/build_unix/
-
-	#This resolves an issue with Ubuntu 19.04 and above. (https://www.fsanmartin.co/compiling-berkeley-db-4-8-30-in-ubuntu-19/)
-	echo ""
-	echo "There is a compile error with Ubuntu 19 and above. "
-	echo "To resolve we are going to modify the source code to resolve the ambiguity issue with __atomic_compare_exchange"
-	echo "  \"../dist/../dbinc/atomic.h:179:19: error: definition of 'int __atomic_compare_exchange(db_atomic_t*, atomic_value_t, atomic_value_t)' ambiguates built-in declaration 'bool __atomic_compare_exchange(long unsigned int, volatile void*, void*, void*, int, int)\""
-	echo "we are going to replace the name __atomic_compare_exchange with __atomic_compare_exchange_db in the atomic.h file"
-	echo "sed -i 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' ${varUserDirectory}db-4.8.30.NC/dbinc/atomic.h"
-	sed -i 's/__atomic_compare_exchange/__atomic_compare_exchange_db/g' ${varUserDirectory}db-4.8.30.NC/dbinc/atomic.h
-	echo "At this point the source code has been modified and the issue should be resolved."
-	echo ""
-
-    #  Note: Do a static build so that it can be embedded into the executable, instead of having to find a .so at runtime
-    ../dist/configure --enable-cxx --disable-shared --with-pic
-    make
-    sudo make install
-
-    echo "--------------------------------------"
-	echo " End of Berkeley DB 4.8.30.NC Compile "
-	echo "--------------------------------------"
 	echo ""
 
 
@@ -1496,12 +1444,12 @@ if [ "$varCompile" = true ]; then
 	echo ""
 	echo "-----------------"
 	echo "Compile String:"
-	echo "CPPFLAGS=-march=native && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS=\"-L${BDB_PREFIX}\" CPPFLAGS=\"-I${BDB_PREFIX} -march=native \" && sudo make"
+	echo "CPPFLAGS=-march=native && sudo ./autogen.sh && sudo ./configure $ConfigParameters  CPPFLAGS=\" -march=native \" && sudo make"
 	echo "-----------------"
 	echo ""
 	echo "Starting Compile"
 	echo "-----------------"
-	CPPFLAGS=-march=native && sudo ./autogen.sh && sudo ./configure $ConfigParameters LDFLAGS="-L${BDB_PREFIX}" CPPFLAGS="-I${BDB_PREFIX} -march=native " && sudo make && strip src/dynamicd && strip src/dynamic-cli
+	CPPFLAGS=-march=native && sudo ./autogen.sh && sudo ./configure $ConfigParameters  CPPFLAGS=" -march=native " && sudo make && strip src/dynamicd && strip src/dynamic-cli
 
     echo "-----------------"
     echo "Compile Finished."
